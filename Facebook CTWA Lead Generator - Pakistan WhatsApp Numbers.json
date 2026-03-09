@@ -36,13 +36,12 @@
     },
     {
       "parameters": {
-        "fieldToSplitOut": "keywords",
-        "options": {}
+        "jsCode": "const config = $json;\nconst keywords = Array.isArray(config.keywords) ? config.keywords : [];\n\nreturn keywords\n  .map(k => (k || '').trim())\n  .filter(Boolean)\n  .map(keyword => ({\n    json: {\n      ...config,\n      keyword,\n      countries: Array.isArray(config.countries) && config.countries.length ? config.countries : ['PK']\n    }\n  }));"
       },
       "id": "ff5b7fe1-45f5-45dd-8d10-7e501af440b3",
       "name": "Split Keywords",
-      "type": "n8n-nodes-base.itemLists",
-      "typeVersion": 3,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         -460,
         -20
@@ -58,11 +57,11 @@
           "parameters": [
             {
               "name": "search_terms",
-              "value": "={{$json.keywords}}"
+              "value": "={{$json.keyword}}"
             },
             {
               "name": "ad_reached_countries",
-              "value": "={{JSON.stringify($json.countries)}}"
+              "value": "={{JSON.stringify($json.countries || ['PK'])}}"
             },
             {
               "name": "ad_active_status",
