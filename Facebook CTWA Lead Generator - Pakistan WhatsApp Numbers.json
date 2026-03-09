@@ -12,26 +12,40 @@
           ]
         }
       },
-      "id": "271b39bb-d303-4ae1-97a8-a6a4c2dea960",
+      "id": "36a3cd0b-c0ac-42c0-b278-9a975dec3b01",
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
       "position": [
-        -224,
-        -32
+        -900,
+        -20
       ]
     },
     {
       "parameters": {
-        "jsCode": "// Pakistan-specific product keywords\nconst KEYWORDS_PAKISTAN = [\n  // Clothing & Fashion Products\n  \"kurti\", \"kurta\", \"shalwar kameez\", \"lawn suit\", \"unstitched lawn\",\n  \"stitched suit\", \"embroidered kurti\", \"chiffon dress\", \"velvet suit\",\n  \"khaddar suit\", \"winter collection\", \"summer lawn\", \"eid dress\",\n  \"bridal dress\", \"wedding dress\", \"lehenga\", \"gown\", \"dupatta\",\n  \"khussa\", \"juttay\", \"sneakers\", \"sandals\", \"heels\", \"sports shoes\",\n\n  // Accessories\n  \"watch\", \"wrist watch\", \"smart watch\", \"sunglasses\", \"eyeglasses\",\n  \"handbag\", \"purse\", \"wallet\", \"backpack\", \"school bag\",\n  \"jewelry\", \"gold jewelry\", \"artificial jewelry\", \"necklace\", \"earrings\",\n  \"bracelet\", \"bangles\", \"rings\", \"perfume\", \"attar\", \"body spray\",\n\n  // Electronics\n  \"mobile phone\", \"smartphone\", \"iPhone\", \"Samsung\", \"Vivo\", \"Oppo\",\n  \"tablet\", \"iPad\", \"laptop\", \"MacBook\", \"Dell\", \"HP\", \"Lenovo\",\n  \"headphones\", \"earbuds\", \"AirPods\", \"speaker\", \"bluetooth speaker\",\n  \"power bank\", \"charger\", \"data cable\", \"USB cable\", \"memory card\",\n  \"smart TV\", \"LED TV\", \"refrigerator\", \"fridge\", \"deep freezer\",\n  \"washing machine\", \"microwave\", \"oven\", \"air conditioner\", \"AC\",\n  \"generator\", \"UPS\", \"solar panel\", \"inverter battery\",\n\n  // Home & Kitchen\n  \"furniture\", \"sofa\", \"bed\", \"dining table\", \"chair\", \"wardrobe\",\n  \"kitchen cabinet\", \"bookshelf\", \"study table\", \"office chair\",\n  \"blender\", \"juicer\", \"mixer grinder\", \"food processor\", \"chopper\",\n  \"kettle\", \"electric kettle\", \"water dispenser\", \"cooler\", \"fan\",\n  \"ceiling fan\", \"pedestal fan\", \"exhaust fan\", \"room heater\",\n  \"cookware\", \"fry pan\", \"sauce pan\", \"pressure cooker\", \"utensils\",\n\n  // Beauty & Personal Care\n  \"makeup\", \"foundation\", \"lipstick\", \"eyeliner\", \"mascara\",\n  \"skincare\", \"face wash\", \"moisturizer\", \"sunscreen\", \"face cream\",\n  \"hair oil\", \"shampoo\", \"conditioner\", \"hair color\", \"hair serum\",\n  \"nail polish\", \"nail paint\", \"manicure set\", \"makeup brushes\",\n\n  // Baby & Kids Products\n  \"baby diapers\", \"baby wipes\", \"baby food\", \"baby milk\", \"baby oil\",\n  \"baby shampoo\", \"baby lotion\", \"baby powder\", \"baby clothes\",\n  \"baby toys\", \"stroller\", \"baby walker\", \"baby cot\", \"baby bed\",\n\n  // Sports & Fitness\n  \"gym equipment\", \"treadmill\", \"exercise bike\", \"dumbbells\",\n  \"yoga mat\", \"fitness band\", \"protein powder\", \"whey protein\",\n  \"sports kit\", \"football\", \"cricket bat\", \"badminton racket\",\n\n  // Automotive Products\n  \"car accessories\", \"car cover\", \"car mat\", \"car perfume\",\n  \"car charger\", \"mobile holder\", \"GPS tracker\", \"car lights\",\n  \"bike accessories\", \"helmet\", \"bike cover\", \"bike lights\",\n  \"motorcycle parts\", \"car parts\", \"spare parts\", \"engine oil\",\n\n  // Grocery & Food Items\n  \"rice\", \"basmati rice\", \"flour\", \"atta\", \"sugar\", \"oil\", \"ghee\",\n  \"spices\", \"masala\", \"salt\", \"tea\", \"coffee\", \"milk powder\",\n  \"biscuits\", \"chips\", \"snacks\", \"chocolate\", \"candy\", \"juice\",\n  \"soft drink\", \"mineral water\", \"dates\", \"dry fruits\", \"nuts\",\n\n  // Health & Medical\n  \"medicine\", \"tablets\", \"syrup\", \"vitamins\", \"supplements\",\n  \"first aid kit\", \"bandage\", \"medical tape\", \"thermometer\",\n  \"BP apparatus\", \"glucometer\", \"nebulizer\", \"inhaler\", \"mask\",\n  \"sanitizer\", \"gloves\", \"syringe\", \"surgical items\",\n\n  // Seasonal Products\n  \"air cooler\", \"water cooler\", \"room cooler\", \"desert cooler\",\n  \"geyser\", \"water heater\", \"instant geyser\", \"room heater\",\n  \"blanket\", \"quilt\", \"comforter\", \"warm clothes\", \"sweater\",\n  \"jacket\", \"hoodie\", \"sweatshirt\", \"gloves\", \"cap\", \"scarf\"\n];\n\n// Get random keywords\nconst getRandomKeywords = (count = 2) => {\n  const shuffled = [...KEYWORDS_PAKISTAN].sort(() => 0.5 - Math.random());\n  return shuffled.slice(0, Math.min(count, KEYWORDS_PAKISTAN.length));\n};\n\n// const keywords = getRandomKeywords(2);\nconst keywords = [\"lahore\", \"kurta\"]\n\nreturn [{\n  json: {\n    keywords: keywords,\n    countries: ['PK'],\n    minAdsPerPage: 4,\n    daysLookback: 7,\n    maxAdsPerKeyword: 200,\n    apiVersion: 'v25.0',\n    spreadsheetId: '1pBYVkOrzarunXq2XhVgUOYOBJuVag3Tk2mjG-WQASTI',\n    sheetName: 'CTWA Leads'\n  }\n}];"
+        "jsCode": "const KEYWORDS_PAKISTAN = [\n  'lahore', 'karachi', 'islamabad', 'rawalpindi', 'faisalabad',\n  'kurta', 'kurti', 'shalwar kameez', 'lawn suit', 'unstitched lawn',\n  'abaya', 'hijab', 'khussa', 'juttay', 'sneakers', 'heels',\n  'mobile phone', 'smartphone', 'laptop', 'airpods', 'power bank',\n  'fridge', 'washing machine', 'air conditioner', 'solar panel',\n  'makeup', 'skincare', 'hair oil', 'perfume',\n  'baby diapers', 'baby wipes', 'stroller',\n  'gym equipment', 'whey protein', 'cricket bat',\n  'car accessories', 'helmet', 'engine oil',\n  'rice', 'atta', 'ghee', 'masala', 'dates',\n  'vitamins', 'first aid kit', 'thermometer'\n];\n\n// Rotate keywords each minute so all keywords eventually run.\nconst nowMinute = Math.floor(Date.now() / 60000);\nconst batchSize = 6;\nconst offset = nowMinute % KEYWORDS_PAKISTAN.length;\n\nconst rotated = [...KEYWORDS_PAKISTAN.slice(offset), ...KEYWORDS_PAKISTAN.slice(0, offset)];\nconst selectedKeywords = [...new Set(rotated.slice(0, batchSize))];\n\nreturn [{\n  json: {\n    keywords: selectedKeywords,\n    countries: ['PK'],\n    minAdsPerPage: 3,\n    daysLookback: 14,\n    maxPagesPerKeyword: 5,\n    apiVersion: 'v25.0',\n    spreadsheetId: '1pBYVkOrzarunXq2XhVgUOYOBJuVag3Tk2mjG-WQASTI',\n    sheetName: 'CTWA Leads'\n  }\n}];"
       },
-      "id": "6b77feaf-20be-42ab-a79c-16fcc6dee200",
-      "name": "Generate Keywords",
+      "id": "4da54db1-45e1-4852-902d-b3636e31cf7b",
+      "name": "Generate Search Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -32,
-        -32
+        -680,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "keywords",
+        "options": {}
+      },
+      "id": "ff5b7fe1-45f5-45dd-8d10-7e501af440b3",
+      "name": "Split Keywords",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        -460,
+        -20
       ]
     },
     {
@@ -44,7 +58,7 @@
           "parameters": [
             {
               "name": "search_terms",
-              "value": "={{$json.keywords[0]}}"
+              "value": "={{$json.keywords}}"
             },
             {
               "name": "ad_reached_countries",
@@ -65,16 +79,21 @@
           ]
         },
         "options": {
-          "timeout": 15000
+          "timeout": 20000,
+          "pagination": {
+            "paginationMode": "responseContainsNextUrl",
+            "nextUrl": "={{$response.body.paging && $response.body.paging.next ? $response.body.paging.next : undefined}}",
+            "limitPagesFetched": "={{$json.maxPagesPerKeyword}}"
+          }
         }
       },
-      "id": "f3cc4973-7cdc-49d7-9217-566d5231d9b1",
-      "name": "Fetch Ads - Keyword 1",
+      "id": "1f27db6f-e008-4e7a-8ffd-9ad01fd44a8c",
+      "name": "Fetch Ads by Keyword (Paginated)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        176,
-        -112
+        -220,
+        -20
       ],
       "credentials": {
         "httpQueryAuth": {
@@ -85,90 +104,75 @@
     },
     {
       "parameters": {
-        "url": "=https://graph.facebook.com/{{$json.apiVersion}}/ads_archive",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpQueryAuth",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "search_terms",
-              "value": "={{$json.keywords[1]}}"
-            },
-            {
-              "name": "ad_reached_countries",
-              "value": "={{JSON.stringify($json.countries)}}"
-            },
-            {
-              "name": "ad_active_status",
-              "value": "ACTIVE"
-            },
-            {
-              "name": "fields",
-              "value": "id,page_id,page_name,ad_creative_bodies,ad_creative_link_captions,ad_delivery_start_time,publisher_platforms"
-            },
-            {
-              "name": "limit",
-              "value": "100"
-            }
-          ]
+        "jsCode": "const keyword = $json.keywords || '';\nconst payload = $json.data || [];\n\nif (!Array.isArray(payload) || payload.length === 0) {\n  return [];\n}\n\nreturn payload.map(ad => ({\n  json: {\n    ...ad,\n    keyword\n  }\n}));"
+      },
+      "id": "6ea695b7-b6c6-4180-bab3-76ab30c8d2f5",
+      "name": "Flatten Ads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        20,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst now = new Date();\nconst cutoffDate = new Date(now);\ncutoffDate.setDate(cutoffDate.getDate() - 14);\n\nconst whatsappTerms = [\n  'whatsapp', 'wa.me', 'whats app', 'click to whatsapp', 'message on whatsapp',\n  '\u0648\u0627\u062a\u0633', '\u0648\u0627\u0679\u0633', '\u0648\u0627\u0679\u0633 \u0627\u06cc\u067e'\n];\n\nconst pageMap = new Map();\n\nfunction adText(ad) {\n  const bodies = Array.isArray(ad.ad_creative_bodies) ? ad.ad_creative_bodies : [];\n  const caps = Array.isArray(ad.ad_creative_link_captions) ? ad.ad_creative_link_captions : [];\n  return [...bodies, ...caps].join(' ').toLowerCase();\n}\n\nfor (const item of items) {\n  const ad = item.json;\n  if (!ad.page_id) continue;\n\n  const start = ad.ad_delivery_start_time ? new Date(ad.ad_delivery_start_time) : null;\n  if (start && start < cutoffDate) continue;\n\n  if (!pageMap.has(ad.page_id)) {\n    pageMap.set(ad.page_id, {\n      business_name: ad.page_name || 'Unknown',\n      page_link: `https://fb.com/${ad.page_id}`,\n      active_ads_count: 0,\n      has_whatsapp: false,\n      first_seen: ad.ad_delivery_start_time || '',\n      sample_text: '',\n      keywords: new Set()\n    });\n  }\n\n  const row = pageMap.get(ad.page_id);\n  row.active_ads_count += 1;\n  if (ad.keyword) row.keywords.add(ad.keyword);\n\n  const txt = adText(ad);\n  const hasWA = whatsappTerms.some(term => txt.includes(term));\n  if (hasWA) {\n    row.has_whatsapp = true;\n    if (!row.sample_text) row.sample_text = txt.slice(0, 500);\n  }\n\n  if (ad.ad_delivery_start_time && (!row.first_seen || ad.ad_delivery_start_time < row.first_seen)) {\n    row.first_seen = ad.ad_delivery_start_time;\n  }\n}\n\nconst output = [];\nfor (const row of pageMap.values()) {\n  if (row.active_ads_count >= 3 && row.has_whatsapp) {\n    output.push({\n      business_name: row.business_name,\n      page_link: row.page_link,\n      ad_creative: row.sample_text || 'whatsapp intent detected',\n      active_ads: row.active_ads_count,\n      start_date: (row.first_seen || '').slice(0,10),\n      keyword_matched: [...row.keywords].join(', '),\n      whatsapp_number: '',\n      status: 'new',\n      fetched_at: new Date().toISOString()\n    });\n  }\n}\n\nreturn output.map(json => ({ json }));"
+      },
+      "id": "a06c030c-6fc3-4099-aba9-9ee5ef4d5ca4",
+      "name": "Process Ads into Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1pBYVkOrzarunXq2XhVgUOYOBJuVag3Tk2mjG-WQASTI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1791857623,
+          "mode": "list",
+          "cachedResultName": "CTWA Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pBYVkOrzarunXq2XhVgUOYOBJuVag3Tk2mjG-WQASTI/edit#gid=1791857623"
         },
         "options": {
-          "timeout": 15000
+          "returnAll": true
         }
       },
-      "id": "0904386e-d0ee-41ad-8aa3-f454c10003d5",
-      "name": "Fetch Ads - Keyword 2",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "id": "53cc4619-bcac-46d1-a50c-57fc9a33a922",
+      "name": "Read Existing Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
       "position": [
-        176,
-        96
+        260,
+        180
       ],
       "credentials": {
-        "httpQueryAuth": {
-          "id": "ADBOuLb4g9NYYvC9",
-          "name": "Meta API Credential"
+        "googleSheetsOAuth2Api": {
+          "id": "OQAPJvfxa8GINvPp",
+          "name": "Google Sheets account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst cutoffDate = new Date();\ncutoffDate.setDate(cutoffDate.getDate() - 7);\nconst cutoffDateStr = cutoffDate.toISOString().split('T')[0];\n\nlet allAds = [];\n\n// Combine ads from both keywords\nitems.forEach(item => {\n  if (item.json && item.json.data && Array.isArray(item.json.data)) {\n    const recentAds = item.json.data.filter(ad => {\n      const startDate = ad.ad_delivery_start_time || '';\n      return startDate && startDate.substring(0, 10) >= cutoffDateStr;\n    });\n    allAds = allAds.concat(recentAds);\n  }\n});\n\nreturn allAds.map(ad => ({ json: ad }));"
+        "jsCode": "const newLeads = $input.all(0).map(i => i.json);\nconst existingRows = $input.all(1).map(i => i.json);\n\nconst existingKeys = new Set();\nfor (const row of existingRows) {\n  const page = (row['Page Link'] || row.page_link || '').trim().toLowerCase();\n  const business = (row['Business Name'] || row.business_name || '').trim().toLowerCase();\n  if (page || business) existingKeys.add(`${page}::${business}`);\n}\n\nconst seenInRun = new Set();\nconst unique = [];\n\nfor (const lead of newLeads) {\n  const page = (lead.page_link || '').trim().toLowerCase();\n  const business = (lead.business_name || '').trim().toLowerCase();\n  const key = `${page}::${business}`;\n\n  if (!page && !business) continue;\n  if (existingKeys.has(key) || seenInRun.has(key)) continue;\n\n  seenInRun.add(key);\n  unique.push({ json: lead });\n}\n\nreturn unique;"
       },
-      "id": "850c83b9-eeb8-4c8c-925a-4d2d303ac1ea",
-      "name": "Combine and Filter Ads",
+      "id": "5ad03814-828a-4028-aa27-e49131c3c090",
+      "name": "Deduplicate Against Sheet",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        384,
-        -32
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const items = $input.all();\n\n// Pakistani cities for detection\nconst PAKISTANI_CITIES = [\n  'karachi', 'lahore', 'islamabad', 'rawalpindi', 'faisalabad',\n  'multan', 'peshawar', 'quetta', 'sialkot', 'gujranwala',\n  'hyderabad', 'sukkur', 'bahawalpur', 'gujrat', 'mardan'\n];\n\nconst hasWhatsAppIndicator = (ad) => {\n  // Check link captions\n  const linkCaptions = ad.ad_creative_link_captions || [];\n  if (Array.isArray(linkCaptions)) {\n    for (const caption of linkCaptions) {\n      if (caption && typeof caption === 'string' && caption.toLowerCase().includes('api.whatsapp.com')) {\n        return true;\n      }\n    }\n  }\n\n  return false;\n};\n\nconst extractAdCreativeText = (ad) => {\n  const creativeParts = [];\n  const bodies = ad.ad_creative_bodies || [];\n  if (Array.isArray(bodies)) {\n    bodies.forEach(body => {\n      if (body && typeof body === 'string') {\n        creativeParts.push(body.trim());\n      }\n    });\n  }\n  return creativeParts.join(' | ').substring(0, 1000);\n};\n\nconst isLikelyPakistani = (pageName, adText) => {\n  const pageLower = (pageName || '').toLowerCase();\n  const adLower = (adText || '').toLowerCase();\n\n  // Check cities\n  for (const city of PAKISTANI_CITIES) {\n    if (pageLower.includes(city) || adLower.includes(city)) {\n      return true;\n    }\n  }\n\n  // Check other indicators\n  if (pageLower.includes('pakistan') || pageLower.includes(' pk ')) return true;\n  if (adLower.includes('pkr') || adLower.includes('rs.') || adLower.includes('rupees')) return true;\n  if (adLower.includes('pakistan')) return true;\n\n  return true; // Default to true for Pakistan-targeted ads\n};\n\n// Group by page\nconst pageMap = new Map();\n\nitems.forEach(item => {\n  const ad = item.json;\n  const pageId = ad.page_id;\n  if (!pageId) return;\n\n  if (!pageMap.has(pageId)) {\n    pageMap.set(pageId, {\n      page_id: pageId,\n      page_name: ad.page_name || 'Unknown',\n      ads: [],\n      has_whatsapp: false,\n      first_seen: ad.ad_delivery_start_time || '',\n      last_seen: ad.ad_delivery_start_time || '',\n      sample_ad_creative: ''\n    });\n  }\n\n  const page = pageMap.get(pageId);\n  page.ads.push(ad);\n\n  if (hasWhatsAppIndicator(ad)) {\n    page.has_whatsapp = true;\n    if (!page.sample_ad_creative) {\n      page.sample_ad_creative = extractAdCreativeText(ad);\n    }\n  }\n\n  // Update dates\n  const startDate = ad.ad_delivery_start_time || '';\n  if (startDate) {\n    if (!page.first_seen || startDate < page.first_seen) {\n      page.first_seen = startDate;\n    }\n    if (!page.last_seen || startDate > page.last_seen) {\n      page.last_seen = startDate;\n    }\n  }\n});\n\n// Filter and format results\nconst minAdsPerPage = 4;\nconst results = [];\n\nfor (const [pageId, data] of pageMap) {\n  const adCount = data.ads.length;\n  const adCreative = data.sample_ad_creative || 'No creative text available';\n\n  if (adCount >= minAdsPerPage && data.has_whatsapp) {\n    if (isLikelyPakistani(data.page_name, adCreative)) {\n      results.push({\n        business_name: data.page_name,\n        page_link: `https://fb.com/${pageId}`,\n        ad_creative_bodies: adCreative,\n        active_ads_count: adCount,\n        first_seen: data.first_seen,\n        last_seen: data.last_seen\n      });\n    }\n  }\n}\n\nreturn results.map(lead => ({ json: lead }));"
-      },
-      "id": "4a713765-2612-4b6b-a394-b53dbaf7e3ec",
-      "name": "Process Ads - Find WhatsApp Pages",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        576,
-        -32
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Get existing data from Google Sheets (would need a prior node to fetch this)\n// For now, return all leads as new\nconst items = $input.all();\n\n// Create sets for deduplication (in a real workflow, you'd fetch existing data first)\nconst existingBusinesses = new Set();\nconst existingPageLinks = new Set();\n\nconst uniqueLeads = [];\n\nitems.forEach(item => {\n  const lead = item.json;\n  const business = (lead.business_name || '').trim();\n  const pageLink = (lead.page_link || '').trim();\n\n  // Simple check - in production, you'd have previous data\n  if (!existingBusinesses.has(business) && !existingPageLinks.has(pageLink)) {\n    uniqueLeads.push(lead);\n    existingBusinesses.add(business);\n    existingPageLinks.add(pageLink);\n  }\n});\n\n// Format for Google Sheets\nreturn uniqueLeads.map(lead => ({\n  json: {\n    business_name: lead.business_name,\n    page_link: lead.page_link,\n    ad_creative: (lead.ad_creative_bodies || '').substring(0, 500) + (lead.ad_creative_bodies?.length > 500 ? '...' : ''),\n    active_ads: lead.active_ads_count,\n    start_date: (lead.first_seen || '').substring(0, 10),\n    whatsapp_number: '', // Empty for manual entry\n    status: '' // Empty for manual entry\n  }\n}));"
-      },
-      "id": "a89f908e-53b6-4c59-aa27-cc4467bd41cd",
-      "name": "Prepare Data for Google Sheets",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        784,
-        -32
+        500,
+        40
       ]
     },
     {
@@ -189,13 +193,15 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "Business Name": "={{ $json.business_name }}",
-            "Page Link": "={{ $json.page_link }}",
-            "Ad Creative Bodies": "={{ $json.ad_creative }}",
-            "Active Ads": "={{ $json.active_ads }}",
-            "Start Date": "={{ $json.start_date }}",
-            "WhatsApp Number": "={{ $json.whatsapp_number }}",
-            "Status": "={{ $json.status }}"
+            "Business Name": "={{$json.business_name}}",
+            "Page Link": "={{$json.page_link}}",
+            "Ad Creative Bodies": "={{$json.ad_creative}}",
+            "Active Ads": "={{$json.active_ads}}",
+            "Start Date": "={{$json.start_date}}",
+            "Keyword Matched": "={{$json.keyword_matched}}",
+            "WhatsApp Number": "={{$json.whatsapp_number}}",
+            "Status": "={{$json.status}}",
+            "Fetched At": "={{$json.fetched_at}}"
           },
           "matchingColumns": [],
           "schema": [
@@ -245,6 +251,15 @@
               "canBeUsedToMatch": true
             },
             {
+              "id": "Keyword Matched",
+              "displayName": "Keyword Matched",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
               "id": "WhatsApp Number",
               "displayName": "WhatsApp Number",
               "required": false,
@@ -261,6 +276,15 @@
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fetched At",
+              "displayName": "Fetched At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
             }
           ],
           "attemptToConvertTypes": false,
@@ -268,13 +292,13 @@
         },
         "options": {}
       },
-      "id": "29789611-eed9-43e3-b9a7-d7d45bec0db8",
-      "name": "Save to Google Sheets",
+      "id": "2343ba34-e7fe-4bbb-a223-999cef408a87",
+      "name": "Save Unique Leads to Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        976,
-        -32
+        740,
+        40
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -285,15 +309,15 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst savedCount = items.length;\n\nconst summary = {\n  timestamp: new Date().toISOString(),\n  saved_count: savedCount,\n  message: savedCount > 0 ? `Saved ${savedCount} new leads` : 'No new leads found'\n};\n\n// Add random delay between 45-90 seconds before next run\nconst delaySeconds = Math.floor(Math.random() * 45) + 45;\nconsole.log(`Waiting ${delaySeconds} seconds before next run...`);\n\nreturn [{\n  json: summary\n}];"
+        "jsCode": "const inserted = $input.all().length;\nreturn [{\n  json: {\n    timestamp: new Date().toISOString(),\n    inserted,\n    message: inserted > 0 ? `Saved ${inserted} unique leads` : 'No unique leads to save'\n  }\n}];"
       },
-      "id": "1cc441d2-280e-447e-917b-d57cf9584d55",
+      "id": "d4b737b4-bd75-4fcf-82f5-615f01f89648",
       "name": "Generate Summary",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1184,
-        -32
+        960,
+        40
       ]
     }
   ],
@@ -303,85 +327,96 @@
       "main": [
         [
           {
-            "node": "Generate Keywords",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Generate Keywords": {
-      "main": [
-        [
-          {
-            "node": "Fetch Ads - Keyword 1",
+            "node": "Generate Search Config",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Fetch Ads - Keyword 2",
+            "node": "Read Existing Leads",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Fetch Ads - Keyword 1": {
+    "Generate Search Config": {
       "main": [
         [
           {
-            "node": "Combine and Filter Ads",
+            "node": "Split Keywords",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Fetch Ads - Keyword 2": {
+    "Split Keywords": {
       "main": [
         [
           {
-            "node": "Combine and Filter Ads",
+            "node": "Fetch Ads by Keyword (Paginated)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Combine and Filter Ads": {
+    "Fetch Ads by Keyword (Paginated)": {
       "main": [
         [
           {
-            "node": "Process Ads - Find WhatsApp Pages",
+            "node": "Flatten Ads",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Process Ads - Find WhatsApp Pages": {
+    "Flatten Ads": {
       "main": [
         [
           {
-            "node": "Prepare Data for Google Sheets",
+            "node": "Process Ads into Leads",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Prepare Data for Google Sheets": {
+    "Process Ads into Leads": {
       "main": [
         [
           {
-            "node": "Save to Google Sheets",
+            "node": "Deduplicate Against Sheet",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Save to Google Sheets": {
+    "Read Existing Leads": {
+      "main": [
+        [
+          {
+            "node": "Deduplicate Against Sheet",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Deduplicate Against Sheet": {
+      "main": [
+        [
+          {
+            "node": "Save Unique Leads to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Unique Leads to Sheets": {
       "main": [
         [
           {
@@ -399,7 +434,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "da9b69cb-d72e-4160-b6b6-36f825695277",
+  "versionId": "0069955d-ea20-41ec-b983-17623e340454",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "6702e8371be16819f7c6e095b56a1b8bb307e17744987fc3ae9cd566919a7420"
