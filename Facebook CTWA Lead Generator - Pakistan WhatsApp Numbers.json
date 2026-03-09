@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const KEYWORDS_PAKISTAN = [\n  'lahore', 'karachi', 'islamabad', 'rawalpindi', 'faisalabad',\n  'kurta', 'kurti', 'shalwar kameez', 'lawn suit', 'unstitched lawn',\n  'abaya', 'hijab', 'khussa', 'juttay', 'sneakers', 'heels',\n  'mobile phone', 'smartphone', 'laptop', 'airpods', 'power bank',\n  'fridge', 'washing machine', 'air conditioner', 'solar panel',\n  'makeup', 'skincare', 'hair oil', 'perfume',\n  'baby diapers', 'baby wipes', 'stroller',\n  'gym equipment', 'whey protein', 'cricket bat',\n  'car accessories', 'helmet', 'engine oil',\n  'rice', 'atta', 'ghee', 'masala', 'dates',\n  'vitamins', 'first aid kit', 'thermometer'\n];\n\n// Rotate keywords each minute so all keywords eventually run.\nconst nowMinute = Math.floor(Date.now() / 60000);\nconst batchSize = 6;\nconst offset = nowMinute % KEYWORDS_PAKISTAN.length;\n\nconst rotated = [...KEYWORDS_PAKISTAN.slice(offset), ...KEYWORDS_PAKISTAN.slice(0, offset)];\nconst selectedKeywords = [...new Set(rotated.slice(0, batchSize))];\n\nreturn [{\n  json: {\n    keywords: selectedKeywords,\n    countries: ['PK'],\n    minAdsPerPage: 3,\n    daysLookback: 14,\n    maxPagesPerKeyword: 5,\n    apiVersion: 'v25.0',\n    spreadsheetId: '1pBYVkOrzarunXq2XhVgUOYOBJuVag3Tk2mjG-WQASTI',\n    sheetName: 'CTWA Leads'\n  }\n}];"
+        "jsCode": "const KEYWORDS_PAKISTAN = [\n  'lahore', 'karachi', 'islamabad', 'rawalpindi', 'faisalabad',\n  'kurta', 'kurti', 'shalwar kameez', 'lawn suit', 'unstitched lawn',\n  'abaya', 'hijab', 'khussa', 'juttay', 'sneakers', 'heels',\n  'mobile phone', 'smartphone', 'laptop', 'airpods', 'power bank',\n  'fridge', 'washing machine', 'air conditioner', 'solar panel',\n  'makeup', 'skincare', 'hair oil', 'perfume',\n  'baby diapers', 'baby wipes', 'stroller',\n  'gym equipment', 'whey protein', 'cricket bat',\n  'car accessories', 'helmet', 'engine oil',\n  'rice', 'atta', 'ghee', 'masala', 'dates',\n  'vitamins', 'first aid kit', 'thermometer'\n];\n\n// Rotate keywords each minute so all keywords eventually run.\nconst nowMinute = Math.floor(Date.now() / 60000);\nconst batchSize = 6;\nconst offset = nowMinute % KEYWORDS_PAKISTAN.length;\n\nconst rotated = [...KEYWORDS_PAKISTAN.slice(offset), ...KEYWORDS_PAKISTAN.slice(0, offset)];\nconst selectedKeywords = [...new Set(rotated.slice(0, batchSize))];\n\nreturn [{\n  json: {\n    keywords: selectedKeywords,\n    countries: ['PK'],\n    minAdsPerPage: 3,\n    daysLookback: 14,\n    maxPagesPerKeyword: 5,\n    adType: 'ALL',\n    searchType: 'KEYWORD_UNORDERED',\n    apiVersion: 'v25.0',\n    spreadsheetId: '1pBYVkOrzarunXq2XhVgUOYOBJuVag3Tk2mjG-WQASTI',\n    sheetName: 'CTWA Leads'\n  }\n}];"
       },
       "id": "4da54db1-45e1-4852-902d-b3636e31cf7b",
       "name": "Generate Search Config",
@@ -69,6 +69,14 @@
               "value": "ACTIVE"
             },
             {
+              "name": "ad_type",
+              "value": "={{$json.adType || \"ALL\"}}"
+            },
+            {
+              "name": "search_type",
+              "value": "={{$json.searchType || \"KEYWORD_UNORDERED\"}}"
+            },
+            {
               "name": "fields",
               "value": "id,page_id,page_name,ad_creative_bodies,ad_creative_link_captions,ad_delivery_start_time,publisher_platforms"
             },
@@ -83,7 +91,7 @@
           "pagination": {
             "paginationMode": "responseContainsNextUrl",
             "nextUrl": "={{$response.body.paging && $response.body.paging.next ? $response.body.paging.next : undefined}}",
-            "limitPagesFetched": "={{$json.maxPagesPerKeyword}}"
+            "limitPagesFetched": 5
           }
         }
       },
