@@ -124,7 +124,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst now = new Date();\nconst cutoffDate = new Date(now);\ncutoffDate.setDate(cutoffDate.getDate() - 14);\n\nconst whatsappTerms = [\n  'whatsapp', 'wa.me', 'whats app', 'click to whatsapp', 'message on whatsapp',\n  '\u0648\u0627\u062a\u0633', '\u0648\u0627\u0679\u0633', '\u0648\u0627\u0679\u0633 \u0627\u06cc\u067e'\n];\n\nconst pageMap = new Map();\n\nfunction adText(ad) {\n  const bodies = Array.isArray(ad.ad_creative_bodies) ? ad.ad_creative_bodies : [];\n  const caps = Array.isArray(ad.ad_creative_link_captions) ? ad.ad_creative_link_captions : [];\n  return [...bodies, ...caps].join(' ').toLowerCase();\n}\n\nfor (const item of items) {\n  const ad = item.json;\n  if (!ad.page_id) continue;\n\n  const start = ad.ad_delivery_start_time ? new Date(ad.ad_delivery_start_time) : null;\n  if (start && start < cutoffDate) continue;\n\n  if (!pageMap.has(ad.page_id)) {\n    pageMap.set(ad.page_id, {\n      business_name: ad.page_name || 'Unknown',\n      page_link: `https://fb.com/${ad.page_id}`,\n      active_ads_count: 0,\n      has_whatsapp: false,\n      first_seen: ad.ad_delivery_start_time || '',\n      sample_text: '',\n      keywords: new Set()\n    });\n  }\n\n  const row = pageMap.get(ad.page_id);\n  row.active_ads_count += 1;\n  if (ad.keyword) row.keywords.add(ad.keyword);\n\n  const txt = adText(ad);\n  const hasWA = whatsappTerms.some(term => txt.includes(term));\n  if (hasWA) {\n    row.has_whatsapp = true;\n    if (!row.sample_text) row.sample_text = txt.slice(0, 500);\n  }\n\n  if (ad.ad_delivery_start_time && (!row.first_seen || ad.ad_delivery_start_time < row.first_seen)) {\n    row.first_seen = ad.ad_delivery_start_time;\n  }\n}\n\nconst output = [];\nfor (const row of pageMap.values()) {\n  if (row.active_ads_count >= 3 && row.has_whatsapp) {\n    output.push({\n      business_name: row.business_name,\n      page_link: row.page_link,\n      ad_creative: row.sample_text || 'whatsapp intent detected',\n      active_ads: row.active_ads_count,\n      start_date: (row.first_seen || '').slice(0,10),\n      keyword_matched: [...row.keywords].join(', '),\n      whatsapp_number: '',\n      status: 'new',\n      fetched_at: new Date().toISOString()\n    });\n  }\n}\n\nreturn output.map(json => ({ json }));"
+        "jsCode": "const items = $input.all();\nconst now = new Date();\nconst cutoffDate = new Date(now);\ncutoffDate.setDate(cutoffDate.getDate() - 14);\n\nconst whatsappTerms = [\n  'whatsapp', 'wa.me', 'whats app', 'click to whatsapp', 'message on whatsapp',\n  '\u0648\u0627\u062a\u0633', '\u0648\u0627\u0679\u0633', '\u0648\u0627\u0679\u0633 \u0627\u06cc\u067e'\n];\n\nconst pageMap = new Map();\n\nfunction getTextParts(ad) {\n  const bodies = Array.isArray(ad.ad_creative_bodies) ? ad.ad_creative_bodies : [];\n  const caps = Array.isArray(ad.ad_creative_link_captions) ? ad.ad_creative_link_captions : [];\n  return [...bodies, ...caps].filter(Boolean);\n}\n\nfunction extractWhatsappNumbers(text) {\n  if (!text) return [];\n\n  const normalized = text\n    .replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))\n    .replace(/[\u06f0-\u06f9]/g, d => String(d.charCodeAt(0) - 0x06F0));\n\n  const matches = normalized.match(/(?:\\+92|0092|92|0)?[\\s\\-()]?3\\d{2}[\\s\\-()]?\\d{7}/g) || [];\n  const cleaned = matches\n    .map(m => m.replace(/[^\\d+]/g, ''))\n    .map(m => {\n      if (m.startsWith('0092')) return `+92${m.slice(4)}`;\n      if (m.startsWith('92') && !m.startsWith('+92')) return `+${m}`;\n      if (m.startsWith('03')) return `+92${m.slice(1)}`;\n      return m;\n    })\n    .filter(m => /^\\+923\\d{9}$/.test(m) || /^03\\d{9}$/.test(m));\n\n  return [...new Set(cleaned)];\n}\n\nfor (const item of items) {\n  const ad = item.json;\n  if (!ad.page_id) continue;\n\n  const start = ad.ad_delivery_start_time ? new Date(ad.ad_delivery_start_time) : null;\n  if (start && start < cutoffDate) continue;\n\n  if (!pageMap.has(ad.page_id)) {\n    pageMap.set(ad.page_id, {\n      business_name: ad.page_name || 'Unknown',\n      page_link: `https://fb.com/${ad.page_id}`,\n      active_ads_count: 0,\n      has_whatsapp: false,\n      first_seen: ad.ad_delivery_start_time || '',\n      sample_text: '',\n      keywords: new Set(),\n      whatsapp_numbers: new Set()\n    });\n  }\n\n  const row = pageMap.get(ad.page_id);\n  row.active_ads_count += 1;\n  if (ad.keyword) row.keywords.add(ad.keyword);\n\n  const textParts = getTextParts(ad);\n  const rawText = textParts.join(' ');\n  const textLower = rawText.toLowerCase();\n\n  const hasWAIntent = whatsappTerms.some(term => textLower.includes(term));\n  const numbers = extractWhatsappNumbers(rawText);\n\n  if (hasWAIntent || numbers.length) {\n    row.has_whatsapp = true;\n    if (!row.sample_text) row.sample_text = rawText.slice(0, 500);\n  }\n\n  for (const num of numbers) row.whatsapp_numbers.add(num);\n\n  if (ad.ad_delivery_start_time && (!row.first_seen || ad.ad_delivery_start_time < row.first_seen)) {\n    row.first_seen = ad.ad_delivery_start_time;\n  }\n}\n\nconst output = [];\nfor (const row of pageMap.values()) {\n  if (row.active_ads_count >= 3 && row.has_whatsapp) {\n    output.push({\n      business_name: row.business_name,\n      page_link: row.page_link,\n      ad_creative: row.sample_text || 'whatsapp intent detected',\n      active_ads: row.active_ads_count,\n      start_date: (row.first_seen || '').slice(0, 10),\n      keyword_matched: [...row.keywords].join(', '),\n      whatsapp_number: [...row.whatsapp_numbers].join(', '),\n      status: 'new',\n      fetched_at: new Date().toISOString()\n    });\n  }\n}\n\nreturn output.map(json => ({ json }));"
       },
       "id": "a06c030c-6fc3-4099-aba9-9ee5ef4d5ca4",
       "name": "Process Ads into Leads",
@@ -171,7 +171,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const newLeads = $input.all(0).map(i => i.json);\nconst existingRows = $input.all(1).map(i => i.json);\n\nconst existingKeys = new Set();\nfor (const row of existingRows) {\n  const page = (row['Page Link'] || row.page_link || '').trim().toLowerCase();\n  const business = (row['Business Name'] || row.business_name || '').trim().toLowerCase();\n  if (page || business) existingKeys.add(`${page}::${business}`);\n}\n\nconst seenInRun = new Set();\nconst unique = [];\n\nfor (const lead of newLeads) {\n  const page = (lead.page_link || '').trim().toLowerCase();\n  const business = (lead.business_name || '').trim().toLowerCase();\n  const key = `${page}::${business}`;\n\n  if (!page && !business) continue;\n  if (existingKeys.has(key) || seenInRun.has(key)) continue;\n\n  seenInRun.add(key);\n  unique.push({ json: lead });\n}\n\nreturn unique;"
+        "jsCode": "const newLeads = $input.all(0).map(i => i.json || {});\nconst existingRows = $input.all(1).map(i => i.json || {});\n\nconst getValueCaseInsensitive = (row, candidates) => {\n  const keys = Object.keys(row || {});\n  for (const c of candidates) {\n    if (row[c] !== undefined && row[c] !== null) return String(row[c]);\n    const found = keys.find(k => k.toLowerCase().trim() === c.toLowerCase().trim());\n    if (found && row[found] !== undefined && row[found] !== null) return String(row[found]);\n  }\n  return '';\n};\n\nconst normalize = v => String(v || '').trim().toLowerCase();\nconst existingKeys = new Set();\n\nfor (const row of existingRows) {\n  const page = normalize(getValueCaseInsensitive(row, ['Page Link', 'page_link', 'Page link']));\n  const business = normalize(getValueCaseInsensitive(row, ['Business Name', 'business_name', 'Business name']));\n\n  if (page) existingKeys.add(`page::${page}`);\n  if (business) existingKeys.add(`biz::${business}`);\n  if (page || business) existingKeys.add(`pair::${page}::${business}`);\n}\n\nconst seenInRun = new Set();\nconst unique = [];\n\nfor (const lead of newLeads) {\n  const page = normalize(lead.page_link);\n  const business = normalize(lead.business_name);\n  const pairKey = `pair::${page}::${business}`;\n  const pageKey = `page::${page}`;\n\n  if (!page && !business) continue;\n\n  // Prefer page-link dedupe, fallback to pair key.\n  const existsAlready = (page && existingKeys.has(pageKey)) || existingKeys.has(pairKey);\n  const seenAlready = seenInRun.has(pageKey) || seenInRun.has(pairKey);\n\n  if (existsAlready || seenAlready) continue;\n\n  if (page) seenInRun.add(pageKey);\n  seenInRun.add(pairKey);\n\n  unique.push({ json: lead });\n}\n\nif (unique.length === 0) {\n  return [{ json: { no_new_leads: true, message: 'No unique leads to save', inserted: 0 } }];\n}\n\nreturn unique;"
       },
       "id": "5ad03814-828a-4028-aa27-e49131c3c090",
       "name": "Deduplicate Against Sheet",
@@ -316,7 +316,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const inserted = $input.all().length;\nreturn [{\n  json: {\n    timestamp: new Date().toISOString(),\n    inserted,\n    message: inserted > 0 ? `Saved ${inserted} unique leads` : 'No unique leads to save'\n  }\n}];"
+        "jsCode": "const items = $input.all();\n\nif (!items.length) {\n  return [{ json: { timestamp: new Date().toISOString(), inserted: 0, message: 'No data to process' } }];\n}\n\nif (items[0].json && items[0].json.no_new_leads) {\n  return [{\n    json: {\n      timestamp: new Date().toISOString(),\n      inserted: 0,\n      message: items[0].json.message || 'No unique leads to save'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    timestamp: new Date().toISOString(),\n    inserted: items.length,\n    message: `Saved ${items.length} unique leads`\n  }\n}];"
       },
       "id": "d4b737b4-bd75-4fcf-82f5-615f01f89648",
       "name": "Generate Summary",
@@ -324,6 +324,40 @@
       "typeVersion": 2,
       "position": [
         960,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "35a96d2f-7900-49ab-988d-27942018cac7",
+              "leftValue": "={{$json.no_new_leads}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5459e186-0cb0-402d-9ce1-d13ac49be631",
+      "name": "Has New Leads?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        620,
         40
       ]
     }
@@ -416,7 +450,7 @@
       "main": [
         [
           {
-            "node": "Save Unique Leads to Sheets",
+            "node": "Has New Leads?",
             "type": "main",
             "index": 0
           }
@@ -428,6 +462,24 @@
         [
           {
             "node": "Generate Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has New Leads?": {
+      "main": [
+        [
+          {
+            "node": "Generate Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Unique Leads to Sheets",
             "type": "main",
             "index": 0
           }
