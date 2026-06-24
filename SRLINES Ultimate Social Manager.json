@@ -2,11 +2,20 @@
   "name": "SRLINES Ultimate Social Manager",
   "nodes": [
     {
-      "parameters": {},
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 10,19 * * *"
+            }
+          ]
+        }
+      },
       "id": "3b68b304-558e-4d4f-a7a1-938f6f382df1",
-      "name": "Manual Trigger",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
+      "name": "Schedule - Video Posts 30 Min After Images PKT",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
       "position": [
         -848,
         1712
@@ -138,7 +147,7 @@
     },
     {
       "parameters": {
-        "content": "## 1. Start & Script\nSet brand/topic settings, then generate the ad voiceover script.",
+        "content": "## 1. Scheduled Educational Video Script\nRuns twice daily, 30 minutes after image posts. Builds a 10-second question → answer → solution reel voiceover.",
         "height": 550,
         "width": 640
       },
@@ -217,7 +226,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const brand = 'SRLINES wCRM';\nconst topic = 'Meta Assets (WhatsApp, Instagram & Facebook Messenger) Omni Inbox and Sales Pipeline.';\nconst language = 'Urdu';\nconst videoSeconds = '10';\n\nconst masterVideoCommand = `\n  Write a ${videoSeconds} second voiceover in ${language} for ${brand} about ${topic}.\n  \n  Requirements:\n  - Pure ${language} script only\n  - Include brand name \"${brand}\" naturally and in ${language}\n  - Professional and conversational tone\n  - No English words including brand name\n  - No labels, timestamps, or greetings\n  - Return ONLY the voiceover text\n  - Outro with CTA\n  \n  Write the ${language} voiceover:\n`;\n\nreturn [\n  {\n    json: {\n      ...$json,\n      master_video_generation_command: masterVideoCommand\n    }\n  }\n];"
+        "jsCode": "const brand = 'SRLINES wCRM';\nconst topic = 'Meta Assets (WhatsApp, Instagram & Facebook Messenger) Omni Inbox and Sales Pipeline.';\nconst language = 'Urdu';\nconst videoSeconds = '10';\n\nconst masterVideoCommand = `\nWrite a ${videoSeconds} second educational short-form reel voiceover in ${language} for ${brand} about ${topic}.\n\nStructure the voiceover like this, but do not include labels:\n1. Question / problem hook for the first 2-3 seconds.\n2. Clear answer for the middle 3-4 seconds.\n3. Practical solution showing how ${brand} softly helps for the final 3-4 seconds.\n\nRequirements:\n- Pure ${language} script only\n- Educational, helpful, soft-pull tone\n- Do NOT sound salesy, pushy, hype-based, or aggressive\n- Include brand name \"${brand}\" naturally and softly\n- Make it suitable for reels, YouTube Shorts, TikTok, Facebook Reels, Instagram Reels, and LinkedIn video\n- No labels, timestamps, markdown, greetings, emojis, or hashtags in the voiceover\n- No hard CTA; end with a helpful professional solution line\n- Return ONLY the spoken voiceover text\n\nWrite the ${language} voiceover:\n`;\n\nreturn [\n  {\n    json: {\n      ...$json,\n      brand,\n      topic,\n      language,\n      videoSeconds,\n      master_video_generation_command: masterVideoCommand\n    }\n  }\n];"
       },
       "id": "f6958050-7a1e-41d4-9a8b-2a4d5aefd408",
       "name": "Build Master Video Command",
@@ -295,7 +304,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Get the voiceover script from OpenAI\nconst voiceoverScript =\n  $input.first().json?.choices?.[0]?.message?.content?.trim() || '';\n\n// Get variables\nconst format = $json.format || '1080x1920';\n\nconst [rawWidth, rawHeight] = format.split('x').map(Number);\nconst width = rawWidth || 1080;\nconst height = rawHeight || 1920;\n\n// Clean script\nconst cleanScript = voiceoverScript\n  .replace(/\\s+/g, ' ')\n  .trim();\n\n// Truncate the entire script to fit in URL (max ~220 chars for safety)\n// You can adjust this limit based on your needs\nconst maxScriptLength = 220;\nlet truncatedScript = cleanScript;\n\nif (truncatedScript.length > maxScriptLength) {\n  // Try to cut at a sentence boundary\n  const cutIndex = truncatedScript.lastIndexOf('.', maxScriptLength);\n  if (cutIndex > maxScriptLength * 0.5) {\n    truncatedScript = truncatedScript.substring(0, cutIndex + 1);\n  } else {\n    truncatedScript = truncatedScript.substring(0, maxScriptLength);\n  }\n}\n\n// Construct the full script as a single prompt\nconst prompt = `Pakistani young beautiful & bold lady explaining this: ${cleanScript} and in background should be corporate business office inside environment, 9:16 vertical, no text, no logo, no watermark.`;\n\n// Create a single URL with the entire script\nconst url = `https://gen.pollinations.ai/video/${encodeURIComponent(\n  prompt\n)}?model=ltx-2&width=1080&height=1920&duration=10&aspectRatio=9%3A16&audio=true`;\n\n// Return a single scene object\nreturn [\n  {\n    json: {\n      url,\n      prompt,\n      fullScript: cleanScript, // Store the full original script for reference\n      truncatedScript,\n      width,\n      height,\n      format\n    }\n  }\n];"
+        "jsCode": "// Get the voiceover script from OpenAI\nconst voiceoverScript =\n  $input.first().json?.choices?.[0]?.message?.content?.trim() || '';\n\n// Get variables\nconst format = $json.format || '1080x1920';\n\nconst [rawWidth, rawHeight] = format.split('x').map(Number);\nconst width = rawWidth || 1080;\nconst height = rawHeight || 1920;\n\n// Clean script\nconst cleanScript = voiceoverScript\n  .replace(/\\s+/g, ' ')\n  .trim();\n\n// Truncate the entire script to fit in URL (max ~220 chars for safety)\n// You can adjust this limit based on your needs\nconst maxScriptLength = 220;\nlet truncatedScript = cleanScript;\n\nif (truncatedScript.length > maxScriptLength) {\n  // Try to cut at a sentence boundary\n  const cutIndex = truncatedScript.lastIndexOf('.', maxScriptLength);\n  if (cutIndex > maxScriptLength * 0.5) {\n    truncatedScript = truncatedScript.substring(0, cutIndex + 1);\n  } else {\n    truncatedScript = truncatedScript.substring(0, maxScriptLength);\n  }\n}\n\n// Construct the full script as a single prompt\nconst prompt = `Professional Pakistani business educator explaining this question-answer-solution lesson: ${cleanScript} with soft SRLINES wCRM education style, corporate business office background, natural gestures, helpful tone, 9:16 vertical reel, no on-screen text, no logo, no watermark, not salesy.`;\n\n// Create a single URL with the entire script\nconst url = `https://gen.pollinations.ai/video/${encodeURIComponent(\n  prompt\n)}?model=ltx-2&width=1080&height=1920&duration=10&aspectRatio=9%3A16&audio=true`;\n\n// Return a single scene object\nreturn [\n  {\n    json: {\n      url,\n      prompt,\n      fullScript: cleanScript, // Store the full original script for reference\n      truncatedScript,\n      width,\n      height,\n      format\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -308,7 +317,7 @@
     },
     {
       "parameters": {
-        "content": "## 5. Post Publish on Social Accounts\nPost Publish on almost all Social Accounts",
+        "content": "## 6. Social Publishing Pipelines\nImage posts run at 10:00 and 19:00 PKT. Video posts run at 10:30 and 19:30 PKT with SEO titles, captions, hashtags, and LinkedIn native video publishing.",
         "height": 1008,
         "width": 1220,
         "color": 4
@@ -334,7 +343,7 @@
         }
       },
       "id": "550964d3-7eac-46c6-9b46-a3101b25d842",
-      "name": "Schedule - 2 Posts Daily PKT",
+      "name": "Schedule - Image Posts 2x Daily PKT",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1,
       "position": [
@@ -769,7 +778,10 @@
       "parameters": {
         "source": "FILE_UPLOAD",
         "additionalFields": {
-          "isAigc": true
+          "isAigc": true,
+          "title": "={{$json.videoTitle}}",
+          "description": "={{$json.tiktokCaption || $json.videoCaption}}",
+          "privacyLevel": "PUBLIC_TO_EVERYONE"
         }
       },
       "type": "@bednij.bohdan/n8n-nodes-tiktok.tiktok",
@@ -791,10 +803,12 @@
       "parameters": {
         "resource": "video",
         "operation": "upload",
-        "title": "SRLINES wCRM \n Meta Multi Assets Omni Inbox and Sales Pipeline",
+        "title": "={{$json.videoTitle}}",
         "regionCode": "PK",
         "categoryId": "27",
-        "options": {}
+        "options": {},
+        "description": "={{$json.videoCaption}}\n\nTags: {{$json.videoTags.join(', ')}}",
+        "tags": "={{$json.videoTags.join(',')}}"
       },
       "type": "n8n-nodes-base.youTube",
       "typeVersion": 1,
@@ -817,7 +831,7 @@
         "operation": "publishFbReel",
         "pageId": "106824605844286",
         "videoUrl": "https://n8n.srlines.net/video-ads/output/srlines-video-ad.mp4",
-        "description": "SRLINES wCRM \n Meta Multi Assets Omni Inbox and Sales Pipeline"
+        "description": "={{$json.videoCaption}}"
       },
       "type": "n8n-nodes-meta-publisher.metaPublisher",
       "typeVersion": 1,
@@ -839,7 +853,7 @@
         "operation": "publishReel",
         "igUserId": "17841462909209635",
         "videoUrl": "https://n8n.srlines.net/video-ads/output/srlines-video-ad.mp4",
-        "caption": "SRLINES wCRM \n Meta Multi Assets Omni Inbox and Sales Pipeline"
+        "caption": "={{$json.videoCaption}}"
       },
       "type": "n8n-nodes-meta-publisher.metaPublisher",
       "typeVersion": 1,
@@ -855,21 +869,103 @@
           "name": "Meta Graph (Access Token) account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst brand = 'SRLINES wCRM';\nconst topic = 'Meta Multi-Asset Omni Inbox and Sales Pipeline';\nconst angle = 'Question Answer Solution';\n\nconst keywords = [\n  'SRLINES wCRM',\n  'WhatsApp CRM Pakistan',\n  'omnichannel inbox',\n  'sales pipeline CRM',\n  'Meta inbox automation',\n  'Facebook Messenger CRM',\n  'Instagram DM CRM',\n  'lead management Pakistan',\n  'business automation Pakistan',\n  'customer support CRM'\n];\n\nconst hashtags = [\n  '#SRLINES', '#wCRM', '#WhatsAppCRM', '#CRMPakistan', '#OmnichannelCRM',\n  '#SalesPipeline', '#LeadManagement', '#BusinessAutomation', '#CustomerSupport',\n  '#PakistanBusiness', '#DigitalPakistan', '#YouTubeShorts', '#TikTokBusiness', '#LinkedInVideo'\n];\n\nconst videoTitle = `${brand}: Stop Losing Meta Leads | WhatsApp, Instagram & Messenger CRM`;\nconst shortTitle = 'Stop Losing Meta Leads with SRLINES wCRM';\nconst videoCaption = `Question: Are WhatsApp, Instagram, Messenger, and Facebook leads getting scattered?\\n\\nAnswer: A unified CRM inbox keeps every customer conversation organized, assigned, and trackable.\\n\\nSolution: ${brand} helps Pakistani businesses manage Meta conversations, follow-ups, and sales pipeline in one clean workflow.\\n\\n${hashtags.join(' ')}`;\nconst linkedInCaption = `${shortTitle}\\n\\nEducational 10-second reel for teams that want cleaner conversations, faster follow-ups, and a visible sales pipeline.\\n\\n${hashtags.slice(0, 8).join(' ')}`;\nconst tiktokCaption = `${shortTitle}. Unified inbox + sales pipeline for Pakistani businesses. ${hashtags.slice(0, 10).join(' ')}`;\n\nreturn [{\n  json: {\n    ...$json,\n    linkedInOrganizationId: '92559353',\n    facebookPageId: '106824605844286',\n    instagramBusinessAccountId: '17841462909209635',\n    videoTitle,\n    shortTitle,\n    videoCaption,\n    linkedInCaption,\n    tiktokCaption,\n    videoDescription: videoCaption,\n    videoTags: keywords,\n    videoHashtags: hashtags,\n    contentPillar: 'Educational CRM Reel',\n    videoLengthSeconds: 10,\n    videoStructure: 'Question → Answer → Solution',\n    publishRunAt: now.toISOString(),\n  },\n  binary: $binary,\n}];"
+      },
+      "id": "e4012d6b-4830-4832-a4ff-d0aaa6c6cdf9",
+      "name": "Prepare SEO Video Publishing Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        2128
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkedin.com/v2/assets?action=registerUpload",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "linkedInOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ registerUploadRequest: { recipes: ['urn:li:digitalmediaRecipe:feedshare-video'], owner: 'urn:li:organization:' + $json.linkedInOrganizationId, serviceRelationships: [{ relationshipType: 'OWNER', identifier: 'urn:li:userGeneratedContent' }] } }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "6cb09e8a-0116-4ba8-893c-4f106e44d863",
+      "name": "LinkedIn Register Video Upload",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1376,
+        1984
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{$(\"LinkedIn Register Video Upload\").first().json.value.uploadMechanism[\"com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest\"].uploadUrl}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "linkedInOAuth2Api",
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "6810edc6-6069-4f8b-8840-c15f24617fe4",
+      "name": "LinkedIn Upload Video Binary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1600,
+        1984
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 90,
+        "unit": "seconds"
+      },
+      "id": "8eb7266a-e4c4-48ee-abe3-48a2f71fbf55",
+      "name": "Wait for LinkedIn Video Processing",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1824,
+        1984
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkedin.com/v2/ugcPosts",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "linkedInOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ author: 'urn:li:organization:' + $json.linkedInOrganizationId, lifecycleState: 'PUBLISHED', specificContent: { 'com.linkedin.ugc.ShareContent': { shareCommentary: { text: $json.linkedInCaption }, shareMediaCategory: 'VIDEO', media: [{ status: 'READY', description: { text: $json.videoDescription }, media: $('LinkedIn Register Video Upload').first().json.value.asset, title: { text: $json.videoTitle } }] } }, visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' } }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "d1716da0-2ead-4905-bbad-d6a7a3c6bc52",
+      "name": "Publish LinkedIn Native Video Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2048,
+        1984
+      ]
     }
   ],
   "pinData": {},
   "connections": {
-    "Manual Trigger": {
-      "main": [
-        [
-          {
-            "node": "Build Master Video Command",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Generate Voiceover": {
       "main": [
         [
@@ -907,22 +1003,7 @@
       "main": [
         [
           {
-            "node": "Upload video",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Upload a video",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Publish reel on facebook page",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Publish reel on Instagram",
+            "node": "Prepare SEO Video Publishing Payload",
             "type": "main",
             "index": 0
           }
@@ -1016,17 +1097,6 @@
         [
           {
             "node": "Generate Image",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Schedule - 2 Posts Daily PKT": {
-      "main": [
-        [
-          {
-            "node": "Brand and Campaign Configuration",
             "type": "main",
             "index": 0
           }
@@ -1163,13 +1233,100 @@
           }
         ]
       ]
+    },
+    "Schedule - Video Posts 30 Min After Images PKT": {
+      "main": [
+        [
+          {
+            "node": "Build Master Video Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule - Image Posts 2x Daily PKT": {
+      "main": [
+        [
+          {
+            "node": "Brand and Campaign Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare SEO Video Publishing Payload": {
+      "main": [
+        [
+          {
+            "node": "Upload video",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload a video",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Publish reel on facebook page",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Publish reel on Instagram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LinkedIn Register Video Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Register Video Upload": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Upload Video Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Upload Video Binary": {
+      "main": [
+        [
+          {
+            "node": "Wait for LinkedIn Video Processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for LinkedIn Video Processing": {
+      "main": [
+        [
+          {
+            "node": "Publish LinkedIn Native Video Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "timezone": "Asia/Karachi"
   },
   "versionId": "e6f55969-5e5a-42b2-953e-7d1b4f94b46a",
   "meta": {
