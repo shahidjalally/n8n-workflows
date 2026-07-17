@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "jsCode": "const now = new Date();\nconst executionId = `${now.toISOString()}-${Math.random().toString(36).slice(2, 10)}`;\n\n// n8n plan note: this workflow intentionally keeps API keys and IDs here instead of env vars.\n// Replace every PASTE_* value before activating. Do not commit real production secrets.\nreturn [{ json: {\n  executionId,\n  now: now.toISOString(),\n  timezone: 'Asia/Karachi',\n  campaign: { name: 'SRLINES Pakistan B2B', consentNote: 'Cold B2B outreach. Stop immediately on bounce, reply, unsubscribe, or complaint.' },\n  company: {\n    name: 'SRLINES',\n    senderName: 'Shahid Rasool',\n    senderTitle: 'CEO',\n    senderEmail: 'srlines.wcrm@gmail.com',\n    replyTo: 'srlines.wcrm@gmail.com',\n    whatsappCtaUrl: 'https://wa.me/923283897926?text=Hi%20SRLINES%2C%20I%20saw%20your%20email%20and%20want%20a%20WhatsApp%20CRM%20demo',\n    signature: 'Shahid Rasool\\nCEO\\nSRLINES SOFTWARE HOUSE\\nWhatsApp demo: https://wa.me/923283897926',\n    products: ['Official Meta Cloud API', 'WhatsApp CRM', 'Omni Inbox', 'Facebook Messenger', 'Instagram DM', 'Sales Pipeline Kanban CRM', 'Chatbots', 'Shopify WhatsApp App Integration', 'N8N Native Node', 'Bitrix24 app']\n  },\n  limits: { keywordsPerRun: 4, minScoreToEmail: 60, emailCooldownDays: 180, maxEmailsPerRun: 50, minDelaySeconds: 25, maxDelaySeconds: 90 },\n  emailValidation: { enabled: true, requireMx: true, dnsProvider: 'https://dns.google/resolve', timeoutMs: 8000, blockedDomains: ['example.com','test.com','invalid.com'], blockedLocalParts: ['no-reply','noreply','donotreply','do-not-reply','support','help','privacy','abuse'] },\n  followup: {\n    enabled: true,\n    maxFollowupsPerRun: 25,\n    stopStatuses: ['replied','bounced','complained','unsubscribed'],\n    sequence: [\n      { stage: 1, delayDays: 3, subject: 'Quick WhatsApp idea for {{businessName}}', body: 'Hi {{businessName}} team,\\n\\nI found {{businessName}} online while reviewing active businesses in {{city}}. A quick idea: SRLINES can centralize WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and lead follow-up in one CRM.\\n\\nIf you want, message me on WhatsApp and I will show a 10-minute demo tailored to your business: {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 2, delayDays: 7, subject: 'Should I send a WhatsApp CRM demo?', body: 'Hi {{businessName}} team,\\n\\nMany businesses lose inquiries because chats, orders, and reminders stay scattered. SRLINES helps teams respond faster with WhatsApp Cloud API, Omni Inbox, chatbots, and a sales pipeline.\\n\\nWould you like me to share a short walkthrough on WhatsApp? {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 3, delayDays: 14, subject: 'Close the loop?', body: 'Hi {{businessName}} team,\\n\\nI do not want to keep emailing if this is not useful. If improving WhatsApp/Meta lead handling is a priority, send me one WhatsApp message and I will suggest the best setup: {{whatsappCtaUrl}}\\n\\nOtherwise, I will close the loop here.\\n\\n{{signature}}' }\n    ]\n  },\n  sheets: { documentId: '19dwAu86RfoMcWcUp8li8DKbQhP7tUBqG2TZVR7hTPhk', keywords: 'Keywords', rawLeads: 'Raw_Leads', qualifiedLeads: 'Qualified_Leads', emailHistory: 'Email_History', campaignReport: 'Campaign_Report', replyLog: 'Reply_Log', followupQueue: 'Followup_Queue', blacklist: 'Blacklist', industryStats: 'Industry_Stats' },\n  deepseek: { apiKey: 'sk-987549f470cd401dbb3eef7b36c79931', apiUrl: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },\n  scraper: { baseUrl: 'http://localhost:3000', maxResultsPerKeyword: 4, delayBetweenRequests: 1000 },\n  gmailSearch: { replyQuery: 'to:srlines.wcrm@gmail.com newer_than:30d -from:me', bounceQuery: '(from:mailer-daemon OR from:postmaster OR subject:(Delivery Status Notification) OR subject:(Undelivered Mail Returned)) newer_than:30d' },\n  instructions: 'Configure placeholders in this Runtime Config node, Google Sheets OAuth, Gmail OAuth, and your local scraper URL before activating.'\n}}];"
+        "jsCode": "const now = new Date();\nconst executionId = `${now.toISOString()}-${Math.random().toString(36).slice(2, 10)}`;\n\n// n8n plan note: this workflow intentionally keeps API keys and IDs here instead of env vars.\n// Replace every PASTE_* value before activating. Do not commit real production secrets.\nreturn [{ json: {\n  executionId,\n  now: now.toISOString(),\n  timezone: 'Asia/Karachi',\n  campaign: { name: 'SRLINES Pakistan B2B', consentNote: 'Cold B2B outreach. Stop immediately on bounce, reply, unsubscribe, or complaint.' },\n  company: {\n    name: 'SRLINES',\n    legalName: 'SRLINES SOFTWARE HOUSE (SMC-PRIVATE) LIMITED',\n    tagline: \"Pakistan's #1 WhatsApp Cloud API Platform for Businesses\",\n    senderName: 'Shahid Rasool',\n    senderTitle: 'CEO',\n    website: 'https://srlines.net',\n    phone: '+92 328 3897926',\n    senderEmail: 'srlines.wcrm@gmail.com',\n    replyTo: 'srlines.wcrm@gmail.com',\n    whatsappCtaUrl: 'https://wa.me/923283897926?text=Hi%20SRLINES%2C%20I%20saw%20your%20email%20and%20want%20a%20WhatsApp%20CRM%20demo',\n    signature: 'Shahid Rasool\\nCEO\\nSRLINES SOFTWARE HOUSE (SMC-PRIVATE) LIMITED\\nWhatsApp demo: https://wa.me/923283897926',\n    brand: { primary: '#16A34A', dark: '#052E16', accent: '#22C55E', soft: '#ECFDF5', ink: '#0F172A', muted: '#64748B', logoText: 'SRLINES', trustLine: 'SECP Registered • Meta Verified Partner • 750+ Businesses Served • 99.9% uptime SLA' },\n    products: ['Official Meta Cloud API', 'WhatsApp CRM', 'Omni Inbox', 'Facebook Messenger', 'Instagram DM', 'Sales Pipeline Kanban CRM', 'Chatbots', 'Shopify WhatsApp App Integration', 'N8N Native Node', 'Bitrix24 app']\n  },\n  limits: { keywordsPerRun: 4, minScoreToEmail: 60, emailCooldownDays: 180, maxEmailsPerRun: 50, minDelaySeconds: 25, maxDelaySeconds: 90 },\n  emailValidation: { enabled: true, requireMx: true, dnsProvider: 'https://dns.google/resolve', timeoutMs: 8000, blockedDomains: ['example.com','test.com','invalid.com'], blockedLocalParts: ['no-reply','noreply','donotreply','do-not-reply','support','help','privacy','abuse'] },\n  followup: {\n    enabled: true,\n    maxFollowupsPerRun: 25,\n    stopStatuses: ['replied','bounced','complained','unsubscribed'],\n    sequence: [\n      { stage: 1, delayDays: 3, subject: 'Quick WhatsApp idea for {{businessName}}', body: 'Hi {{businessName}} team,\\n\\nI found {{businessName}} online while reviewing active businesses in {{city}}. A quick idea: SRLINES can centralize WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and lead follow-up in one CRM.\\n\\nIf you want, message me on WhatsApp and I will show a 10-minute demo tailored to your business: {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 2, delayDays: 7, subject: 'Should I send a WhatsApp CRM demo?', body: 'Hi {{businessName}} team,\\n\\nMany businesses lose inquiries because chats, orders, and reminders stay scattered. SRLINES helps teams respond faster with WhatsApp Cloud API, Omni Inbox, chatbots, and a sales pipeline.\\n\\nWould you like me to share a short walkthrough on WhatsApp? {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 3, delayDays: 14, subject: 'Close the loop?', body: 'Hi {{businessName}} team,\\n\\nI do not want to keep emailing if this is not useful. If improving WhatsApp/Meta lead handling is a priority, send me one WhatsApp message and I will suggest the best setup: {{whatsappCtaUrl}}\\n\\nOtherwise, I will close the loop here.\\n\\n{{signature}}' }\n    ]\n  },\n  sheets: { documentId: '19dwAu86RfoMcWcUp8li8DKbQhP7tUBqG2TZVR7hTPhk', keywords: 'Keywords', rawLeads: 'Raw_Leads', qualifiedLeads: 'Qualified_Leads', emailHistory: 'Email_History', campaignReport: 'Campaign_Report', replyLog: 'Reply_Log', followupQueue: 'Followup_Queue', blacklist: 'Blacklist', industryStats: 'Industry_Stats' },\n  deepseek: { apiKey: 'sk-987549f470cd401dbb3eef7b36c79931', apiUrl: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },\n  scraper: { baseUrl: 'http://localhost:3000', maxResultsPerKeyword: 4, delayBetweenRequests: 1000 },\n  gmailSearch: { replyQuery: 'to:srlines.wcrm@gmail.com newer_than:30d -from:me', bounceQuery: '(from:mailer-daemon OR from:postmaster OR subject:(Delivery Status Notification) OR subject:(Undelivered Mail Returned)) newer_than:30d' },\n  instructions: 'Configure placeholders in this Runtime Config node, Google Sheets OAuth, Gmail OAuth, and your local scraper URL before activating.'\n}}];"
       },
       "id": "bd2c00ed-21d8-4542-b6cc-beccfe51d2db",
       "name": "Runtime Config",
@@ -29,7 +29,7 @@
     },
     {
       "parameters": {
-        "operation": "append",
+        "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
           "value": "={{$json.sheets.documentId}}",
@@ -43,7 +43,9 @@
         "columns": {
           "mappingMode": "autoMapInputData",
           "value": {},
-          "matchingColumns": [],
+          "matchingColumns": [
+            "keyword"
+          ],
           "schema": [
             {
               "id": "executionId",
@@ -67,7 +69,7 @@
               "id": "keyword",
               "displayName": "keyword",
               "required": false,
-              "defaultMatch": false,
+              "defaultMatch": true,
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
@@ -313,7 +315,7 @@
     },
     {
       "parameters": {
-        "operation": "append",
+        "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
           "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
@@ -327,7 +329,9 @@
         "columns": {
           "mappingMode": "autoMapInputData",
           "value": {},
-          "matchingColumns": [],
+          "matchingColumns": [
+            "email"
+          ],
           "schema": [
             {
               "id": "executionId",
@@ -369,7 +373,7 @@
               "id": "email",
               "displayName": "email",
               "required": false,
-              "defaultMatch": false,
+              "defaultMatch": true,
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
@@ -532,7 +536,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json;const out=[];\nfunction fallback(j){return{subject:`${j.businessName}: WhatsApp growth idea`,body:`Hi ${j.businessName} team,\\n\\nI found ${j.businessName}${j.city?' in '+j.city:''} online and noticed your business activity. SRLINES helps businesses manage WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and sales follow-up from one CRM.\\n\\nIf faster WhatsApp replies and better lead tracking would help, message me here for a short demo: ${cfg.company.whatsappCtaUrl}\\n\\n${cfg.company.signature}`}}\nfor(const item of items){const j=item.json;if(!j.qualified)continue;let em=fallback(j);try{const key=cfg.deepseek.apiKey;if(!key||key.startsWith('PASTE_'))throw new Error('Configure cfg.deepseek.apiKey in Runtime Config');const prompt=`Write one concise compliant B2B cold email. Requirements: honest personalization only from provided data; mention we found them online/saw their activity; strong WhatsApp CTA with this exact link: ${cfg.company.whatsappCtaUrl}; no fake claims; subject under 70 chars; body under 150 words; include signature. Return JSON {subject,body}. Sender: ${JSON.stringify(cfg.company)} Lead: ${JSON.stringify({businessName:j.businessName,city:j.city,industry:j.industry,website:j.website,score:j.score,analysis:j.aiAnalysis,signals:j.signals})}`;const res=await this.helpers.httpRequest({method:'POST',url:cfg.deepseek.apiUrl,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:{model:cfg.deepseek.model,temperature:.85,messages:[{role:'user',content:prompt}],response_format:{type:'json_object'}},json:true,timeout:120000});em={...em,...JSON.parse(res.choices?.[0]?.message?.content||'{}')}}catch(e){em.aiEmailError=e.message}out.push({json:{...j,emailSubject:String(em.subject||'SRLINES demo').slice(0,140),emailBody:String(em.body||''),fromEmail:cfg.company.senderEmail,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}})}return out.slice(0,cfg.limits.maxEmailsPerRun);"
+        "jsCode": "const cfg = $('Runtime Config').first().json;\nconst out = [];\nfunction escapeHtml(value) {\n  return String(value ?? '').replace(/[&<>\"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch]));\n}\nfunction textToParagraphs(text) {\n  return String(text || '').split(/\\n{2,}/).map(p => `<p style=\"margin:0 0 16px;color:#334155;font-size:16px;line-height:1.65;\">${escapeHtml(p).replace(/\\n/g, '<br>')}</p>`).join('');\n}\nfunction renderBrandedEmail({lead, subject, body, preheader}) {\n  const brand = cfg.company.brand || {};\n  const cta = cfg.company.whatsappCtaUrl;\n  const businessName = escapeHtml(lead.businessName || 'your business');\n  const city = escapeHtml(lead.city || 'Pakistan');\n  const score = escapeHtml(lead.score || 'high-fit');\n  return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>\n@media only screen and (max-width:620px){.wrap{width:100%!important}.card{border-radius:22px!important}.hero{padding:28px 20px!important}.content{padding:24px 20px!important}.brand-title{font-size:30px!important}.cta{display:block!important;width:100%!important;box-sizing:border-box!important}.grid{display:block!important}.pill{display:block!important;margin:0 0 10px!important}.hide-mobile{display:none!important}}\n@keyframes pulseWhatsApp{0%{box-shadow:0 0 0 0 rgba(34,197,94,.45);transform:translateY(0)}70%{box-shadow:0 0 0 14px rgba(34,197,94,0);transform:translateY(-1px)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);transform:translateY(0)}}\n</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a;\"><div style=\"display:none;max-height:0;overflow:hidden;opacity:0;\">${escapeHtml(preheader || 'SRLINES WhatsApp CRM demo invitation')}</div><table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"background:#f1f5f9;\"><tr><td align=\"center\" style=\"padding:18px 10px;\"><table role=\"presentation\" class=\"wrap\" width=\"600\" cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;max-width:600px;\"><tr><td class=\"card\" style=\"background:#ffffff;border-radius:28px;overflow:hidden;box-shadow:0 20px 60px rgba(15,23,42,.12);\"><div class=\"hero\" style=\"padding:34px 32px;background:linear-gradient(135deg,${brand.dark || '#052E16'} 0%,${brand.primary || '#16A34A'} 58%,${brand.accent || '#22C55E'} 100%);\"><div style=\"font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#dcfce7;font-weight:700;\">${escapeHtml(cfg.company.tagline || 'WhatsApp Cloud API for Businesses')}</div><div class=\"brand-title\" style=\"margin-top:10px;color:#fff;font-size:38px;line-height:1;font-weight:900;letter-spacing:-.04em;\">${escapeHtml(brand.logoText || cfg.company.name)}</div><div style=\"margin-top:18px;color:#f0fdf4;font-size:17px;line-height:1.55;\">A mobile-first WhatsApp CRM, AI chatbot, broadcast, unified inbox, and sales follow-up stack for teams that want faster conversations.</div></div><div class=\"content\" style=\"padding:30px 32px 32px;\"><div style=\"display:inline-block;padding:8px 12px;border-radius:999px;background:${brand.soft || '#ECFDF5'};color:${brand.primary || '#16A34A'};font-weight:800;font-size:13px;\">Personal idea for ${businessName}</div><h1 style=\"margin:18px 0 12px;font-size:25px;line-height:1.2;color:#0f172a;letter-spacing:-.02em;\">Turn online inquiries into WhatsApp conversations</h1>${textToParagraphs(body)}<div class=\"grid\" style=\"display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0;\"><div style=\"padding:14px;border:1px solid #dcfce7;border-radius:16px;background:#f8fffb;\"><strong style=\"color:#052e16;\">Lead context</strong><br><span style=\"color:#64748b;font-size:14px;\">${businessName} • ${city}</span></div><div style=\"padding:14px;border:1px solid #dcfce7;border-radius:16px;background:#f8fffb;\"><strong style=\"color:#052e16;\">Fit signal</strong><br><span style=\"color:#64748b;font-size:14px;\">Score: ${score}</span></div></div><a class=\"cta\" href=\"${escapeHtml(cta)}\" style=\"animation:pulseWhatsApp 1.8s infinite;display:inline-block;background:linear-gradient(135deg,#25D366,#16A34A);color:#fff;text-decoration:none;font-weight:900;font-size:17px;border-radius:999px;padding:17px 24px;text-align:center;box-shadow:0 12px 28px rgba(34,197,94,.38);\">💬 WhatsApp me for a 10-minute demo</a><p style=\"margin:18px 0 0;color:#64748b;font-size:13px;line-height:1.6;\">${escapeHtml(brand.trustLine || '')}</p><hr style=\"border:0;border-top:1px solid #e2e8f0;margin:24px 0;\"><p style=\"margin:0;color:#0f172a;font-size:14px;line-height:1.6;\"><strong>${escapeHtml(cfg.company.senderName)}</strong><br>${escapeHtml(cfg.company.senderTitle)} · ${escapeHtml(cfg.company.legalName || cfg.company.name)}<br><a href=\"${escapeHtml(cfg.company.website || 'https://srlines.net')}\" style=\"color:${brand.primary || '#16A34A'};text-decoration:none;\">${escapeHtml(cfg.company.website || 'https://srlines.net')}</a> · <a href=\"${escapeHtml(cta)}\" style=\"color:${brand.primary || '#16A34A'};text-decoration:none;\">WhatsApp demo</a></p></div></td></tr></table></td></tr></table></body></html>`;\n}\nfunction fallback(j){return{subject:`${j.businessName}: WhatsApp growth idea`,body:`Hi ${j.businessName} team,\\n\\nI found ${j.businessName}${j.city?' in '+j.city:''} online and noticed your business activity. SRLINES helps businesses manage WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and sales follow-up from one CRM.\\n\\nIf faster WhatsApp replies and better lead tracking would help, message me here for a short demo: ${cfg.company.whatsappCtaUrl}\\n\\n${cfg.company.signature}`}}\nfor (const item of items) {\n  const j = item.json;\n  if (!j.qualified) continue;\n  let em = fallback(j);\n  try {\n    const key = cfg.deepseek.apiKey;\n    if (!key || key.startsWith('PASTE_')) throw new Error('Configure cfg.deepseek.apiKey in Runtime Config');\n    const prompt = `Write one concise compliant B2B cold email. Requirements: honest personalization only from provided data; mention we found them online/saw their activity; strong WhatsApp CTA with this exact link: ${cfg.company.whatsappCtaUrl}; no fake claims; subject under 70 chars; body under 150 words; include signature. Return JSON {subject,body}. Sender: ${JSON.stringify(cfg.company)} Lead: ${JSON.stringify({businessName:j.businessName,city:j.city,industry:j.industry,website:j.website,score:j.score,analysis:j.aiAnalysis,signals:j.signals})}`;\n    const res = await this.helpers.httpRequest({method:'POST',url:cfg.deepseek.apiUrl,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:{model:cfg.deepseek.model,temperature:.85,messages:[{role:'user',content:prompt}],response_format:{type:'json_object'}},json:true,timeout:120000});\n    em = {...em, ...JSON.parse(res.choices?.[0]?.message?.content || '{}')};\n  } catch(e) { em.aiEmailError = e.message; }\n  const emailSubject = String(em.subject || 'SRLINES demo').slice(0, 140);\n  const emailBody = String(em.body || '');\n  const emailHtml = renderBrandedEmail({lead:j, subject:emailSubject, body:emailBody, preheader:`${cfg.company.name} can help ${j.businessName || 'your team'} respond faster on WhatsApp.`});\n  out.push({json:{...j,emailSubject,emailBody,emailHtml,fromEmail:cfg.company.senderEmail,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});\n}\nreturn out.slice(0,cfg.limits.maxEmailsPerRun);"
       },
       "id": "70800ad4-2f9e-4703-be25-de55ae1a9433",
       "name": "DeepSeek Personalized Email",
@@ -602,7 +606,7 @@
       "parameters": {
         "sendTo": "={{ $json.email }}",
         "subject": "={{ $json.emailSubject }}",
-        "message": "={{ $json.emailBody }}",
+        "message": "={{ $json.emailHtml || $json.emailBody }}",
         "options": {
           "replyTo": "={{ $json.replyTo }}"
         }
@@ -625,7 +629,7 @@
     },
     {
       "parameters": {
-        "operation": "append",
+        "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
           "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
@@ -913,7 +917,7 @@
     },
     {
       "parameters": {
-        "operation": "append",
+        "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
           "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
@@ -927,13 +931,15 @@
         "columns": {
           "mappingMode": "autoMapInputData",
           "value": {},
-          "matchingColumns": [],
+          "matchingColumns": [
+            "executionId"
+          ],
           "schema": [
             {
               "id": "executionId",
               "displayName": "executionId",
               "required": false,
-              "defaultMatch": false,
+              "defaultMatch": true,
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
@@ -1170,7 +1176,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg = $('Runtime Config').first().json;\n// Input: rows from Email_History. Output: due follow-ups only.\nconst rows = $input.all().map(i=>i.json);\nconst stop = new Set((cfg.followup.stopStatuses || []).map(s => String(s).toLowerCase()));\nconst latest = new Map();\nconst now = Date.now();\nfunction render(t, r){ return String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl); }\nfor (const r of rows) {\n const email = String(r.email || '').toLowerCase().trim(); if (!email) continue;\n const t = new Date(r.lastSent || r.timestamp || 0).getTime();\n const prev = latest.get(email);\n if (!prev || t > prev._time) latest.set(email, {...r, _time: t});\n}\nconst out=[];\nfor (const r of latest.values()) {\n const email=String(r.email||'').toLowerCase().trim();\n const status=String(r.status||'').toLowerCase();\n const replied = r.replied === true || String(r.replied).toLowerCase() === 'true';\n if(!email || replied || stop.has(status) || status.includes('bounced') || status.includes('unsubscribed') || status.includes('complained')) continue;\n const stage=Number(r.followupStage||0); const next=(cfg.followup.sequence||[]).find(s=>Number(s.stage)===stage+1); if(!next) continue;\n const last=Number(r._time || new Date(r.lastSent||r.timestamp||0).getTime()); if(!last || now-last < Number(next.delayDays||999)*86400000) continue;\n out.push({json:{...r,email,emailSubject:render(next.subject,r),emailBody:render(next.body,r),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});\n if(out.length >= cfg.followup.maxFollowupsPerRun) break;\n}\nreturn out;"
+        "jsCode": "const cfg = $('Runtime Config').first().json;\n// Input: rows from Email_History. Output: due follow-ups only.\nconst rows = $input.all().map(i=>i.json);\nconst stop = new Set((cfg.followup.stopStatuses || []).map(s => String(s).toLowerCase()));\nconst latest = new Map();\nconst now = Date.now();\nfunction escapeHtml(value) { return String(value ?? '').replace(/[&<>\"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch])); }\nfunction render(t, r){ return String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl); }\nfunction paragraphs(text){ return String(text||'').split(/\\n{2,}/).map(p=>`<p style=\"margin:0 0 16px;color:#334155;font-size:16px;line-height:1.65;\">${escapeHtml(p).replace(/\\n/g,'<br>')}</p>`).join(''); }\nfunction renderFollowupEmail(r, body){ const brand=cfg.company.brand||{}; const cta=r.whatsappCtaUrl||cfg.company.whatsappCtaUrl; return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>@media only screen and (max-width:620px){.wrap{width:100%!important}.box{border-radius:22px!important}.content{padding:24px 20px!important}.cta{display:block!important;width:100%!important;box-sizing:border-box!important}}@keyframes pulseWhatsApp{0%{box-shadow:0 0 0 0 rgba(34,197,94,.45)}70%{box-shadow:0 0 0 14px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;\"><table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td align=\"center\" style=\"padding:18px 10px;\"><table class=\"wrap\" role=\"presentation\" width=\"600\" cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;max-width:600px;\"><tr><td class=\"box\" style=\"background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 18px 55px rgba(15,23,42,.12);\"><div style=\"padding:24px;background:linear-gradient(135deg,${brand.dark||'#052E16'},${brand.primary||'#16A34A'});color:#fff;\"><div style=\"font-size:30px;font-weight:900;letter-spacing:-.04em;\">${escapeHtml(brand.logoText||'SRLINES')}</div><div style=\"margin-top:8px;color:#dcfce7;font-size:14px;\">${escapeHtml(cfg.company.tagline||'WhatsApp Cloud API for Businesses')}</div></div><div class=\"content\" style=\"padding:30px 32px;\">${paragraphs(body)}<a class=\"cta\" href=\"${escapeHtml(cta)}\" style=\"animation:pulseWhatsApp 1.8s infinite;display:inline-block;background:linear-gradient(135deg,#25D366,#16A34A);color:#fff;text-decoration:none;font-weight:900;border-radius:999px;padding:16px 22px;text-align:center;box-shadow:0 12px 28px rgba(34,197,94,.38);\">💬 Reply on WhatsApp</a><p style=\"margin:20px 0 0;color:#64748b;font-size:13px;line-height:1.6;\">${escapeHtml(brand.trustLine||'')}</p><hr style=\"border:0;border-top:1px solid #e2e8f0;margin:22px 0;\"><p style=\"margin:0;color:#0f172a;font-size:14px;line-height:1.6;\"><strong>${escapeHtml(cfg.company.senderName)}</strong><br>${escapeHtml(cfg.company.senderTitle)} · ${escapeHtml(cfg.company.legalName||cfg.company.name)}<br><a href=\"${escapeHtml(cfg.company.website||'https://srlines.net')}\" style=\"color:${brand.primary||'#16A34A'};text-decoration:none;\">${escapeHtml(cfg.company.website||'https://srlines.net')}</a></p></div></td></tr></table></td></tr></table></body></html>`; }\nfor (const r of rows) {\n const email = String(r.email || '').toLowerCase().trim(); if (!email) continue;\n const t = new Date(r.lastSent || r.timestamp || 0).getTime();\n const prev = latest.get(email);\n if (!prev || t > prev._time) latest.set(email, {...r, _time: t});\n}\nconst out=[];\nfor (const r of latest.values()) {\n const email=String(r.email||'').toLowerCase().trim();\n const status=String(r.status||'').toLowerCase();\n const replied = r.replied === true || String(r.replied).toLowerCase() === 'true';\n if(!email || replied || stop.has(status) || status.includes('bounced') || status.includes('unsubscribed') || status.includes('complained')) continue;\n const stage=Number(r.followupStage||0); const next=(cfg.followup.sequence||[]).find(s=>Number(s.stage)===stage+1); if(!next) continue;\n const last=Number(r._time || new Date(r.lastSent||r.timestamp||0).getTime()); if(!last || now-last < Number(next.delayDays||999)*86400000) continue;\n const emailBody=render(next.body,r);\n out.push({json:{...r,email,emailSubject:render(next.subject,r),emailBody,emailHtml:renderFollowupEmail(r,emailBody),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});\n if(out.length >= cfg.followup.maxFollowupsPerRun) break;\n}\nreturn out;"
       },
       "id": "99e2de22-b92e-46c4-98f2-73c20bf614bc",
       "name": "Follow-up Sequence Builder (manual/cron branch)",
@@ -1235,7 +1241,7 @@
     },
     {
       "parameters": {
-        "operation": "append",
+        "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
           "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
@@ -1258,7 +1264,9 @@
             "status": "={{$json.status}}",
             "notes": "={{$json.notes}}"
           },
-          "matchingColumns": [],
+          "matchingColumns": [
+            "threadId"
+          ],
           "schema": [
             {
               "id": "timestamp",
@@ -1291,7 +1299,7 @@
               "id": "threadId",
               "displayName": "threadId",
               "required": false,
-              "defaultMatch": false,
+              "defaultMatch": true,
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
@@ -1391,7 +1399,7 @@
     },
     {
       "parameters": {
-        "operation": "append",
+        "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
           "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
@@ -1412,7 +1420,9 @@
             "reason": "={{$json.reason}}",
             "notes": "={{$json.notes}}"
           },
-          "matchingColumns": [],
+          "matchingColumns": [
+            "value"
+          ],
           "schema": [
             {
               "id": "timestamp",
@@ -1436,7 +1446,7 @@
               "id": "value",
               "displayName": "value",
               "required": false,
-              "defaultMatch": false,
+              "defaultMatch": true,
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
@@ -1519,7 +1529,7 @@
       "parameters": {
         "sendTo": "={{$json.email}}",
         "subject": "={{$json.emailSubject}}",
-        "message": "={{$json.emailBody}}",
+        "message": "={{ $json.emailHtml || $json.emailBody }}",
         "options": {
           "replyTo": "={{$json.replyTo}}"
         }
@@ -1542,7 +1552,7 @@
     },
     {
       "parameters": {
-        "operation": "append",
+        "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
           "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
@@ -1581,13 +1591,15 @@
             "replied": "false",
             "whatsappCtaUrl": "={{$('Follow-up Suppression Check').item.json.whatsappCtaUrl}}"
           },
-          "matchingColumns": [],
+          "matchingColumns": [
+            "id"
+          ],
           "schema": [
             {
               "id": "id",
               "displayName": "id",
               "required": false,
-              "defaultMatch": false,
+              "defaultMatch": true,
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
