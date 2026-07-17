@@ -18,7 +18,8 @@ This guide explains how to configure and operate the `SRLINES Ultimate 6-in-1 Go
 10. Suppresses addresses already sent, replied, bounced, blacklisted, or inside cooldown.
 11. Sends Gmail messages with randomized throttling.
 12. Appends send history and campaign reporting.
-13. Provides a ready follow-up sequence builder for staged drip emails.
+13. Syncs replied emails into `Reply_Log` and bounced recipients into `Blacklist`.
+14. Runs a wired follow-up branch from `Email_History` through suppression, rate limiting, Gmail send, and history append.
 
 ## Required services
 
@@ -117,14 +118,14 @@ If your scraper endpoint path or payload differs, update the **Google Maps Scrap
 
 ## Reply, bounce, and reputation process
 
-For production safety, update suppression tabs daily:
+For production safety, the workflow now includes two wired Gmail search branches:
 
-1. Search Gmail for replies using the query from `gmailSearch.replyQuery` and append matching contacts to `Reply_Log`.
-2. Search Gmail for bounces using `gmailSearch.bounceQuery` and append bounced recipient emails to `Blacklist` with `type=email`.
+1. **Gmail Search Replied Emails** uses `gmailSearch.replyQuery`, extracts sender addresses, and appends them to `Reply_Log`.
+2. **Gmail Search Bounced Emails** uses `gmailSearch.bounceQuery`, extracts failed recipient addresses, and appends them to `Blacklist` with `type=email`.
 3. Add manual unsubscribes or complaints to `Blacklist` immediately.
 4. Never remove hard bounces from `Blacklist`.
 
-The sending branch checks `Email_History`, `Reply_Log`, and `Blacklist` before sending. If a lead appears in any suppression source, it is skipped.
+The initial sending branch and the follow-up branch both check suppression data before sending. If a lead appears in any suppression source, it is skipped.
 
 ## Drip follow-up sequence
 
@@ -141,7 +142,7 @@ Each follow-up includes the WhatsApp CTA and is automatically personalized with:
 - `{{signature}}`
 - `{{whatsappCtaUrl}}`
 
-The **Follow-up Sequence Builder (manual/cron branch)** node is included as a ready production component. Wire it from a Google Sheets read of `Email_History`, then into the same rate-limit, Gmail send, and append-history pattern after you verify your suppression logs are accurate.
+The follow-up branch is fully wired: **Get Emails History → Follow-up Sequence Builder → Follow-up Suppression Check → Follow-up Rate Limit → Send Follow-up Gmail → Append Follow-up Email History**. It sends only the latest due stage per email and skips replied, bounced, complained, unsubscribed, duplicate, and blacklisted contacts.
 
 ## Production activation checklist
 

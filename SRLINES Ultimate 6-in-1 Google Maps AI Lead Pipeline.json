@@ -1170,19 +1170,6 @@
     },
     {
       "parameters": {
-        "jsCode": "// ============================================================\n// DROP IF FOUND IN HISTORY - DIRECT INPUTS (NO MERGE)\n// ============================================================\n\n// Get ALL input items from both connections\nconst allItems = $input.all();\n\nconsole.log(`\ud83d\udcca Received ${allItems.length} total items`);\n\n// ============================================================\n// STEP 1: Separate leads from history\n// ============================================================\n\nconst leads = [];\nconst historyEmails = new Set();\n\nfor (const item of allItems) {\n    const data = item.json;\n    \n    // Check if this is a LEAD (has businessName, email, and keyword)\n    if (data.businessName && data.email && data.keyword) {\n        leads.push(data);\n        console.log(`\ud83d\udccb LEAD: ${data.businessName} (${data.email})`);\n    }\n    // Check if this is HISTORY (from Get Emails History node)\n    else if (data.email || data.emails || data.values) {\n        // Extract emails from history data\n        if (data.email) {\n            const email = String(data.email).toLowerCase().trim();\n            if (email && email.includes('@')) {\n                historyEmails.add(email);\n                console.log(`\ud83d\udce7 HISTORY: ${email}`);\n            }\n        }\n        if (data.emails && Array.isArray(data.emails)) {\n            for (const email of data.emails) {\n                if (email) {\n                    const cleanEmail = String(email).toLowerCase().trim();\n                    if (cleanEmail && cleanEmail.includes('@')) {\n                        historyEmails.add(cleanEmail);\n                    }\n                }\n            }\n        }\n        if (data.values && Array.isArray(data.values)) {\n            for (const row of data.values) {\n                if (Array.isArray(row)) {\n                    for (const cell of row) {\n                        if (cell && String(cell).includes('@')) {\n                            const email = String(cell).toLowerCase().trim();\n                            historyEmails.add(email);\n                        }\n                    }\n                }\n            }\n        }\n    }\n    // Fallback: if it has email and looks like a lead\n    else if (data.email && data.email.includes('@')) {\n        // Check if it has business-like fields\n        if (data.businessName || data.name || data.company) {\n            leads.push(data);\n            console.log(`\ud83d\udccb LEAD (fallback): ${data.email}`);\n        } else {\n            historyEmails.add(String(data.email).toLowerCase().trim());\n            console.log(`\ud83d\udce7 HISTORY (fallback): ${data.email}`);\n        }\n    }\n}\n\nconsole.log(`\\n\ud83d\udcca Found ${leads.length} leads, ${historyEmails.size} history emails`);\n\n// ============================================================\n// STEP 2: Filter leads - keep ONLY those NOT in history\n// ============================================================\n\nconst newLeads = [];\nconst droppedLeads = [];\n\nfor (const lead of leads) {\n    const email = String(lead.email || '').toLowerCase().trim();\n    \n    if (!email) {\n        droppedLeads.push({\n            email: 'missing',\n            reason: 'no_email',\n            businessName: lead.businessName || 'Unknown'\n        });\n        continue;\n    }\n    \n    if (historyEmails.has(email)) {\n        droppedLeads.push({\n            email: email,\n            reason: 'already_in_history',\n            businessName: lead.businessName || 'Unknown'\n        });\n        console.log(`\u274c DROPPED: ${email}`);\n        continue;\n    }\n    \n    newLeads.push({\n        json: {\n            ...lead,\n            isNewLead: true,\n            filteredAt: new Date().toISOString()\n        }\n    });\n    console.log(`\u2705 PASSED: ${email}`);\n}\n\nconsole.log(`\\n\ud83d\udcca SUMMARY: ${newLeads.length} new, ${droppedLeads.length} dropped`);\n\nif (newLeads.length === 0) {\n    const template = leads.length > 0 ? leads[0] : {};\n    return [{\n        json: {\n            ...template,\n            status: 'all_leads_dropped',\n            message: 'All leads already exist in history',\n            timestamp: new Date().toISOString()\n        }\n    }];\n}\n\nreturn newLeads;"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        272,
-        -832
-      ],
-      "id": "621fa05d-84cc-4e14-b786-73ec113891f5",
-      "name": "Drop If Found in History"
-    },
-    {
-      "parameters": {
         "content": "## 2. Suppression safety\nRead Email_History, Reply_Log, and Blacklist before every send. Log Gmail replies and bounces daily, then stop all future initial/follow-up mail to those addresses.",
         "height": 360,
         "width": 560,
@@ -1215,16 +1202,656 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg = $('Runtime Config').first().json;\n// Input: rows from Email_History. Output: due follow-ups only.\nconst rows = $input.all().map(i=>i.json);\nconst stop = new Set(cfg.followup.stopStatuses || []);\nconst now = Date.now();\nfunction render(t, r){ return String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl); }\nconst out=[];\nfor (const r of rows) {\n const email=String(r.email||'').toLowerCase().trim(); if(!email || stop.has(String(r.status||'').toLowerCase()) || r.replied===true || String(r.replied).toLowerCase()==='true') continue;\n const stage=Number(r.followupStage||0); const next=(cfg.followup.sequence||[]).find(s=>Number(s.stage)===stage+1); if(!next) continue;\n const last=new Date(r.lastSent||r.timestamp||0).getTime(); if(!last || now-last < Number(next.delayDays||999)*86400000) continue;\n out.push({json:{...r,email,emailSubject:render(next.subject,r),emailBody:render(next.body,r),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo}});\n if(out.length >= cfg.followup.maxFollowupsPerRun) break;\n}\nreturn out;"
+        "jsCode": "const cfg = $('Runtime Config').first().json;\n// Input: rows from Email_History. Output: due follow-ups only.\nconst rows = $input.all().map(i=>i.json);\nconst stop = new Set((cfg.followup.stopStatuses || []).map(s => String(s).toLowerCase()));\nconst latest = new Map();\nconst now = Date.now();\nfunction render(t, r){ return String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl); }\nfor (const r of rows) {\n const email = String(r.email || '').toLowerCase().trim(); if (!email) continue;\n const t = new Date(r.lastSent || r.timestamp || 0).getTime();\n const prev = latest.get(email);\n if (!prev || t > prev._time) latest.set(email, {...r, _time: t});\n}\nconst out=[];\nfor (const r of latest.values()) {\n const email=String(r.email||'').toLowerCase().trim();\n const status=String(r.status||'').toLowerCase();\n const replied = r.replied === true || String(r.replied).toLowerCase() === 'true';\n if(!email || replied || stop.has(status) || status.includes('bounced') || status.includes('unsubscribed') || status.includes('complained')) continue;\n const stage=Number(r.followupStage||0); const next=(cfg.followup.sequence||[]).find(s=>Number(s.stage)===stage+1); if(!next) continue;\n const last=Number(r._time || new Date(r.lastSent||r.timestamp||0).getTime()); if(!last || now-last < Number(next.delayDays||999)*86400000) continue;\n out.push({json:{...r,email,emailSubject:render(next.subject,r),emailBody:render(next.body,r),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});\n if(out.length >= cfg.followup.maxFollowupsPerRun) break;\n}\nreturn out;"
       },
       "id": "299a33f8-ab2b-4ae4-a899-ce43352bbfcd",
       "name": "Follow-up Sequence Builder (manual/cron branch)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        832,
-        -520
+        576,
+        -416
       ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Reply & Bounce Sync\nRuns from Runtime Config on every execution. Gmail reply search appends Reply_Log; Gmail bounce search appends Blacklist. These tabs are checked before initial and follow-up sends.",
+        "height": 360,
+        "width": 1040,
+        "color": 6
+      },
+      "id": "9d39745d-4ec4-4ef9-8a31-9cccca4d21c6",
+      "name": "SECTION 4 - Reply & Bounce Sync",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": false,
+        "limit": 50,
+        "filters": {
+          "q": "={{$('Runtime Config').first().json.gmailSearch.replyQuery}}"
+        }
+      },
+      "id": "1cf9e785-db5c-484e-8dc5-3db95b75e70a",
+      "name": "Gmail Search Replied Emails",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -96,
+        -256
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BnYJ9LBiL4qlRcEf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Runtime Config').first().json;\nconst my = String(cfg.company.senderEmail || '').toLowerCase();\nfunction header(m, name){ const h=(m.payload?.headers||[]).find(x=>String(x.name).toLowerCase()===name.toLowerCase()); return h?.value || ''; }\nfunction emailFrom(v){ const m=String(v||'').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i); return m ? m[0].toLowerCase() : ''; }\nconst seen=new Set(), out=[];\nfor (const item of items) { const m=item.json; const from=emailFrom(header(m,'From') || m.from || m.sender); if(!from || from===my || seen.has(from)) continue; seen.add(from); out.push({json:{timestamp:new Date().toISOString(),email:from,businessName:'',threadId:m.threadId||m.id||'',subject:header(m,'Subject')||m.subject||'',snippet:m.snippet||'',status:'replied',notes:'Detected by Gmail reply search'}}); }\nreturn out;"
+      },
+      "id": "31a852e4-06fc-4694-8178-88f7a1a1acd8",
+      "name": "Extract Replied Emails for Reply_Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.replyLog}}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{$json.timestamp}}",
+            "email": "={{$json.email}}",
+            "businessName": "={{$json.businessName}}",
+            "threadId": "={{$json.threadId}}",
+            "subject": "={{$json.subject}}",
+            "snippet": "={{$json.snippet}}",
+            "status": "={{$json.status}}",
+            "notes": "={{$json.notes}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "businessName",
+              "displayName": "businessName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "threadId",
+              "displayName": "threadId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "snippet",
+              "displayName": "snippet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b7e3e378-4bf7-4f2c-a101-608b5d977272",
+      "name": "Append Reply_Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        384,
+        -256
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": false,
+        "limit": 50,
+        "filters": {
+          "q": "={{$('Runtime Config').first().json.gmailSearch.bounceQuery}}"
+        }
+      },
+      "id": "f82839f3-02b2-4ec8-8753-2dbbd339bd70",
+      "name": "Gmail Search Bounced Emails",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -96,
+        -96
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BnYJ9LBiL4qlRcEf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Runtime Config').first().json;\nfunction header(m, name){ const h=(m.payload?.headers||[]).find(x=>String(x.name).toLowerCase()===name.toLowerCase()); return h?.value || ''; }\nconst textOf = m => [m.snippet, header(m,'To'), header(m,'X-Failed-Recipients'), header(m,'Final-Recipient'), header(m,'Original-Recipient'), header(m,'Subject')].filter(Boolean).join(' ');\nconst seen=new Set(), out=[];\nfor (const item of items) { const m=item.json; const text=textOf(m); const emails=[...text.matchAll(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/ig)].map(x=>x[0].toLowerCase()).filter(e=>!e.includes('mailer-daemon')&&!e.includes('postmaster')); for (const email of emails) { if(seen.has(email)) continue; seen.add(email); out.push({json:{timestamp:new Date().toISOString(),type:'email',value:email,source:'gmail_bounce_search',reason:'hard_or_soft_bounce_detected',notes:`Thread ${m.threadId||m.id||''}`}}); } }\nreturn out;"
+      },
+      "id": "afdc59f3-d356-424e-a571-9043492c3626",
+      "name": "Extract Bounced Emails for Blacklist",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.blacklist}}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{$json.timestamp}}",
+            "type": "={{$json.type}}",
+            "value": "={{$json.value}}",
+            "source": "={{$json.source}}",
+            "reason": "={{$json.reason}}",
+            "notes": "={{$json.notes}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "value",
+              "displayName": "value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7e3af983-a415-4f33-a3e9-0c855fef5a22",
+      "name": "Append Blacklist Bounces",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        384,
+        -96
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Runtime Config').first().json;\nasync function sheetSet(tab, col){ try{ const res=await this.helpers.httpRequest({method:'GET',url:`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${tab}`,headers:{Authorization:'Bearer '+(await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token},json:true,timeout:10000}); const vals=res.values||[]; if(vals.length<2) return new Set(); const idx=vals[0].indexOf(col); if(idx<0) return new Set(); return new Set(vals.slice(1).map(r=>String(r[idx]||'').toLowerCase().trim()).filter(Boolean)); }catch(e){ console.log(`Could not read ${tab}:`, e.message); return new Set(); }}\nconst replies=await sheetSet.call(this,cfg.sheets.replyLog,'email'); const blacklist=await sheetSet.call(this,cfg.sheets.blacklist,'value');\nconst inRun=new Set(); const out=[];\nfor(const item of items){ const j=item.json; const email=String(j.email||'').toLowerCase().trim(); if(!email||inRun.has(email)||replies.has(email)||blacklist.has(email)) continue; inRun.add(email); out.push({json:{...j,email,shouldSend:true}}); }\nreturn out;"
+      },
+      "id": "e639dc15-fe82-4f3b-98ab-416a82f9501f",
+      "name": "Follow-up Suppression Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -416
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg=$('Runtime Config').first().json;const ms=(cfg.limits.minDelaySeconds+Math.random()*(cfg.limits.maxDelaySeconds-cfg.limits.minDelaySeconds))*1000;await new Promise(r=>setTimeout(r,ms));return items;"
+      },
+      "id": "5740f77b-046e-4573-abfa-b9a82fe9ce6c",
+      "name": "Follow-up Rate Limit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        -416
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.email}}",
+        "subject": "={{$json.emailSubject}}",
+        "message": "={{$json.emailBody}}",
+        "options": {
+          "replyTo": "={{$json.replyTo}}"
+        }
+      },
+      "id": "91939583-9e9a-44b0-a665-266f6d11e5a7",
+      "name": "Send Follow-up Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        -416
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BnYJ9LBiL4qlRcEf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.emailHistory}}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{$('Follow-up Suppression Check').item.json.id || $('Follow-up Suppression Check').item.json.email + '-' + $('Follow-up Suppression Check').item.json.followupStage}}",
+            "executionId": "={{$('Runtime Config').first().json.executionId}}",
+            "timestamp": "={{new Date().toISOString()}}",
+            "businessName": "={{$('Follow-up Suppression Check').item.json.businessName}}",
+            "email": "={{$('Follow-up Suppression Check').item.json.email}}",
+            "phone": "={{$('Follow-up Suppression Check').item.json.phone}}",
+            "website": "={{$('Follow-up Suppression Check').item.json.website}}",
+            "domain": "={{$('Follow-up Suppression Check').item.json.domain}}",
+            "city": "={{$('Follow-up Suppression Check').item.json.city}}",
+            "industry": "={{$('Follow-up Suppression Check').item.json.industry}}",
+            "score": "={{$('Follow-up Suppression Check').item.json.score}}",
+            "priority": "={{$('Follow-up Suppression Check').item.json.priority}}",
+            "emailSubject": "={{$('Follow-up Suppression Check').item.json.emailSubject}}",
+            "emailBody": "={{$('Follow-up Suppression Check').item.json.emailBody}}",
+            "fromEmail": "={{$('Runtime Config').first().json.company.senderEmail}}",
+            "replyTo": "={{$('Follow-up Suppression Check').item.json.replyTo}}",
+            "lastSent": "={{$('Follow-up Suppression Check').item.json.lastSent}}",
+            "campaign": "={{$('Follow-up Suppression Check').item.json.campaign}}",
+            "status": "={{$('Follow-up Suppression Check').item.json.status}}",
+            "error": "",
+            "notes": "follow-up drip sent",
+            "followupStage": "={{$('Follow-up Suppression Check').item.json.followupStage}}",
+            "replied": "false",
+            "whatsappCtaUrl": "={{$('Follow-up Suppression Check').item.json.whatsappCtaUrl}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "businessName",
+              "displayName": "businessName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "domain",
+              "displayName": "domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "industry",
+              "displayName": "industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "priority",
+              "displayName": "priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailSubject",
+              "displayName": "emailSubject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailBody",
+              "displayName": "emailBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fromEmail",
+              "displayName": "fromEmail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "replyTo",
+              "displayName": "replyTo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lastSent",
+              "displayName": "lastSent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "campaign",
+              "displayName": "campaign",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "followupStage",
+              "displayName": "followupStage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "replied",
+              "displayName": "replied",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "whatsappCtaUrl",
+              "displayName": "whatsappCtaUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "16b11f08-87eb-41ea-9978-8dd8ff0be73f",
+      "name": "Append Follow-up Email History",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        1472,
+        -416
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -1250,6 +1877,16 @@
           },
           {
             "node": "Get Emails History",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail Search Replied Emails",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail Search Bounced Emails",
             "type": "main",
             "index": 0
           }
@@ -1359,7 +1996,7 @@
       "main": [
         [
           {
-            "node": "Drop If Found in History",
+            "node": "Loop Over Items2",
             "type": "main",
             "index": 0
           }
@@ -1370,7 +2007,7 @@
       "main": [
         [
           {
-            "node": "Drop If Found in History",
+            "node": "Follow-up Sequence Builder (manual/cron branch)",
             "type": "main",
             "index": 0
           }
@@ -1486,11 +2123,88 @@
         ]
       ]
     },
-    "Drop If Found in History": {
+    "Gmail Search Replied Emails": {
       "main": [
         [
           {
-            "node": "Loop Over Items2",
+            "node": "Extract Replied Emails for Reply_Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Replied Emails for Reply_Log": {
+      "main": [
+        [
+          {
+            "node": "Append Reply_Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Search Bounced Emails": {
+      "main": [
+        [
+          {
+            "node": "Extract Bounced Emails for Blacklist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Bounced Emails for Blacklist": {
+      "main": [
+        [
+          {
+            "node": "Append Blacklist Bounces",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-up Sequence Builder (manual/cron branch)": {
+      "main": [
+        [
+          {
+            "node": "Follow-up Suppression Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-up Suppression Check": {
+      "main": [
+        [
+          {
+            "node": "Follow-up Rate Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-up Rate Limit": {
+      "main": [
+        [
+          {
+            "node": "Send Follow-up Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Follow-up Gmail": {
+      "main": [
+        [
+          {
+            "node": "Append Follow-up Email History",
             "type": "main",
             "index": 0
           }
