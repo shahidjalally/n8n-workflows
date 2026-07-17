@@ -165,3 +165,18 @@ The follow-up branch is fully wired: **Get Emails History → Follow-up Sequence
 - Keep daily volume low during warm-up.
 - Make emails truthful: the prompt forbids fake claims and uses only provided lead data.
 - Monitor bounce rate; pause the workflow if hard bounces exceed safe thresholds.
+
+## Google Maps scraper timeout troubleshooting
+
+The **Google Maps Scraper** node is intentionally kept byte-for-byte aligned with the originally provided working scraper code. If you see `Search failed: timeout of 60000ms exceeded`, the timeout is coming from the local scraper request to `/api/scrape/search`, not from the reply/bounce/follow-up additions. Check that the scraper service is running, reachable from the n8n container/VPS network namespace, and able to finish one keyword within 60 seconds.
+
+Quick checks on the VPS:
+
+```bash
+curl -sS http://localhost:3000/health || true
+curl -sS -X POST http://localhost:3000/api/scrape/search \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"real estate agent in karachi","maxResults":5}'
+```
+
+If the second command takes more than 60 seconds, reduce `scraper.maxResultsPerKeyword` in **Runtime Config**, increase scraper server capacity, or test the scraper directly outside n8n before activating the full campaign.
