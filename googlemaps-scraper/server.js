@@ -31,18 +31,12 @@ app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-const positiveInt = (value, fallback) => {
-  const parsed = Number.parseInt(value, 10);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
-};
-
 const config = {
-  // Page crashes must recycle the full browser process; retrying a crashed Page
-  // instance (the old behaviour) can never recover.
-  maxRetries: positiveInt(process.env.MAX_RETRIES, 3),
-  retryDelay: positiveInt(process.env.RETRY_DELAY, 3000),
-  timeout: positiveInt(process.env.TIMEOUT, 60000),
-  headless: process.env.HEADLESS !== 'false',
+  maxRetries: 2,
+  retryDelay: 3000,
+  timeout: 60000,
+  concurrentScrapers: 1,
+  headless: true,
 };
 
 class ScraperQueue {
@@ -60,27 +54,49 @@ class ScraperQueue {
       logger.info('Initializing browser...');
 
       this.browser = await chromium.launch({
-        headless: config.headless,
-        // Keep this list deliberately small. Several conflicting rendering and
-        // isolation flags in the previous configuration caused Chromium page
-        // processes to crash under container memory pressure.
+        headless: true,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
           '--disable-gpu',
-          '--disable-extensions',
+          '--window-size=1920,1080',
+          '--disable-blink-features=AutomationControlled',
+          '--disable-features=IsolateOrigins,site-per-process',
+          '--disable-site-isolation-trials',
+          '--disable-web-security',
+          '--disable-features=BlockInsecurePrivateNetworkRequests',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
           '--disable-background-networking',
           '--disable-default-apps',
+          '--disable-extensions',
+          '--disable-component-extensions-with-background-pages',
+          '--disable-client-side-phishing-detection',
+          '--disable-crash-reporter',
+          '--disable-component-update',
+          '--disable-login-animations',
+          '--disable-prompt-on-repost',
           '--disable-sync',
+          '--no-default-browser-check',
           '--no-first-run',
-          '--no-zygote',
-          '--window-size=1280,720',
+          '--disable-hang-monitor',
+          '--disable-ipc-flooding-protection',
+          '--disable-popup-blocking',
+          '--disable-pulseaudio',
+          '--disable-software-rasterizer',
+          '--enable-features=NetworkService,NetworkServiceInProcess',
+          '--force-color-profile=srgb',
+          '--metrics-recording-only',
+          '--password-store=basic',
+          '--use-gl=swiftshader'
         ]
       });
 
       this.context = await this.browser.newContext({
-        viewport: { width: 1280, height: 720 },
+        viewport: { width: 1920, height: 1080 },
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         locale: 'en-US',
         timezoneId: 'America/New_York',
@@ -90,13 +106,6 @@ class ScraperQueue {
           'Connection': 'keep-alive',
           'Upgrade-Insecure-Requests': '1'
         }
-      });
-
-      // Maps result text is enough for this service. Avoid downloading images,
-      // media and fonts, which materially lowers renderer memory usage.
-      await this.context.route('**/*', route => {
-        const type = route.request().resourceType();
-        return ['image', 'media', 'font'].includes(type) ? route.abort() : route.continue();
       });
 
       this.page = await this.context.newPage();
@@ -185,27 +194,11 @@ class ScraperQueue {
   }
 
   async ensureInitialized() {
-    if (!this.isInitialized || !this.browser || !this.browser.isConnected() || !this.page || this.page.isClosed()) {
-      logger.info('Initializing a fresh browser process...');
-      await this.resetBrowser();
+    if (!this.isInitialized || !this.browser || !this.page) {
+      logger.info('Re-initializing browser...');
+      await this.initialize();
     }
     return this.isInitialized;
-  }
-
-  isBrowserCrash(error) {
-    return /page crashed|target page, context or browser has been closed|browser has been closed|connection closed/i.test(String(error?.message || error));
-  }
-
-  async resetBrowser() {
-    const oldBrowser = this.browser;
-    this.browser = null;
-    this.context = null;
-    this.page = null;
-    this.isInitialized = false;
-    if (oldBrowser) {
-      try { await oldBrowser.close(); } catch (error) { logger.warn(`Browser close during reset failed: ${error.message}`); }
-    }
-    await this.initialize();
   }
 
   async addToQueue(task) {
@@ -256,10 +249,7 @@ class ScraperQueue {
         logger.warn(`Task failed (attempt ${retries}/${config.maxRetries}):`, error.message);
         if (retries < config.maxRetries) {
           await this.sleep(config.retryDelay * retries);
-          // A page crash invalidates the entire Playwright target. Recreate the
-          // browser instead of reloading the broken page.
-          if (this.isBrowserCrash(error)) await this.resetBrowser();
-          else await this.refreshPage();
+          await this.refreshPage();
         } else {
           throw error;
         }
@@ -644,26 +634,15 @@ class ScraperQueue {
   }
 
   async close() {
-    const browser = this.browser;
-    this.browser = null;
-    this.context = null;
-    this.page = null;
-    this.isInitialized = false;
-    if (browser) await browser.close();
-    logger.info('Browser closed');
+    if (this.browser) {
+      await this.browser.close();
+      this.isInitialized = false;
+      logger.info('Browser closed');
+    }
   }
 }
 
 let scraperQueue = null;
-
-app.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    browserConnected: Boolean(scraperQueue?.browser?.isConnected()),
-    queueLength: scraperQueue?.queue.length || 0,
-    timestamp: new Date().toISOString(),
-  });
-});
 
 app.post('/api/scrape/search', async (req, res) => {
   try {
