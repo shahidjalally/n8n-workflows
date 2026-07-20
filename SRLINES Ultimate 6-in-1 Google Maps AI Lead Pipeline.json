@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "jsCode": "const now = new Date();\nconst executionId = `${now.toISOString()}-${Math.random().toString(36).slice(2, 10)}`;\n\n// n8n plan note: this workflow intentionally keeps API keys and IDs here instead of env vars.\n// Replace every PASTE_* value before activating. Do not commit real production secrets.\nreturn [{ json: {\n  executionId,\n  now: now.toISOString(),\n  timezone: 'Asia/Karachi',\n  campaign: { name: 'SRLINES Pakistan B2B', consentNote: 'Cold B2B outreach. Stop immediately on bounce, reply, unsubscribe, or complaint.' },\n  company: {\n    name: 'SRLINES',\n    legalName: 'SRLINES SOFTWARE HOUSE (SMC-PRIVATE) LIMITED',\n    tagline: \"Pakistan's #1 WhatsApp Cloud API Platform for Businesses\",\n    senderName: 'Shahid Rasool',\n    senderTitle: 'CEO',\n    website: 'https://srlines.net',\n    phone: '+92 328 3897926',\n    senderEmail: 'srlines.wcrm@gmail.com',\n    replyTo: 'srlines.wcrm@gmail.com',\n    whatsappCtaUrl: 'https://wa.me/923283897926?text=Hi%20SRLINES%2C%20I%20saw%20your%20email%20and%20want%20a%20WhatsApp%20CRM%20demo',\n    signature: 'Shahid Rasool\\nCEO\\nSRLINES SOFTWARE HOUSE (SMC-PRIVATE) LIMITED\\nWhatsApp demo: https://wa.me/923283897926',\n    brand: { primary: '#16A34A', dark: '#052E16', accent: '#22C55E', soft: '#ECFDF5', ink: '#0F172A', muted: '#64748B', logoText: 'SRLINES', trustLine: 'SECP Registered • Meta Verified Partner • 750+ Businesses Served • 99.9% uptime SLA' },\n    products: ['Official Meta Cloud API', 'WhatsApp CRM', 'Omni Inbox', 'Facebook Messenger', 'Instagram DM', 'Sales Pipeline Kanban CRM', 'Chatbots', 'Shopify WhatsApp App Integration', 'N8N Native Node', 'Bitrix24 app']\n  },\n  limits: { keywordsPerRun: 6, minScoreToEmail: 60, emailCooldownDays: 180, maxEmailsPerRun: 50, minDelaySeconds: 25, maxDelaySeconds: 90 },\n  emailValidation: { enabled: true, requireMx: true, dnsProvider: 'https://dns.google/resolve', timeoutMs: 8000, blockedDomains: ['example.com','test.com','invalid.com'], blockedLocalParts: ['no-reply','noreply','donotreply','do-not-reply','support','help','privacy','abuse'] },\n  followup: {\n    enabled: true,\n    maxFollowupsPerRun: 25,\n    stopStatuses: ['replied','bounced','complained','unsubscribed'],\n    sequence: [\n      { stage: 1, delayDays: 3, subject: 'Quick WhatsApp idea for {{businessName}}', body: 'Hi {{businessName}} team,\\n\\nI found {{businessName}} online while reviewing active businesses in {{city}}. A quick idea: SRLINES can centralize WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and lead follow-up in one CRM.\\n\\nIf you want, message me on WhatsApp and I will show a 10-minute demo tailored to your business: {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 2, delayDays: 7, subject: 'Should I send a WhatsApp CRM demo?', body: 'Hi {{businessName}} team,\\n\\nMany businesses lose inquiries because chats, orders, and reminders stay scattered. SRLINES helps teams respond faster with WhatsApp Cloud API, Omni Inbox, chatbots, and a sales pipeline.\\n\\nWould you like me to share a short walkthrough on WhatsApp? {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 3, delayDays: 14, subject: 'Close the loop?', body: 'Hi {{businessName}} team,\\n\\nI do not want to keep emailing if this is not useful. If improving WhatsApp/Meta lead handling is a priority, send me one WhatsApp message and I will suggest the best setup: {{whatsappCtaUrl}}\\n\\nOtherwise, I will close the loop here.\\n\\n{{signature}}' }\n    ]\n  },\n  sheets: { documentId: '19dwAu86RfoMcWcUp8li8DKbQhP7tUBqG2TZVR7hTPhk', keywords: 'Keywords', rawLeads: 'Raw_Leads', qualifiedLeads: 'Qualified_Leads', emailHistory: 'Email_History', campaignReport: 'Campaign_Report', replyLog: 'Reply_Log', followupQueue: 'Followup_Queue', blacklist: 'Blacklist', industryStats: 'Industry_Stats' },\n  deepseek: { apiKey: 'sk-987549f470cd401dbb3eef7b36c79931', apiUrl: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },\n  scraper: { baseUrl: 'http://localhost:3000', maxResultsPerKeyword: 30, delayBetweenRequests: 1000 },\n  gmailSearch: { replyQuery: 'in:inbox newer_than:90d -from:me -from:srlines.wcrm@gmail.com -from:mailer-daemon -from:postmaster -subject:(Delivery Status Notification) -subject:(Undelivered Mail Returned) -subject:(Delivery incomplete) -category:promotions -category:social', bounceQuery: 'newer_than:90d (from:mailer-daemon OR from:postmaster OR subject:(Delivery Status Notification) OR subject:(Undelivered Mail Returned) OR subject:(Delivery incomplete) OR subject:(Address not found) OR subject:(Message not delivered))' },\n  instructions: 'Configure placeholders in this Runtime Config node, Google Sheets OAuth, Gmail OAuth, and your local scraper URL before activating.'\n}}];"
+        "jsCode": "const now = new Date();\nconst executionId = `${now.toISOString()}-${Math.random().toString(36).slice(2, 10)}`;\n\n// n8n plan note: this workflow intentionally keeps API keys and IDs here instead of env vars.\n// Replace every PASTE_* value before activating. Do not commit real production secrets.\nreturn [{ json: {\n  executionId,\n  now: now.toISOString(),\n  timezone: 'Asia/Karachi',\n  campaign: { name: 'SRLINES Pakistan B2B', consentNote: 'Cold B2B outreach. Stop immediately on bounce, reply, unsubscribe, or complaint.' },\n  company: {\n    name: 'SRLINES',\n    legalName: 'SRLINES SOFTWARE HOUSE (SMC-PRIVATE) LIMITED',\n    tagline: \"Pakistan's #1 WhatsApp Cloud API Platform for Businesses\",\n    senderName: 'Shahid Rasool',\n    senderTitle: 'CEO',\n    website: 'https://srlines.net',\n    phone: '+92 328 3897926',\n    senderEmail: 'srlines.wcrm@gmail.com',\n    replyTo: 'srlines.wcrm@gmail.com',\n    whatsappCtaUrl: 'https://wa.me/923283897926?text=Hi%20SRLINES%2C%20I%20saw%20your%20email%20and%20want%20a%20WhatsApp%20CRM%20demo',\n    signature: 'Shahid Rasool\\nCEO\\nSRLINES SOFTWARE HOUSE (SMC-PRIVATE) LIMITED\\nWhatsApp demo: https://wa.me/923283897926',\n    brand: { primary: '#16A34A', dark: '#052E16', accent: '#22C55E', soft: '#ECFDF5', ink: '#0F172A', muted: '#64748B', logoText: 'SRLINES', trustLine: 'SECP Registered • Meta Verified Partner • 750+ Businesses Served • 99.9% uptime SLA' },\n    products: ['Official Meta Cloud API', 'WhatsApp CRM', 'Omni Inbox', 'Facebook Messenger', 'Instagram DM', 'Sales Pipeline Kanban CRM', 'Chatbots', 'Shopify WhatsApp App Integration', 'N8N Native Node', 'Bitrix24 app']\n  },\n  limits: { keywordsPerRun: 6, minScoreToEmail: 60, emailCooldownDays: 180, maxEmailsPerRun: 50, minDelaySeconds: 25, maxDelaySeconds: 90 },\n  emailValidation: { enabled: true, requireMx: true, dnsProvider: 'https://dns.google/resolve', timeoutMs: 8000, blockedDomains: ['example.com','test.com','invalid.com'], blockedLocalParts: ['no-reply','noreply','donotreply','do-not-reply','support','help','privacy','abuse'] },\n  followup: {\n    enabled: true,\n    maxFollowupsPerRun: 25,\n    stopStatuses: ['replied','bounced','complained','unsubscribed'],\n    sequence: [\n      { stage: 1, delayDays: 3, subject: 'Quick WhatsApp idea for {{businessName}}', body: 'Hi {{businessName}} team,\\n\\nI found {{businessName}} online while reviewing active businesses in {{city}}. A quick idea: SRLINES can centralize WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and lead follow-up in one CRM.\\n\\nIf you want, message me on WhatsApp and I will show a 10-minute demo tailored to your business: {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 2, delayDays: 7, subject: 'Should I send a WhatsApp CRM demo?', body: 'Hi {{businessName}} team,\\n\\nMany businesses lose inquiries because chats, orders, and reminders stay scattered. SRLINES helps teams respond faster with WhatsApp Cloud API, Omni Inbox, chatbots, and a sales pipeline.\\n\\nWould you like me to share a short walkthrough on WhatsApp? {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 3, delayDays: 14, subject: 'Close the loop?', body: 'Hi {{businessName}} team,\\n\\nI do not want to keep emailing if this is not useful. If improving WhatsApp/Meta lead handling is a priority, send me one WhatsApp message and I will suggest the best setup: {{whatsappCtaUrl}}\\n\\nOtherwise, I will close the loop here.\\n\\n{{signature}}' }\n    ]\n  },\n  sheets: { documentId: '19dwAu86RfoMcWcUp8li8DKbQhP7tUBqG2TZVR7hTPhk', keywords: 'Keywords', rawLeads: 'Raw_Leads', qualifiedLeads: 'Qualified_Leads', emailHistory: 'Email_History', campaignReport: 'Campaign_Report', replyLog: 'Reply_Log', followupQueue: 'Followup_Queue', blacklist: 'Blacklist', industryStats: 'Industry_Stats' },\n  deepseek: { apiKey: 'PASTE_DEEPSEEK_API_KEY_HERE', apiUrl: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },\n  scraper: { baseUrl: 'http://localhost:3000', maxResultsPerKeyword: 30, delayBetweenRequests: 1000 },\n  gmailSearch: { replyQuery: 'in:inbox newer_than:90d -from:me -from:srlines.wcrm@gmail.com -from:mailer-daemon -from:postmaster -subject:(Delivery Status Notification) -subject:(Undelivered Mail Returned) -subject:(Delivery incomplete) -category:promotions -category:social', bounceQuery: 'newer_than:90d (from:mailer-daemon OR from:postmaster OR subject:(Delivery Status Notification) OR subject:(Undelivered Mail Returned) OR subject:(Delivery incomplete) OR subject:(Address not found) OR subject:(Message not delivered))' },\n  instructions: 'Configure placeholders in this Runtime Config node, Google Sheets OAuth, Gmail OAuth, and your local scraper URL before activating. Keep credentials in n8n credentials/environment variables; never store live secrets in this workflow export. Before activation, complete SRLINES Google Sheets Production Setup.md and preserve its exact tab names and headers.'\n}}];"
       },
       "id": "cc0ed6d1-f4c5-4d41-91f4-9b5075e45d02",
       "name": "Runtime Config",
@@ -230,7 +230,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// ================================================================\n// GOOGLE MAPS SCRAPER - WITH WEBSITE SCRAPING\n// Extracts emails from websites\n// ================================================================\n\n/**\n * CONFIGURATION\n * Load settings from incoming workflow data or use defaults\n */\nconst incomingConfig = $input.first()?.json || {};\n\nconst config = {\n    BASE_URL: incomingConfig.scraper?.baseUrl || 'http://localhost:3000',\n    maxResults: incomingConfig.scraper?.maxResultsPerKeyword || 20,\n    delayBetweenRequests: incomingConfig.scraper?.delayBetweenRequests || 1000\n};\n\n// ================================================================\n// EMAIL VALIDATION UTILITIES\n// ================================================================\n\n/**\n * Validates if a string is a legitimate business email address\n * Filters out test accounts, images, and common fake domains\n * \n * @param {string} email - Email address to validate\n * @returns {boolean} - True if email passes all validation checks\n */\nfunction isValidEmail(email) {\n    // Basic type and format checks\n    if (!email || typeof email !== 'string') return false;\n    \n    email = email.trim().toLowerCase();\n    \n    // Check against standard email regex pattern\n    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;\n    if (!emailRegex.test(email)) return false;\n    \n    // Basic structural checks\n    if (!email.includes('@') || !email.includes('.')) return false;\n    \n    const parts = email.split('@');\n    if (parts.length !== 2) return false;\n    \n    const [localPart, domain] = parts;\n    \n    // Minimum length requirements\n    if (localPart.length < 2) return false;\n    if (domain.length < 3 || !domain.includes('.')) return false;\n    \n    // Validate TLD\n    const tld = domain.split('.').pop();\n    if (!tld || tld.length < 2) return false;\n    \n    // Filter out test/placeholder patterns\n    const fakePatterns = [\n        /^test/i, /^example/i, /^sample/i, /^demo/i,\n        /^noreply/i, /^no-?reply/i, /^admin@/i,\n        /^user@/i, /^email@/i, /^your@/i,\n        /^logo-/i, /-color@/, /@2x\\.png/, /\\.png$/, /\\.jpg$/, /\\.jpeg$/, /\\.gif$/,\n        /^[0-9]+@/,\n        /^[a-zA-Z]@/,\n    ];\n    \n    for (const pattern of fakePatterns) {\n        if (pattern.test(email)) return false;\n    }\n    \n    // Block known fake domains\n    const fakeDomains = [\n        'example.com', 'test.com', 'sample.com', 'demo.com',\n        'domain.com', 'yourdomain.com', 'website.com',\n        'yoursite.com', 'email.com', 'mail.com',\n        'localhost', 'local', 'invalid', 'placeholder',\n        'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'\n    ];\n    \n    for (const fakeDomain of fakeDomains) {\n        if (domain === fakeDomain || domain.endsWith('.' + fakeDomain)) {\n            return false;\n        }\n    }\n    \n    // Filter out image file extensions\n    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico'];\n    for (const ext of imageExtensions) {\n        if (email.includes(ext)) return false;\n    }\n    \n    // Filter out code file extensions\n    const fileExtensions = ['.css', '.js', '.json', '.xml', '.html', '.php', '.asp'];\n    for (const ext of fileExtensions) {\n        if (email.includes(ext)) return false;\n    }\n    \n    // Ensure local part contains at least one letter\n    if (!/[a-zA-Z]/.test(localPart)) return false;\n    \n    return true;\n}\n\n/**\n * Extracts and validates all emails from a text string\n * \n * @param {string} text - Text to search for emails\n * @returns {string[]} - Array of unique valid email addresses\n */\nfunction extractEmails(text) {\n    if (!text) return [];\n    \n    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g;\n    const matches = text.match(emailRegex) || [];\n    \n    const validEmails = [];\n    const seen = new Set();\n    \n    for (const email of matches) {\n        const cleanEmail = email.trim().toLowerCase();\n        \n        if (!seen.has(cleanEmail) && isValidEmail(cleanEmail)) {\n            seen.add(cleanEmail);\n            validEmails.push(cleanEmail);\n        }\n    }\n    \n    return validEmails;\n}\n\n/**\n * Validates if a URL is a legitimate business website\n * Excludes social media platforms and search engines\n * \n * @param {string} url - URL to validate\n * @returns {boolean} - True if URL is valid and not a social platform\n */\nfunction isValidWebsite(url) {\n    if (!url || typeof url !== 'string') return false;\n    \n    url = url.trim().toLowerCase();\n    \n    // Must have proper protocol\n    if (!url.startsWith('http://') && !url.startsWith('https://')) return false;\n    \n    // Exclude social media and search platforms\n    const excludedDomains = [\n        'google.com', 'google.se', 'maps.google', 'gstatic',\n        'facebook.com', 'instagram.com', 'linkedin.com', 'twitter.com'\n    ];\n    \n    for (const domain of excludedDomains) {\n        if (url.includes(domain)) return false;\n    }\n    \n    return true;\n}\n\n// ================================================================\n// WEBSITE SCRAPING\n// ================================================================\n\n/**\n * Scrapes a website for email addresses\n * \n * @param {string} websiteUrl - URL of the website to scrape\n * @returns {Promise<{emails: string[], success: boolean}>} \n *          Object containing extracted emails and success status\n */\nasync function scrapeWebsite(websiteUrl) {\n    try {\n        // Fetch the website HTML\n        const html = await this.helpers.request({\n            method: 'GET',\n            url: websiteUrl,\n            headers: {\n                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'\n            },\n            timeout: 15000,\n            rejectUnauthorized: false\n        });\n        \n        // Extract emails from the HTML content\n        const emails = extractEmails(html);\n        \n        // Also extract mailto: links\n        const mailtoRegex = /mailto:([^\"'\\s<>]+)/gi;\n        let match;\n        while ((match = mailtoRegex.exec(html)) !== null) {\n            const email = match[1].trim();\n            if (isValidEmail(email) && !emails.includes(email)) {\n                emails.push(email);\n            }\n        }\n        \n        return {\n            emails: [...new Set(emails)],\n            success: true\n        };\n        \n    } catch (error) {\n        return {\n            emails: [],\n            success: false\n        };\n    }\n}\n\n// ================================================================\n// MAIN EXECUTION\n// ================================================================\n\n/**\n * Main workflow execution\n * Searches Google Maps, scrapes websites, and extracts emails\n */\nasync function main() {\n    // Get workflow input data\n    const items = $input.all();\n    const workflowContext = (items && items.length > 0) ? items[0].json : {};\n    \n    // Extract search keywords\n    let keywords = '';\n    if (items && items.length > 0) {\n        const item = items[0].json;\n        keywords = item.keywords || item.query || item.search || item.keyword || '';\n    }\n    \n    // Fallback keyword if none provided\n    if (!keywords || keywords.trim() === '') {\n        keywords = 'real estate agent in karachi';\n    }\n    \n    console.log(`🔍 Searching: \"${keywords}\"`);\n    \n    // -------- SEARCH GOOGLE MAPS --------\n    \n    let searchResult;\n    try {\n        searchResult = await this.helpers.request({\n            method: 'POST',\n            url: `${config.BASE_URL}/api/scrape/search`,\n            headers: { 'Content-Type': 'application/json' },\n            body: JSON.stringify({\n                query: keywords,\n                maxResults: config.maxResults\n            }),\n            json: true,\n            timeout: 60000\n        });\n    } catch (error) {\n        return [{\n            json: {\n                error: `Search failed: ${error.message}`,\n                success: false,\n                timestamp: new Date().toISOString()\n            }\n        }];\n    }\n    \n    // Handle search errors\n    if (!searchResult.success) {\n        return [{\n            json: {\n                error: `Search error: ${searchResult.error}`,\n                success: false,\n                timestamp: new Date().toISOString()\n            }\n        }];\n    }\n    \n    const places = searchResult.data?.results || [];\n    console.log(`✅ Found ${places.length} total results`);\n    \n    // -------- PROCESS RESULTS --------\n    \n    const validResults = [];\n    let processedCount = 0;\n    \n    for (let i = 0; i < places.length; i++) {\n        const place = places[i];\n        processedCount++;\n        console.log(`📋 ${i+1}/${places.length}: ${place.title}`);\n        \n        // Skip invalid entries\n        if (!place.title || place.title.includes('Logga in') || place.title.includes('Google Maps')) {\n            console.log(`   ⚠️ Skipping invalid entry`);\n            continue;\n        }\n        \n        let primaryEmail = 'N/A';\n        let allEmails = [];\n        \n        // Check if website exists and is valid\n        if (place.website && place.website !== 'N/A' && isValidWebsite(place.website)) {\n            console.log(`   🌐 Scraping website: ${place.website}`);\n            \n            const websiteData = await scrapeWebsite.call(this, place.website);\n            \n            if (websiteData.success && websiteData.emails.length > 0) {\n                allEmails = websiteData.emails;\n                \n                // Prefer business emails over generic providers\n                const businessEmails = allEmails.filter(email => {\n                    const domain = email.split('@')[1];\n                    return domain && !['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'].includes(domain);\n                });\n                \n                primaryEmail = businessEmails.length > 0 ? businessEmails[0] : allEmails[0];\n                console.log(`   📧 Found ${allEmails.length} emails: ${allEmails.join(', ')}`);\n            } else {\n                console.log(`   ⚠️ No emails found on website`);\n            }\n        } else {\n            console.log(`   ⚠️ No valid website to scrape`);\n        }\n        \n        // Only keep results with valid emails\n        if (primaryEmail !== 'N/A') {\n            const result = {\n                name: place.title || 'N/A',\n                phone: place.phone || 'N/A',\n                email: primaryEmail,\n                website: place.website || 'N/A',\n                rating: place.rating || 0,\n                reviews: place.reviews || 0,\n                keyword: keywords,\n                keywordCity: workflowContext.keywordCity || '',\n                keywordIndustry: workflowContext.keywordIndustry || '',\n                keywordIntent: workflowContext.keywordIntent || '',\n                executionId: workflowContext.executionId || '',\n                timestamp: new Date().toISOString()\n            };\n            \n            validResults.push(result);\n            console.log(`   ✅ KEPT - Email: ${primaryEmail}`);\n        } else {\n            console.log(`   ❌ SKIPPED - No valid email found`);\n        }\n        \n        // Delay between requests\n        if (i < places.length - 1) {\n            await new Promise(resolve => setTimeout(resolve, config.delayBetweenRequests));\n        }\n    }\n    \n    // Print summary\n    console.log(`\\n📊 Summary:`);\n    console.log(`   Total processed: ${processedCount}`);\n    console.log(`   Valid results with emails: ${validResults.length}`);\n    console.log(`   Skipped: ${processedCount - validResults.length}`);\n    \n    // -------- RETURN RESULTS --------\n    \n    if (validResults.length > 0) {\n        return validResults.map(result => ({\n            json: result\n        }));\n    }\n    \n    // Fallback response when no results found\n    return [{\n        json: {\n            message: 'No businesses with valid email addresses found',\n            searchKeywords: keywords,\n            keyword: keywords,\n            keywordCity: workflowContext.keywordCity || '',\n            keywordIndustry: workflowContext.keywordIndustry || '',\n            keywordIntent: workflowContext.keywordIntent || '',\n            executionId: workflowContext.executionId || '',\n            totalProcessed: processedCount,\n            success: true,\n            timestamp: new Date().toISOString()\n        }\n    }];\n}\n\n// Execute the workflow\nreturn await main();"
+        "jsCode": "// ================================================================\n// GOOGLE MAPS SCRAPER - WITH WEBSITE SCRAPING\n// Extracts emails from websites\n// ================================================================\n\n/**\n * CONFIGURATION\n * Load settings from incoming workflow data or use defaults\n */\nconst incomingConfig = $input.first()?.json || {};\n\nconst config = {\n    BASE_URL: incomingConfig.scraper?.baseUrl || 'http://localhost:3000',\n    maxResults: incomingConfig.scraper?.maxResultsPerKeyword || 20,\n    delayBetweenRequests: incomingConfig.scraper?.delayBetweenRequests || 1000\n};\n\n// ================================================================\n// EMAIL VALIDATION UTILITIES\n// ================================================================\n\n/**\n * Validates if a string is a legitimate business email address\n * Filters out test accounts, images, and common fake domains\n * \n * @param {string} email - Email address to validate\n * @returns {boolean} - True if email passes all validation checks\n */\nfunction isValidEmail(email) {\n    // Basic type and format checks\n    if (!email || typeof email !== 'string') return false;\n    \n    email = email.trim().toLowerCase();\n    \n    // Check against standard email regex pattern\n    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;\n    if (!emailRegex.test(email)) return false;\n    \n    // Basic structural checks\n    if (!email.includes('@') || !email.includes('.')) return false;\n    \n    const parts = email.split('@');\n    if (parts.length !== 2) return false;\n    \n    const [localPart, domain] = parts;\n    \n    // Minimum length requirements\n    if (localPart.length < 2) return false;\n    if (domain.length < 3 || !domain.includes('.')) return false;\n    \n    // Validate TLD\n    const tld = domain.split('.').pop();\n    if (!tld || tld.length < 2) return false;\n    \n    // Filter out test/placeholder patterns\n    const fakePatterns = [\n        /^test/i, /^example/i, /^sample/i, /^demo/i,\n        /^noreply/i, /^no-?reply/i, /^admin@/i,\n        /^user@/i, /^email@/i, /^your@/i,\n        /^logo-/i, /-color@/, /@2x\\.png/, /\\.png$/, /\\.jpg$/, /\\.jpeg$/, /\\.gif$/,\n        /^[0-9]+@/,\n        /^[a-zA-Z]@/,\n    ];\n    \n    for (const pattern of fakePatterns) {\n        if (pattern.test(email)) return false;\n    }\n    \n    // Block known fake domains\n    const fakeDomains = [\n        'example.com', 'test.com', 'sample.com', 'demo.com',\n        'domain.com', 'yourdomain.com', 'website.com',\n        'yoursite.com', 'email.com', 'mail.com',\n        'localhost', 'local', 'invalid', 'placeholder',\n        'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'\n    ];\n    \n    for (const fakeDomain of fakeDomains) {\n        if (domain === fakeDomain || domain.endsWith('.' + fakeDomain)) {\n            return false;\n        }\n    }\n    \n    // Filter out image file extensions\n    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico'];\n    for (const ext of imageExtensions) {\n        if (email.includes(ext)) return false;\n    }\n    \n    // Filter out code file extensions\n    const fileExtensions = ['.css', '.js', '.json', '.xml', '.html', '.php', '.asp'];\n    for (const ext of fileExtensions) {\n        if (email.includes(ext)) return false;\n    }\n    \n    // Ensure local part contains at least one letter\n    if (!/[a-zA-Z]/.test(localPart)) return false;\n    \n    return true;\n}\n\n/**\n * Extracts and validates all emails from a text string\n * \n * @param {string} text - Text to search for emails\n * @returns {string[]} - Array of unique valid email addresses\n */\nfunction extractEmails(text) {\n    if (!text) return [];\n    \n    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g;\n    const matches = text.match(emailRegex) || [];\n    \n    const validEmails = [];\n    const seen = new Set();\n    \n    for (const email of matches) {\n        const cleanEmail = email.trim().toLowerCase();\n        \n        if (!seen.has(cleanEmail) && isValidEmail(cleanEmail)) {\n            seen.add(cleanEmail);\n            validEmails.push(cleanEmail);\n        }\n    }\n    \n    return validEmails;\n}\n\n/**\n * Validates if a URL is a legitimate business website\n * Excludes social media platforms and search engines\n * \n * @param {string} url - URL to validate\n * @returns {boolean} - True if URL is valid and not a social platform\n */\nfunction isValidWebsite(url) {\n    if (!url || typeof url !== 'string') return false;\n    \n    url = url.trim().toLowerCase();\n    \n    // Must have proper protocol\n    if (!url.startsWith('http://') && !url.startsWith('https://')) return false;\n    \n    // Exclude social media and search platforms\n    const excludedDomains = [\n        'google.com', 'google.se', 'maps.google', 'gstatic',\n        'facebook.com', 'instagram.com', 'linkedin.com', 'twitter.com'\n    ];\n    \n    for (const domain of excludedDomains) {\n        if (url.includes(domain)) return false;\n    }\n    \n    return true;\n}\n\n// ================================================================\n// WEBSITE SCRAPING\n// ================================================================\n\n/**\n * Scrapes a website for email addresses\n * \n * @param {string} websiteUrl - URL of the website to scrape\n * @returns {Promise<{emails: string[], success: boolean}>} \n *          Object containing extracted emails and success status\n */\nasync function scrapeWebsite(websiteUrl) {\n    try {\n        // Fetch the website HTML\n        const html = await this.helpers.request({\n            method: 'GET',\n            url: websiteUrl,\n            headers: {\n                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'\n            },\n            timeout: 15000,\n            rejectUnauthorized: false\n        });\n        \n        // Extract emails from the HTML content\n        const emails = extractEmails(html);\n        \n        // Also extract mailto: links\n        const mailtoRegex = /mailto:([^\"'\\s<>]+)/gi;\n        let match;\n        while ((match = mailtoRegex.exec(html)) !== null) {\n            const email = match[1].trim();\n            if (isValidEmail(email) && !emails.includes(email)) {\n                emails.push(email);\n            }\n        }\n        \n        return {\n            emails: [...new Set(emails)],\n            success: true\n        };\n        \n    } catch (error) {\n        return {\n            emails: [],\n            success: false\n        };\n    }\n}\n\n// ================================================================\n// MAIN EXECUTION\n// ================================================================\n\n/**\n * Main workflow execution\n * Searches Google Maps, scrapes websites, and extracts emails\n */\nasync function main() {\n    // One Code-node execution receives all keyword rows. Process every row so\n    // no keyword is silently dropped when n8n batches items.\n    const inputItems = $input.all();\n    const allResults = [];\n    for (const input of inputItems) {\n      const workflowContext = input.json || {};\n      const keywords = String(workflowContext.keywords || workflowContext.query || workflowContext.search || workflowContext.keyword || '').trim();\n      if (!keywords) { console.log('Skipping empty keyword row'); continue; }\n      console.log(`🔍 Searching: \"${keywords}\"`);\n    \n    // -------- SEARCH GOOGLE MAPS --------\n    \n    let searchResult;\n    try {\n        searchResult = await this.helpers.request({\n            method: 'POST',\n            url: `${config.BASE_URL}/api/scrape/search`,\n            headers: { 'Content-Type': 'application/json' },\n            body: JSON.stringify({\n                query: keywords,\n                maxResults: config.maxResults\n            }),\n            json: true,\n            timeout: 60000\n        });\n    } catch (error) {\n        return [{\n            json: {\n                error: `Search failed: ${error.message}`,\n                success: false,\n                timestamp: new Date().toISOString()\n            }\n        }];\n    }\n    \n    // Handle search errors\n    if (!searchResult.success) {\n        return [{\n            json: {\n                error: `Search error: ${searchResult.error}`,\n                success: false,\n                timestamp: new Date().toISOString()\n            }\n        }];\n    }\n    \n    const places = searchResult.data?.results || [];\n    console.log(`✅ Found ${places.length} total results`);\n    \n    // -------- PROCESS RESULTS --------\n    \n    const validResults = [];\n    let processedCount = 0;\n    \n    for (let i = 0; i < places.length; i++) {\n        const place = places[i];\n        processedCount++;\n        console.log(`📋 ${i+1}/${places.length}: ${place.title}`);\n        \n        // Skip invalid entries\n        if (!place.title || place.title.includes('Logga in') || place.title.includes('Google Maps')) {\n            console.log(`   ⚠️ Skipping invalid entry`);\n            continue;\n        }\n        \n        let primaryEmail = 'N/A';\n        let allEmails = [];\n        \n        // Check if website exists and is valid\n        if (place.website && place.website !== 'N/A' && isValidWebsite(place.website)) {\n            console.log(`   🌐 Scraping website: ${place.website}`);\n            \n            const websiteData = await scrapeWebsite.call(this, place.website);\n            \n            if (websiteData.success && websiteData.emails.length > 0) {\n                allEmails = websiteData.emails;\n                \n                // Prefer business emails over generic providers\n                const businessEmails = allEmails.filter(email => {\n                    const domain = email.split('@')[1];\n                    return domain && !['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'].includes(domain);\n                });\n                \n                primaryEmail = businessEmails.length > 0 ? businessEmails[0] : allEmails[0];\n                console.log(`   📧 Found ${allEmails.length} emails: ${allEmails.join(', ')}`);\n            } else {\n                console.log(`   ⚠️ No emails found on website`);\n            }\n        } else {\n            console.log(`   ⚠️ No valid website to scrape`);\n        }\n        \n        // Only keep results with valid emails\n        if (primaryEmail !== 'N/A') {\n            const result = {\n                name: place.title || 'N/A',\n                phone: place.phone || 'N/A',\n                email: primaryEmail,\n                website: place.website || 'N/A',\n                rating: place.rating || 0,\n                reviews: place.reviews || 0,\n                keyword: keywords,\n                keywordCity: workflowContext.keywordCity || '',\n                keywordIndustry: workflowContext.keywordIndustry || '',\n                keywordIntent: workflowContext.keywordIntent || '',\n                executionId: workflowContext.executionId || '',\n                timestamp: new Date().toISOString()\n            };\n            \n            validResults.push(result);\n            console.log(`   ✅ KEPT - Email: ${primaryEmail}`);\n        } else {\n            console.log(`   ❌ SKIPPED - No valid email found`);\n        }\n        \n        // Delay between requests\n        if (i < places.length - 1) {\n            await new Promise(resolve => setTimeout(resolve, config.delayBetweenRequests));\n        }\n    }\n    \n    // Print summary\n    console.log(`\\n📊 Summary:`);\n    console.log(`   Total processed: ${processedCount}`);\n    console.log(`   Valid results with emails: ${validResults.length}`);\n    console.log(`   Skipped: ${processedCount - validResults.length}`);\n    \n    // -------- RETURN RESULTS --------\n    \n    if (validResults.length > 0) {\n        allResults.push(...validResults.map(result => ({ json: result })));\n    }\n    }\n    return allResults;\n}\n\n// Execute the workflow\nreturn await main();"
       },
       "id": "c4a20100-ae38-4642-a6d0-3eac851ce8a5",
       "name": "Google Maps Scraper",
@@ -578,7 +578,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg = $('Runtime Config').first().json;\n\n// Get leads from the previous node (DeepSeek Personalized Email output)\nconst items = $input.all();\nconst leadsToProcess = items.map(item => item.json);\n\n// Get email history from Google Sheets\nasync function getEmailHistory() {\n    try {\n        const result = await this.helpers.httpRequest({\n            method: 'GET',\n            url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${cfg.sheets.emailHistory}`,\n            headers: {\n                'Authorization': 'Bearer ' + (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token\n            },\n            json: true,\n            timeout: 10000\n        });\n        \n        const history = {};\n        if (result.values && result.values.length > 1) {\n            const header = result.values[0];\n            const emailIndex = header.indexOf('email');\n            const lastSentIndex = header.indexOf('lastSent');\n            const statusIndex = header.indexOf('status');\n            const repliedIndex = header.indexOf('replied');\n            const campaignIndex = header.indexOf('campaign');\n            \n            if (emailIndex !== -1 && lastSentIndex !== -1) {\n                for (let i = 1; i < result.values.length; i++) {\n                    const row = result.values[i];\n                    if (row[emailIndex] && row[lastSentIndex]) {\n                        const email = String(row[emailIndex]).toLowerCase().trim();\n                        // Only consider our campaign\n                        if (!campaignIndex || row[campaignIndex] === 'SRLINES Pakistan B2B' || !row[campaignIndex]) {\n                            const status = statusIndex !== -1 ? row[statusIndex] : '';\n                            const replied = repliedIndex !== -1 \n                                ? (row[repliedIndex] === 'true' || row[repliedIndex] === 'TRUE' || row[repliedIndex] === '1')\n                                : (status === 'replied');\n                            \n                            history[email] = {\n                                lastSent: row[lastSentIndex],\n                                status: status,\n                                replied: replied,\n                                rowIndex: i\n                            };\n                        }\n                    }\n                }\n            }\n        }\n        return history;\n    } catch (error) {\n        console.log('Error reading email history:', error);\n        return {};\n    }\n}\n\n// Get blacklist (bounced emails)\nasync function getBlacklistEmails() {\n    try {\n        const result = await this.helpers.httpRequest({\n            method: 'GET',\n            url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${cfg.sheets.blacklist}`,\n            headers: {\n                'Authorization': 'Bearer ' + (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token\n            },\n            json: true,\n            timeout: 10000\n        });\n        const emails = new Set();\n        if (result.values && result.values.length > 1) {\n            const header = result.values[0];\n            const valueIndex = header.indexOf('value');\n            if (valueIndex !== -1) {\n                for (let i = 1; i < result.values.length; i++) {\n                    if (result.values[i][valueIndex]) {\n                        emails.add(String(result.values[i][valueIndex]).toLowerCase().trim());\n                    }\n                }\n            }\n        }\n        return emails;\n    } catch (error) {\n        console.log('Error reading blacklist:', error);\n        return new Set();\n    }\n}\n\n// Get reply log\nasync function getReplyLogEmails() {\n    try {\n        const result = await this.helpers.httpRequest({\n            method: 'GET',\n            url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${cfg.sheets.replyLog}`,\n            headers: {\n                'Authorization': 'Bearer ' + (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token\n            },\n            json: true,\n            timeout: 10000\n        });\n        const emails = new Set();\n        if (result.values && result.values.length > 1) {\n            const header = result.values[0];\n            const emailIndex = header.indexOf('email');\n            if (emailIndex !== -1) {\n                for (let i = 1; i < result.values.length; i++) {\n                    if (result.values[i][emailIndex]) {\n                        emails.add(String(result.values[i][emailIndex]).toLowerCase().trim());\n                    }\n                }\n            }\n        }\n        return emails;\n    } catch (error) {\n        console.log('Error reading reply log:', error);\n        return new Set();\n    }\n}\n\n// Get all exclusion data\nconst emailHistory = await getEmailHistory.call(this);\nconst blacklistedEmails = await getBlacklistEmails.call(this);\nconst replyLogEmails = await getReplyLogEmails.call(this);\n\n// Combine all emails that should be skipped\nconst skipEmails = new Set([...blacklistedEmails, ...replyLogEmails]);\n\n// Add emails marked as replied in history\nfor (const [email, data] of Object.entries(emailHistory)) {\n    if (data.replied === true) {\n        skipEmails.add(email);\n    }\n}\n\nconst cooldownMs = cfg.limits.emailCooldownDays * 86400000;\nconst now = Date.now();\n\nconst out = [];\nconst processedEmails = new Set(); // Track to prevent duplicates in this run\nconst skippedLog = [];\n\nconsole.log(`📊 Processing ${leadsToProcess.length} leads`);\nconsole.log(`🚫 Skipping ${skipEmails.size} emails (blacklisted or replied)`);\n\n// Process each lead\nfor (const lead of leadsToProcess) {\n    const email = String(lead.email || '').toLowerCase().trim();\n    \n    // Skip if no email\n    if (!email) {\n        skippedLog.push({email: 'missing', reason: 'no_email', business: lead.businessName});\n        continue;\n    }\n    \n    // Skip if already processed in this run\n    if (processedEmails.has(email)) {\n        skippedLog.push({email, reason: 'duplicate_in_run', business: lead.businessName});\n        continue;\n    }\n    \n    // CRITICAL: Skip if blacklisted (bounced)\n    if (blacklistedEmails.has(email)) {\n        skippedLog.push({email, reason: 'blacklisted_bounced', business: lead.businessName});\n        console.log(`❌ Skipping bounced email: ${email}`);\n        continue;\n    }\n    \n    // CRITICAL: Skip if replied\n    if (replyLogEmails.has(email)) {\n        skippedLog.push({email, reason: 'replied', business: lead.businessName});\n        console.log(`❌ Skipping replied email: ${email}`);\n        continue;\n    }\n    \n    // Skip if replied in history\n    if (emailHistory[email] && emailHistory[email].replied === true) {\n        skippedLog.push({email, reason: 'replied_in_history', business: lead.businessName});\n        console.log(`❌ Skipping replied email (history): ${email}`);\n        continue;\n    }\n    \n    // Check cooldown period\n    if (emailHistory[email] && emailHistory[email].lastSent) {\n        const lastSentTime = new Date(emailHistory[email].lastSent).getTime();\n        const daysSinceLastSent = (now - lastSentTime) / (24 * 60 * 60 * 1000);\n        \n        if (daysSinceLastSent < cfg.limits.emailCooldownDays) {\n            skippedLog.push({\n                email, \n                reason: `cooldown_${daysSinceLastSent.toFixed(1)}_days`, \n                business: lead.businessName,\n                daysRemaining: (cfg.limits.emailCooldownDays - daysSinceLastSent).toFixed(1)\n            });\n            console.log(`⏳ Skipping email in cooldown: ${email}, days since last sent: ${daysSinceLastSent.toFixed(1)}`);\n            continue;\n        }\n    }\n    \n    // If we get here, email is valid to send\n    processedEmails.add(email);\n    const lastSent = new Date().toISOString();\n    \n    out.push({\n        json: {\n            ...lead,\n            email: email,\n            lastSent: lastSent,\n            campaign: 'SRLINES Pakistan B2B',\n            status: 'sent_initial',\n            followupStage: 0,\n            replied: false,\n            shouldSend: true,\n            // Keep track for logging\n            isNewEmail: !emailHistory[email],\n            daysSinceLastContact: emailHistory[email] ? \n                ((now - new Date(emailHistory[email].lastSent).getTime()) / (24 * 60 * 60 * 1000)).toFixed(1) : \n                'never'\n        }\n    });\n}\n\n// Log summary\nconsole.log(`\\n📊 Summary:`);\nconsole.log(`   ✅ Emails to send: ${out.length}`);\nconsole.log(`   ⏭️  Skipped: ${skippedLog.length}`);\nconsole.log(`   📧 Total leads checked: ${leadsToProcess.length}`);\n\n// Show skipped reasons\nconst skipReasons = {};\nfor (const skip of skippedLog) {\n    skipReasons[skip.reason] = (skipReasons[skip.reason] || 0) + 1;\n}\nconsole.log(`\\n📋 Skip reasons:`, skipReasons);\n\n// If no emails to send, stop this branch cleanly so Gmail does not send status rows.\nif (out.length === 0) {\n    console.log(`\\n⚠️ No emails ready to send. All ${leadsToProcess.length} leads were skipped.`);\n    \n    return [];\n}\n\nconsole.log(`\\n✅ Ready to send ${out.length} emails`);\nreturn out;"
+        "jsCode": "const cfg = $('Runtime Config').first().json;\nconst leads = $input.all().map(i => i.json);\nconst normalize = value => String(value || '').trim().toLowerCase();\nasync function readSheet(tab) {\n  const token = (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token;\n  if (!token) throw new Error(`Google Sheets OAuth token is unavailable; refusing to send without ${tab} suppression data`);\n  const result = await this.helpers.httpRequest({\n    method: 'GET', url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${encodeURIComponent(tab)}`,\n    headers: { Authorization: `Bearer ${token}` }, json: true, timeout: 15000,\n  });\n  const values = result.values || [];\n  if (!values.length) return [];\n  const header = values[0].map(h => String(h || '').trim());\n  return values.slice(1).map(row => Object.fromEntries(header.map((h, i) => [h, row[i] || ''])));\n}\nconst [historyRows, blacklistRows, replyRows] = await Promise.all([\n  readSheet.call(this, cfg.sheets.emailHistory), readSheet.call(this, cfg.sheets.blacklist), readSheet.call(this, cfg.sheets.replyLog),\n]);\nconst suppressed = new Set([...blacklistRows.map(r => normalize(r.value || r.email)), ...replyRows.map(r => normalize(r.email))].filter(Boolean));\nconst latest = new Map();\nfor (const row of historyRows) {\n  const email = normalize(row.email); if (!email) continue;\n  const when = new Date(row.lastSent || row.timestamp || 0).getTime();\n  const previous = latest.get(email);\n  if (!previous || when >= previous.when) latest.set(email, { row, when });\n  const status = normalize(row.status);\n  if (row.replied === true || normalize(row.replied) === 'true' || /replied|bounce|undeliver|complain|unsubscribe/.test(status)) suppressed.add(email);\n}\nconst out = [], inRun = new Set(), cooldown = Number(cfg.limits.emailCooldownDays || 180) * 86400000, now = Date.now();\nfor (const lead of leads) {\n  const email = normalize(lead.email);\n  if (!email || inRun.has(email) || suppressed.has(email)) continue;\n  inRun.add(email);\n  const sent = latest.get(email);\n  if (sent && Number.isFinite(sent.when) && now - sent.when < cooldown) continue;\n  const timestamp = new Date().toISOString();\n  out.push({ json: { ...lead, email, id: `${email}-0`, timestamp, lastSent: timestamp, campaign: cfg.campaign.name, status: 'sent_initial', followupStage: 0, replied: false, shouldSend: true } });\n}\nreturn out;"
       },
       "id": "c2c7e7a9-cffb-4c80-99d6-fcc50d8c4c0c",
       "name": "Email Cooldown Deduplication",
@@ -665,10 +665,7 @@
             "error": "={{ $('Email Cooldown Deduplication').item.json.error }}",
             "notes": "={{ $('Email Cooldown Deduplication').item.json.notes }}",
             "threadId": "={{ $('Email Cooldown Deduplication').item.json.threadId }}",
-            "labelIds": "={{ $('Email Cooldown Deduplication').item.json.labelIds }}",
-            "followupStage": "={{ $('Email Cooldown Deduplication').item.json.followupStage }}",
-            "replied": "={{ $('Email Cooldown Deduplication').item.json.replied }}",
-            "whatsappCtaUrl": "={{ $('Email Cooldown Deduplication').item.json.whatsappCtaUrl }}"
+            "labelIds": "={{ $('Email Cooldown Deduplication').item.json.labelIds }}"
           },
           "matchingColumns": [
             "id"
@@ -1121,46 +1118,7 @@
     },
     {
       "parameters": {
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        -640,
-        -64
-      ],
-      "id": "4e3d8a7e-01b5-47c9-a004-79400c616539",
-      "name": "Loop Over Items"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        -48,
-        -208
-      ],
-      "id": "f46c8877-d868-47a3-ba33-2448ca2bfdf5",
-      "name": "Loop Over Items1"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        -224,
-        320
-      ],
-      "id": "57c15e12-94b7-47ae-8063-472d78fcda38",
-      "name": "Loop Over Items2"
-    },
-    {
-      "parameters": {
-        "jsCode": "const cfg = $('Runtime Config').first().json;\n// Input: rows from Email_History. Output: due follow-ups only.\nconst rows = $input.all().map(i=>i.json);\nif (!cfg.followup?.enabled) return [];\nconst stop = new Set((cfg.followup.stopStatuses || []).map(s => String(s).toLowerCase()));\nconst latest = new Map();\nconst now = Date.now();\nfunction escapeHtml(value) { return String(value ?? '').replace(/[&<>\"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch])); }\nfunction render(t, r){ return String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl); }\nfunction paragraphs(text){ return String(text||'').split(/\\n{2,}/).map(p=>`<p style=\"margin:0 0 16px;color:#334155;font-size:16px;line-height:1.65;\">${escapeHtml(p).replace(/\\n/g,'<br>')}</p>`).join(''); }\nfunction renderFollowupEmail(r, body){ const brand=cfg.company.brand||{}; const cta=r.whatsappCtaUrl||cfg.company.whatsappCtaUrl; return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>@media only screen and (max-width:620px){.wrap{width:100%!important}.box{border-radius:22px!important}.content{padding:24px 20px!important}.cta{display:block!important;width:100%!important;box-sizing:border-box!important}}@keyframes pulseWhatsApp{0%{box-shadow:0 0 0 0 rgba(34,197,94,.45)}70%{box-shadow:0 0 0 14px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;\"><table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td align=\"center\" style=\"padding:18px 10px;\"><table class=\"wrap\" role=\"presentation\" width=\"600\" cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;max-width:600px;\"><tr><td class=\"box\" style=\"background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 18px 55px rgba(15,23,42,.12);\"><div style=\"padding:24px;background:linear-gradient(135deg,${brand.dark||'#052E16'},${brand.primary||'#16A34A'});color:#fff;\"><div style=\"font-size:30px;font-weight:900;letter-spacing:-.04em;\">${escapeHtml(brand.logoText||'SRLINES')}</div><div style=\"margin-top:8px;color:#dcfce7;font-size:14px;\">${escapeHtml(cfg.company.tagline||'WhatsApp Cloud API for Businesses')}</div></div><div class=\"content\" style=\"padding:30px 32px;\">${paragraphs(body)}<a class=\"cta\" href=\"${escapeHtml(cta)}\" style=\"animation:pulseWhatsApp 1.8s infinite;display:inline-block;background:linear-gradient(135deg,#25D366,#16A34A);color:#fff;text-decoration:none;font-weight:900;border-radius:999px;padding:16px 22px;text-align:center;box-shadow:0 12px 28px rgba(34,197,94,.38);\">💬 Reply on WhatsApp</a><p style=\"margin:20px 0 0;color:#64748b;font-size:13px;line-height:1.6;\">${escapeHtml(brand.trustLine||'')}</p><hr style=\"border:0;border-top:1px solid #e2e8f0;margin:22px 0;\"><p style=\"margin:0;color:#0f172a;font-size:14px;line-height:1.6;\"><strong>${escapeHtml(cfg.company.senderName)}</strong><br>${escapeHtml(cfg.company.senderTitle)} · ${escapeHtml(cfg.company.legalName||cfg.company.name)}<br><a href=\"${escapeHtml(cfg.company.website||'https://srlines.net')}\" style=\"color:${brand.primary||'#16A34A'};text-decoration:none;\">${escapeHtml(cfg.company.website||'https://srlines.net')}</a></p></div></td></tr></table></td></tr></table></body></html>`; }\nfor (const r of rows) {\n const email = String(r.email || '').toLowerCase().trim(); if (!email) continue;\n const t = new Date(r.lastSent || r.timestamp || 0).getTime(); if (!Number.isFinite(t)) continue;\n const prev = latest.get(email);\n if (!prev || t > prev._time) latest.set(email, {...r, _time: t});\n}\nconst out=[];\nfor (const r of latest.values()) {\n const email=String(r.email||'').toLowerCase().trim();\n const status=String(r.status||'').toLowerCase();\n const replied = r.replied === true || String(r.replied).toLowerCase() === 'true';\n if(!email || replied || stop.has(status) || status.includes('replied') || status.includes('bounce') || status.includes('unsubscribed') || status.includes('complained')) continue;\n const stage=Number(r.followupStage||0); const next=(cfg.followup.sequence||[]).find(s=>Number(s.stage)===stage+1); if(!next) continue;\n const last=Number(r._time || new Date(r.lastSent||r.timestamp||0).getTime()); if(!last || now-last < Number(next.delayDays||999)*86400000) continue;\n const emailBody=render(next.body,r);\n out.push({json:{...r,email,emailSubject:render(next.subject,r),emailBody,emailHtml:renderFollowupEmail(r,emailBody),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});\n if(out.length >= cfg.followup.maxFollowupsPerRun) break;\n}\nreturn out;"
+        "jsCode": "const cfg = $('Runtime Config').first().json;\n// Input: rows from Email_History. Output: due follow-ups only.\nconst rows = $input.all().map(i=>i.json);\nif (!cfg.followup?.enabled) return [];\nconst stop = new Set((cfg.followup.stopStatuses || []).map(s => String(s).toLowerCase()));\nconst latest = new Map();\nconst now = Date.now();\nfunction escapeHtml(value) { return String(value ?? '').replace(/[&<>\"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch])); }\nfunction render(t, r){ return String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl); }\nfunction paragraphs(text){ return String(text||'').split(/\\n{2,}/).map(p=>`<p style=\"margin:0 0 16px;color:#334155;font-size:16px;line-height:1.65;\">${escapeHtml(p).replace(/\\n/g,'<br>')}</p>`).join(''); }\nfunction renderFollowupEmail(r, body){ const brand=cfg.company.brand||{}; const cta=r.whatsappCtaUrl||cfg.company.whatsappCtaUrl; return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>@media only screen and (max-width:620px){.wrap{width:100%!important}.box{border-radius:22px!important}.content{padding:24px 20px!important}.cta{display:block!important;width:100%!important;box-sizing:border-box!important}}@keyframes pulseWhatsApp{0%{box-shadow:0 0 0 0 rgba(34,197,94,.45)}70%{box-shadow:0 0 0 14px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;\"><table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td align=\"center\" style=\"padding:18px 10px;\"><table class=\"wrap\" role=\"presentation\" width=\"600\" cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;max-width:600px;\"><tr><td class=\"box\" style=\"background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 18px 55px rgba(15,23,42,.12);\"><div style=\"padding:24px;background:linear-gradient(135deg,${brand.dark||'#052E16'},${brand.primary||'#16A34A'});color:#fff;\"><div style=\"font-size:30px;font-weight:900;letter-spacing:-.04em;\">${escapeHtml(brand.logoText||'SRLINES')}</div><div style=\"margin-top:8px;color:#dcfce7;font-size:14px;\">${escapeHtml(cfg.company.tagline||'WhatsApp Cloud API for Businesses')}</div></div><div class=\"content\" style=\"padding:30px 32px;\">${paragraphs(body)}<a class=\"cta\" href=\"${escapeHtml(cta)}\" style=\"animation:pulseWhatsApp 1.8s infinite;display:inline-block;background:linear-gradient(135deg,#25D366,#16A34A);color:#fff;text-decoration:none;font-weight:900;border-radius:999px;padding:16px 22px;text-align:center;box-shadow:0 12px 28px rgba(34,197,94,.38);\">💬 Reply on WhatsApp</a><p style=\"margin:20px 0 0;color:#64748b;font-size:13px;line-height:1.6;\">${escapeHtml(brand.trustLine||'')}</p><hr style=\"border:0;border-top:1px solid #e2e8f0;margin:22px 0;\"><p style=\"margin:0;color:#0f172a;font-size:14px;line-height:1.6;\"><strong>${escapeHtml(cfg.company.senderName)}</strong><br>${escapeHtml(cfg.company.senderTitle)} · ${escapeHtml(cfg.company.legalName||cfg.company.name)}<br><a href=\"${escapeHtml(cfg.company.website||'https://srlines.net')}\" style=\"color:${brand.primary||'#16A34A'};text-decoration:none;\">${escapeHtml(cfg.company.website||'https://srlines.net')}</a></p></div></td></tr></table></td></tr></table></body></html>`; }\nfor (const r of rows) {\n const email = String(r.email || '').toLowerCase().trim(); if (!email) continue;\n const t = new Date(r.lastSent || r.timestamp || 0).getTime(); if (!Number.isFinite(t)) continue;\n const prev = latest.get(email);\n if (!prev || t > prev._time) latest.set(email, {...r, _time: t});\n}\nconst out=[];\nfor (const r of latest.values()) {\n const email=String(r.email||'').toLowerCase().trim();\n const status=String(r.status||'').toLowerCase();\n const replied = r.replied === true || String(r.replied).toLowerCase() === 'true';\n if(!email || replied || stop.has(status) || status.includes('replied') || status.includes('bounce') || status.includes('unsubscribed') || status.includes('complained')) continue;\n const statusStage = String(r.status || '').match(/^sent_followup_(\\d+)$/i); const explicitStage = String(r.followupStage ?? '').trim(); const stage = explicitStage !== '' && Number.isFinite(Number(explicitStage)) ? Number(explicitStage) : (statusStage ? Number(statusStage[1]) : 0); const next=(cfg.followup.sequence||[]).find(s=>Number(s.stage)===stage+1); if(!next) continue;\n const last=Number(r._time || new Date(r.lastSent||r.timestamp||0).getTime()); if(!last || now-last < Number(next.delayDays||999)*86400000) continue;\n const emailBody=render(next.body,r);\n out.push({json:{...r,email,emailSubject:render(next.subject,r),emailBody,emailHtml:renderFollowupEmail(r,emailBody),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});\n if(out.length >= cfg.followup.maxFollowupsPerRun) break;\n}\nreturn out;"
       },
       "id": "23e153cb-6343-4a6e-a6b0-807751e9c32f",
       "name": "Follow-up Sequence Builder (manual/cron branch)",
@@ -1240,14 +1198,15 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "timestamp": "={{$json.timestamp}}",
             "email": "={{$json.email}}",
             "businessName": "={{$json.businessName}}",
             "threadId": "={{$json.threadId}}",
-            "subject": "={{$json.subject}}",
             "snippet": "={{$json.snippet}}",
             "status": "={{$json.status}}",
-            "notes": "={{$json.notes}}"
+            "notes": "={{$json.notes}}",
+            "repliedAt": "={{$json.timestamp}}",
+            "executionId": "={{$('Runtime Config').first().json.executionId}}",
+            "action": "suppress_outreach"
           },
           "matchingColumns": [
             "threadId"
@@ -1319,6 +1278,33 @@
             {
               "id": "notes",
               "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "repliedAt",
+              "displayName": "repliedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "action",
+              "displayName": "action",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -1399,12 +1385,11 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "timestamp": "={{$json.timestamp}}",
             "type": "={{$json.type}}",
             "value": "={{$json.value}}",
-            "source": "={{$json.source}}",
             "reason": "={{$json.reason}}",
-            "notes": "={{$json.notes}}"
+            "notes": "={{$json.notes}}",
+            "addedAt": "={{$json.timestamp}}"
           },
           "matchingColumns": [
             "value"
@@ -1463,6 +1448,15 @@
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
+            },
+            {
+              "id": "addedAt",
+              "displayName": "addedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
             }
           ],
           "attemptToConvertTypes": false,
@@ -1487,7 +1481,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg = $('Runtime Config').first().json;\nasync function sheetRows(tab) {\n  try {\n    const res = await this.helpers.httpRequest({ method: 'GET', url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${tab}`, headers: { Authorization: 'Bearer ' + (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token }, json: true, timeout: 10000 });\n    const vals = res.values || [];\n    if (vals.length < 2) return [];\n    const header = vals[0];\n    return vals.slice(1).map(r => Object.fromEntries(header.map((h, i) => [h, r[i] || ''])));\n  } catch (e) { console.log(`Could not read ${tab}:`, e.message); return []; }\n}\nconst replyRows = await sheetRows.call(this, cfg.sheets.replyLog);\nconst blacklistRows = await sheetRows.call(this, cfg.sheets.blacklist);\nconst historyRows = await sheetRows.call(this, cfg.sheets.emailHistory);\nconst replies = new Set(replyRows.map(r => String(r.email || '').toLowerCase().trim()).filter(Boolean));\nconst blacklist = new Set(blacklistRows.map(r => String(r.value || r.email || '').toLowerCase().trim()).filter(Boolean));\nfor (const r of historyRows) {\n  const email = String(r.email || '').toLowerCase().trim();\n  const status = String(r.status || '').toLowerCase();\n  const replied = String(r.replied || '').toLowerCase() === 'true';\n  if (email && (replied || status.includes('replied'))) replies.add(email);\n  if (email && (status.includes('bounce') || status.includes('undeliver'))) blacklist.add(email);\n}\nconst inRun = new Set();\nconst out = [];\nfor (const item of $input.all()) {\n  const j = item.json;\n  const email = String(j.email || '').toLowerCase().trim();\n  if (!email || inRun.has(email) || replies.has(email) || blacklist.has(email)) continue;\n  inRun.add(email);\n  out.push({ json: { ...j, email, shouldSend: true } });\n}\nreturn out;"
+        "jsCode": "const cfg = $('Runtime Config').first().json;\nasync function sheetRows(tab) {\n  try {\n    const res = await this.helpers.httpRequest({ method: 'GET', url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${tab}`, headers: { Authorization: 'Bearer ' + (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token }, json: true, timeout: 10000 });\n    const vals = res.values || [];\n    if (vals.length < 2) return [];\n    const header = vals[0];\n    return vals.slice(1).map(r => Object.fromEntries(header.map((h, i) => [h, r[i] || ''])));\n  } catch (e) { throw new Error(`Could not read ${tab} suppression data; refusing follow-up sends: ${e.message}`); }\n}\nconst replyRows = await sheetRows.call(this, cfg.sheets.replyLog);\nconst blacklistRows = await sheetRows.call(this, cfg.sheets.blacklist);\nconst historyRows = await sheetRows.call(this, cfg.sheets.emailHistory);\nconst replies = new Set(replyRows.map(r => String(r.email || '').toLowerCase().trim()).filter(Boolean));\nconst blacklist = new Set(blacklistRows.map(r => String(r.value || r.email || '').toLowerCase().trim()).filter(Boolean));\nfor (const r of historyRows) {\n  const email = String(r.email || '').toLowerCase().trim();\n  const status = String(r.status || '').toLowerCase();\n  const replied = String(r.replied || '').toLowerCase() === 'true';\n  if (email && (replied || status.includes('replied'))) replies.add(email);\n  if (email && (status.includes('bounce') || status.includes('undeliver'))) blacklist.add(email);\n}\nconst inRun = new Set();\nconst out = [];\nfor (const item of $input.all()) {\n  const j = item.json;\n  const email = String(j.email || '').toLowerCase().trim();\n  if (!email || inRun.has(email) || replies.has(email) || blacklist.has(email)) continue;\n  inRun.add(email);\n  out.push({ json: { ...j, email, shouldSend: true } });\n}\nreturn out;"
       },
       "id": "96b884ac-21b8-4b87-b9a9-3e5c3e2f901e",
       "name": "Follow-up Suppression Check",
@@ -1552,7 +1546,7 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "id": "={{$('Follow-up Suppression Check').item.json.id || $('Follow-up Suppression Check').item.json.email + '-' + $('Follow-up Suppression Check').item.json.followupStage}}",
+            "id": "={{$('Follow-up Suppression Check').item.json.email + '-' + $('Follow-up Suppression Check').item.json.followupStage}}",
             "executionId": "={{$('Runtime Config').first().json.executionId}}",
             "timestamp": "={{new Date().toISOString()}}",
             "businessName": "={{$('Follow-up Suppression Check').item.json.businessName}}",
@@ -1572,10 +1566,7 @@
             "campaign": "={{$('Follow-up Suppression Check').item.json.campaign}}",
             "status": "={{$('Follow-up Suppression Check').item.json.status}}",
             "error": "",
-            "notes": "follow-up drip sent",
-            "followupStage": "={{$('Follow-up Suppression Check').item.json.followupStage}}",
-            "replied": "false",
-            "whatsappCtaUrl": "={{$('Follow-up Suppression Check').item.json.whatsappCtaUrl}}"
+            "notes": "follow-up drip sent"
           },
           "matchingColumns": [
             "id"
@@ -1769,33 +1760,6 @@
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
-            },
-            {
-              "id": "followupStage",
-              "displayName": "followupStage",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "replied",
-              "displayName": "replied",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "whatsappCtaUrl",
-              "displayName": "whatsappCtaUrl",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
             }
           ],
           "attemptToConvertTypes": false,
@@ -1842,6 +1806,17 @@
   ],
   "pinData": {},
   "connections": {
+    "Cron - 20 x Minute PKT": {
+      "main": [
+        [
+          {
+            "node": "Runtime Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Runtime Config": {
       "main": [
         [
@@ -1883,7 +1858,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "Google Maps Scraper",
             "type": "main",
             "index": 0
           }
@@ -1894,7 +1869,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "Normalize & Require Email",
             "type": "main",
             "index": 0
           }
@@ -1916,7 +1891,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items1",
+            "node": "Website Enrichment",
             "type": "main",
             "index": 0
           }
@@ -1938,7 +1913,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items1",
+            "node": "Qualified Only",
             "type": "main",
             "index": 0
           }
@@ -1971,18 +1946,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Emails History": {
-      "main": [
-        [
-          {
-            "node": "Follow-up Sequence Builder (manual/cron branch)",
+            "node": "Email Cooldown Deduplication",
             "type": "main",
             "index": 0
           }
@@ -2026,7 +1990,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items2",
+            "node": "Build Campaign Report",
             "type": "main",
             "index": 0
           }
@@ -2044,98 +2008,11 @@
         ]
       ]
     },
-    "Loop Over Items": {
+    "Get Emails History": {
       "main": [
         [
           {
-            "node": "Normalize & Require Email",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Google Maps Scraper",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Over Items1": {
-      "main": [
-        [
-          {
-            "node": "Qualified Only",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Website Enrichment",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Over Items2": {
-      "main": [
-        [
-          {
-            "node": "Build Campaign Report",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Email Cooldown Deduplication",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Gmail Search Replied Emails": {
-      "main": [
-        [
-          {
-            "node": "Extract Replied Emails for Reply_Log",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract Replied Emails for Reply_Log": {
-      "main": [
-        [
-          {
-            "node": "Append Reply_Log",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Gmail Search Bounced Emails": {
-      "main": [
-        [
-          {
-            "node": "Extract Bounced Emails for Blacklist",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract Bounced Emails for Blacklist": {
-      "main": [
-        [
-          {
-            "node": "Append Blacklist Bounces",
+            "node": "Follow-up Sequence Builder (manual/cron branch)",
             "type": "main",
             "index": 0
           }
@@ -2186,11 +2063,44 @@
         ]
       ]
     },
-    "Cron - 20 x Minute PKT": {
+    "Gmail Search Replied Emails": {
       "main": [
         [
           {
-            "node": "Runtime Config",
+            "node": "Extract Replied Emails for Reply_Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Replied Emails for Reply_Log": {
+      "main": [
+        [
+          {
+            "node": "Append Reply_Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Search Bounced Emails": {
+      "main": [
+        [
+          {
+            "node": "Extract Bounced Emails for Blacklist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Bounced Emails for Blacklist": {
+      "main": [
+        [
+          {
+            "node": "Append Blacklist Bounces",
             "type": "main",
             "index": 0
           }
