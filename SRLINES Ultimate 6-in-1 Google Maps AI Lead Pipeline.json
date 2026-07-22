@@ -574,7 +574,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json, leads=$input.all().map(i=>i.json);const norm=v=>String(v||'').trim().toLowerCase(), key=v=>norm(v).replace(/[^a-z0-9]/g,'');const field=(r,...names)=>{const wanted=new Set(names.map(key)),found=Object.keys(r||{}).find(k=>wanted.has(key(k)));return found===undefined?'':r[found];};\nasync function rows(tab){try{const token=(await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token,res=await this.helpers.httpRequest({method:'GET',url:`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${encodeURIComponent(tab+'!A:ZZ')}`,headers:{Authorization:`Bearer ${token}`},json:true,timeout:15000}),v=res.values||[],h=v[0]||[];return v.slice(1).map(r=>Object.fromEntries(h.map((x,i)=>[x,r[i]??''])));}catch(e){throw Error(`Could not read ${tab} for send suppression: ${e.message}`);}}\nconst [history,replies,blacklist]=await Promise.all([rows.call(this,cfg.sheets.emailHistory),rows.call(this,cfg.sheets.replyLog),rows.call(this,cfg.sheets.blacklist)]);const sent=new Set(history.map(r=>norm(field(r,'email','email address','emailaddress'))).filter(Boolean)),blocked=new Set([...replies.map(r=>norm(field(r,'email','email address','emailaddress'))),...blacklist.filter(r=>!field(r,'type')||norm(field(r,'type'))==='email').map(r=>norm(field(r,'value','email','email address','emailaddress')))].filter(Boolean));for(const r of history){const email=norm(field(r,'email','email address','emailaddress')),status=norm(field(r,'status'));if(field(r,'replied')===true||['true','1','yes'].includes(norm(field(r,'replied')))||/replied|bounce|undeliver|unsubscribe|complaint/.test(status))blocked.add(email);}const inRun=new Set(),out=[];for(const lead of leads){const email=norm(lead.email);if(!email||inRun.has(email)||sent.has(email)||blocked.has(email))continue;inRun.add(email);const now=new Date().toISOString();out.push({json:{...lead,email,id:`${email}-initial`,timestamp:now,lastSent:now,campaign:cfg.campaign.name,status:'sent_initial',followupStage:0,replied:false,shouldSend:true,notes:'Initial outreach; all later contact is controlled by the follow-up sequence.'}});}return out;"
+        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst normalize=value=>String(value||'').trim().toLowerCase(), key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\n// Google Sheets OAuth is handled by the Get Emails History node; Code nodes in n8n 2.x cannot access credentials directly.\nconst sent=new Set($('Get Emails History').all().map(item=>normalize(field(item.json,'email','email address','emailaddress'))).filter(Boolean));\nconst inRun=new Set(),out=[];for(const item of $input.all()){const lead=item.json,email=normalize(lead.email);if(!email||sent.has(email)||inRun.has(email))continue;inRun.add(email);const now=new Date().toISOString();out.push({json:{...lead,email,id:`${email}-initial`,timestamp:now,lastSent:now,campaign:cfg.campaign.name,status:'sent_initial',followupStage:0,replied:false,shouldSend:true,notes:'Initial outreach; history prevents repeat initial sends.'}});}return out;"
       },
       "id": "83f96442-408c-46a6-80b8-f8706aeb0d64",
       "name": "Email Cooldown Deduplication",
@@ -1151,7 +1151,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json,rows=$input.all().map(i=>i.json);if(!cfg.followup?.enabled)return[];const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));const render=(t,r)=>String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl);function html(r,body){const b=cfg.company.brand||{};return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>@media(max-width:620px){.w{width:100%!important}.c{padding:24px 20px!important}.cta{display:block!important;width:100%!important;box-sizing:border-box!important}}</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial\"><table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td align=\"center\" style=\"padding:18px 10px\"><table class=\"w\" width=\"600\" style=\"width:600px;max-width:600px;background:#fff;border-radius:28px;overflow:hidden\"><tr><td style=\"padding:24px 32px;background:linear-gradient(135deg,${b.dark||'#052E16'},${b.primary||'#16A34A'});color:#fff\"><strong style=\"font-size:30px\">${esc(b.logoText||'SRLINES')}</strong><br><span style=\"color:#dcfce7\">${esc(cfg.company.tagline)}</span></td></tr><tr><td class=\"c\" style=\"padding:30px 32px\">${String(body).split(/\\n{2,}/).map(p=>`<p style=\"color:#334155;line-height:1.65\">${esc(p).replace(/\\n/g,'<br>')}</p>`).join('')}<a class=\"cta\" href=\"${esc(cfg.company.whatsappCtaUrl)}\" style=\"display:inline-block;padding:16px 22px;border-radius:999px;background:#16a34a;color:#fff;font-weight:900;text-decoration:none\">💬 Reply on WhatsApp</a><hr style=\"border:0;border-top:1px solid #e2e8f0;margin:22px 0\"><p style=\"font-size:14px\"><strong>${esc(cfg.company.senderName)}</strong><br>${esc(cfg.company.senderTitle)} · <a href=\"${esc(cfg.company.website)}\">${esc(cfg.company.website)}</a></p></td></tr></table></td></tr></table></body></html>`;}const latest=new Map(),now=Date.now(),stop=new Set((cfg.followup.stopStatuses||[]).map(norm=>String(norm).toLowerCase()));for(const r of rows){const e=String(r.email||'').toLowerCase().trim(),t=new Date(r.lastSent||r.timestamp||0).getTime();if(e&&Number.isFinite(t)&&(!latest.has(e)||t>latest.get(e)._time))latest.set(e,{...r,_time:t});}const out=[];for(const r of latest.values()){const e=String(r.email||'').toLowerCase().trim(),s=String(r.status||'').toLowerCase(),stage=Number(r.followupStage||0),next=(cfg.followup.sequence||[]).find(x=>Number(x.stage)===stage+1);if(!e||r.replied===true||String(r.replied).toLowerCase()==='true'||stop.has(s)||/replied|bounce|undeliver|unsubscribe|complaint/.test(s)||!next||now-r._time<Number(next.delayDays||999)*86400000)continue;const emailBody=render(next.body,r);out.push({json:{...r,email:e,emailSubject:render(next.subject,r),emailBody,emailHtml:html(r,emailBody),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});if(out.length>=cfg.followup.maxFollowupsPerRun)break;}return out;"
+        "jsCode": "const cfg=$('Runtime Config').first().json,rows=$input.all().map(i=>i.json);if(!cfg.followup?.enabled)return[];const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));const render=(t,r)=>String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl);function html(r,body){const b=cfg.company.brand||{};return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>@media(max-width:620px){.w{width:100%!important}.c{padding:24px 20px!important}.cta{display:block!important;width:100%!important;box-sizing:border-box!important}}</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial\"><table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td align=\"center\" style=\"padding:18px 10px\"><table class=\"w\" width=\"600\" style=\"width:600px;max-width:600px;background:#fff;border-radius:28px;overflow:hidden\"><tr><td style=\"padding:24px 32px;background:linear-gradient(135deg,${b.dark||'#052E16'},${b.primary||'#16A34A'});color:#fff\"><strong style=\"font-size:30px\">${esc(b.logoText||'SRLINES')}</strong><br><span style=\"color:#dcfce7\">${esc(cfg.company.tagline)}</span></td></tr><tr><td class=\"c\" style=\"padding:30px 32px\">${String(body).split(/\\n{2,}/).map(p=>`<p style=\"color:#334155;line-height:1.65\">${esc(p).replace(/\\n/g,'<br>')}</p>`).join('')}<a class=\"cta\" href=\"${esc(cfg.company.whatsappCtaUrl)}\" style=\"display:inline-block;padding:16px 22px;border-radius:999px;background:#16a34a;color:#fff;font-weight:900;text-decoration:none\">💬 Reply on WhatsApp</a><hr style=\"border:0;border-top:1px solid #e2e8f0;margin:22px 0\"><p style=\"font-size:14px\"><strong>${esc(cfg.company.senderName)}</strong><br>${esc(cfg.company.senderTitle)} · <a href=\"${esc(cfg.company.website)}\">${esc(cfg.company.website)}</a></p></td></tr></table></td></tr></table></body></html>`;}const latest=new Map(),now=Date.now(),stop=new Set((cfg.followup.stopStatuses||[]).map(norm=>String(norm).toLowerCase()));for(const r of rows){const e=String(r.email||'').toLowerCase().trim(),t=new Date(r.lastSent||r.timestamp||0).getTime();if(e&&Number.isFinite(t)&&(!latest.has(e)||t>latest.get(e)._time))latest.set(e,{...r,_time:t});}const out=[];for(const r of latest.values()){const e=String(r.email||'').toLowerCase().trim(),s=String(r.status||'').toLowerCase(),stage=Number(r.followupStage||0),next=(cfg.followup.sequence||[]).find(x=>Number(x.stage)===stage+1);if(!e||r.replied===true||String(r.replied).toLowerCase()==='true'||stop.has(s)||/replied|bounce|undeliver|unsubscribe|complaint/.test(s)||!next||now-r._time<Number(next.delayDays||999)*86400000)continue;const emailBody=render(next.body,r);out.push({json:{...r,_suppressionSource:'candidate',email:e,emailSubject:render(next.subject,r),emailBody,emailHtml:html(r,emailBody),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});if(out.length>=cfg.followup.maxFollowupsPerRun)break;}return out;"
       },
       "id": "b799e219-1f85-4fe8-b8c5-f91c30af7667",
       "name": "Follow-up Sequence Builder (manual/cron branch)",
@@ -1473,7 +1473,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json,norm=v=>String(v||'').trim().toLowerCase(),key=v=>norm(v).replace(/[^a-z0-9]/g,''),field=(r,...n)=>{const f=Object.keys(r||{}).find(k=>n.map(key).includes(key(k)));return f===undefined?'':r[f]};async function rows(tab){try{const token=(await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token,res=await this.helpers.httpRequest({method:'GET',url:`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${encodeURIComponent(tab+'!A:ZZ')}`,headers:{Authorization:`Bearer ${token}`},json:true,timeout:15000}),v=res.values||[],h=v[0]||[];return v.slice(1).map(r=>Object.fromEntries(h.map((x,i)=>[x,r[i]??''])))}catch(e){throw Error(`Could not read ${tab} for follow-up suppression: ${e.message}`)}}const [reply,blacklist,history]=await Promise.all([rows.call(this,cfg.sheets.replyLog),rows.call(this,cfg.sheets.blacklist),rows.call(this,cfg.sheets.emailHistory)]),blocked=new Set(reply.map(r=>norm(field(r,'email','email address','emailaddress'))).filter(Boolean)),sentStages=new Set();for(const r of blacklist)if(!field(r,'type')||norm(field(r,'type'))==='email')blocked.add(norm(field(r,'value','email','email address','emailaddress')));for(const r of history){const e=norm(field(r,'email','email address','emailaddress')),s=norm(field(r,'status')),stage=Number(field(r,'followupStage','followup stage')||0);if(/replied|bounce|undeliver|unsubscribe|complaint/.test(s)||['true','1','yes'].includes(norm(field(r,'replied'))))blocked.add(e);if(stage>0&&s.startsWith('sent_followup_'))sentStages.add(`${e}:${stage}`)}const inRun=new Set(),out=[];for(const item of items){const j=item.json,e=norm(j.email),stage=Number(j.followupStage||0),id=`${e}:${stage}`;if(!e||!stage||inRun.has(id)||sentStages.has(id)||blocked.has(e))continue;inRun.add(id);out.push({json:{...j,email:e,id:`${e}-followup-${stage}`,shouldSend:true}})}return out;"
+        "jsCode": "const normalize=value=>String(value||'').trim().toLowerCase();\nconst key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\nconst replies=new Set(), blacklist=new Set(), sentStages=new Set(), candidates=[];\nfor(const item of $input.all()){const row=item.json, source=row._suppressionSource;\n if(source==='candidate'){candidates.push(row);continue;}\n const email=normalize(field(row,'email','email address','emailaddress'));\n if(!email) continue;\n if(source==='reply') replies.add(email);\n if(source==='blacklist'&&(!field(row,'type')||normalize(field(row,'type'))==='email')) blacklist.add(normalize(field(row,'value','email','email address','emailaddress')));\n}\nconst inRun=new Set(), out=[];\nfor(const row of candidates){const email=normalize(row.email),stage=Number(row.followupStage||0),stageKey=`${email}:${stage}`;\n // Reply_Log, Blacklist, duplicate stages, and duplicate items all stop a follow-up before Gmail.\n if(!email||!stage||replies.has(email)||blacklist.has(email)||sentStages.has(stageKey)||inRun.has(stageKey))continue;\n inRun.add(stageKey);out.push({json:{...row,email,id:`${email}-followup-${stage}`,shouldSend:true}});\n}\nreturn out;"
       },
       "id": "5e135617-28c8-4e86-b80a-b6859311c92f",
       "name": "Follow-up Suppression Check",
@@ -1822,6 +1822,118 @@
         -1392,
         -752
       ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Runtime Config').first().json.sheets.documentId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={ $('Runtime Config').first().json.sheets.replyLog }",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "e1b44759-6b47-47e1-bf78-cda136cf2653",
+      "name": "Get Reply_Log for Follow-up Suppression",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        0,
+        864
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Runtime Config').first().json.sheets.documentId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={ $('Runtime Config').first().json.sheets.blacklist }",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "1d3e6ecb-1263-43c9-bff5-8881d1e5ebbb",
+      "name": "Get Blacklist for Follow-up Suppression",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        0,
+        976
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item=>({json:{...item.json,_suppressionSource:'reply'}}));"
+      },
+      "id": "532baa09-a91e-4ed9-8ccf-bae303a7cb32",
+      "name": "Tag Reply_Log Suppression Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        864
+      ],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item=>({json:{...item.json,_suppressionSource:'blacklist'}}));"
+      },
+      "id": "3296e54b-9236-4748-81cb-70c3b103d33c",
+      "name": "Tag Blacklist Suppression Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        976
+      ],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "16a42af1-40b2-4320-a97a-83f09b80adce",
+      "name": "Combine Follow-up Suppression Sources",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        448,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "a80e5fe6-bae2-452d-8861-9610fb6ebdef",
+      "name": "Combine Follow-up Candidates and Suppression",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        672,
+        808
+      ]
     }
   ],
   "pinData": {},
@@ -1846,6 +1958,16 @@
           },
           {
             "node": "Gmail Search Bounced Emails",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Reply_Log for Follow-up Suppression",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Blacklist for Follow-up Suppression",
             "type": "main",
             "index": 0
           }
@@ -2130,7 +2252,7 @@
       "main": [
         [
           {
-            "node": "Follow-up Suppression Check",
+            "node": "Combine Follow-up Candidates and Suppression",
             "type": "main",
             "index": 0
           }
@@ -2175,6 +2297,72 @@
         [
           {
             "node": "Runtime Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Reply_Log for Follow-up Suppression": {
+      "main": [
+        [
+          {
+            "node": "Tag Reply_Log Suppression Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Blacklist for Follow-up Suppression": {
+      "main": [
+        [
+          {
+            "node": "Tag Blacklist Suppression Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Reply_Log Suppression Rows": {
+      "main": [
+        [
+          {
+            "node": "Combine Follow-up Suppression Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Blacklist Suppression Rows": {
+      "main": [
+        [
+          {
+            "node": "Combine Follow-up Suppression Sources",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combine Follow-up Suppression Sources": {
+      "main": [
+        [
+          {
+            "node": "Combine Follow-up Candidates and Suppression",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combine Follow-up Candidates and Suppression": {
+      "main": [
+        [
+          {
+            "node": "Follow-up Suppression Check",
             "type": "main",
             "index": 0
           }
