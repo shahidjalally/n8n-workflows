@@ -532,7 +532,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json;const out=[];\nfunction fallback(j){return{subject:`${j.businessName}: WhatsApp growth idea`,body:`Hi ${j.businessName} team,\\n\\nI found ${j.businessName}${j.city?' in '+j.city:''} online and noticed your business activity. SRLINES helps businesses manage WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and sales follow-up from one CRM.\\n\\nIf faster WhatsApp replies and better lead tracking would help, message me here for a short demo: ${cfg.company.whatsappCtaUrl}\\n\\n${cfg.company.signature}`}}\nfor(const item of items){const j=item.json;if(!j.qualified)continue;let em=fallback(j);try{const key=cfg.deepseek.apiKey;if(!key||key.startsWith('PASTE_'))throw new Error('Configure cfg.deepseek.apiKey in Runtime Config');const prompt=`Write one concise compliant B2B cold email. Requirements: honest personalization only from provided data; mention we found them online/saw their activity; strong WhatsApp CTA with this exact link: ${cfg.company.whatsappCtaUrl}; no fake claims; subject under 70 chars; body under 150 words; include signature. Return JSON {subject,body}. Sender: ${JSON.stringify(cfg.company)} Lead: ${JSON.stringify({businessName:j.businessName,city:j.city,industry:j.industry,website:j.website,score:j.score,analysis:j.aiAnalysis,signals:j.signals})}`;const res=await this.helpers.httpRequest({method:'POST',url:cfg.deepseek.apiUrl,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:{model:cfg.deepseek.model,temperature:.85,messages:[{role:'user',content:prompt}],response_format:{type:'json_object'}},json:true,timeout:120000});em={...em,...JSON.parse(res.choices?.[0]?.message?.content||'{}')}}catch(e){em.aiEmailError=e.message}out.push({json:{...j,emailSubject:String(em.subject||'SRLINES demo').slice(0,140),emailBody:String(em.body||''),fromEmail:cfg.company.senderEmail,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}})}return out.slice(0,cfg.limits.maxEmailsPerRun);"
+        "jsCode": "const cfg=$('Runtime Config').first().json, out=[];\nconst esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\nfunction html(lead,body){const b=cfg.company.brand||{},cta=cfg.company.whatsappCtaUrl;const name=esc(lead.businessName||'your business');return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>@media only screen and (max-width:620px){.wrap{width:100%!important}.content,.hero{padding:24px 20px!important}.cta{display:block!important;width:100%!important;box-sizing:border-box!important}.grid{display:block!important}.tile{margin:0 0 10px!important}}</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a\"><div style=\"display:none;max-height:0;overflow:hidden\">SRLINES WhatsApp CRM demo for ${name}</div><table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td align=\"center\" style=\"padding:18px 10px\"><table class=\"wrap\" role=\"presentation\" width=\"600\" cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;max-width:600px\"><tr><td style=\"overflow:hidden;border-radius:28px;background:#fff;box-shadow:0 18px 55px rgba(15,23,42,.12)\"><div class=\"hero\" style=\"padding:34px 32px;background:linear-gradient(135deg,${b.dark||'#052E16'},${b.primary||'#16A34A'},${b.accent||'#22C55E'});color:#fff\"><div style=\"font-size:13px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#dcfce7\">${esc(cfg.company.tagline)}</div><div style=\"margin-top:10px;font-size:38px;font-weight:900;letter-spacing:-.04em\">${esc(b.logoText||cfg.company.name)}</div><div style=\"margin-top:16px;font-size:17px;line-height:1.55\">One inbox for WhatsApp, Instagram, Facebook, chatbots, and faster sales follow-up.</div></div><div class=\"content\" style=\"padding:30px 32px\"><div style=\"display:inline-block;padding:8px 12px;border-radius:999px;background:#ecfdf5;color:#16a34a;font-size:13px;font-weight:800\">A personal idea for ${name}</div><h1 style=\"font-size:25px;line-height:1.2\">Turn inquiries into conversations</h1>${String(body||'').split(/\\n{2,}/).map(x=>`<p style=\"color:#334155;font-size:16px;line-height:1.65\">${esc(x).replace(/\\n/g,'<br>')}</p>`).join('')}<div class=\"grid\" style=\"display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0\"><div class=\"tile\" style=\"padding:14px;border:1px solid #dcfce7;border-radius:16px\"><strong>Business</strong><br><span style=\"color:#64748b\">${name}</span></div><div class=\"tile\" style=\"padding:14px;border:1px solid #dcfce7;border-radius:16px\"><strong>Location</strong><br><span style=\"color:#64748b\">${esc(lead.city||'Pakistan')}</span></div></div><a class=\"cta\" href=\"${esc(cta)}\" style=\"display:inline-block;padding:17px 24px;border-radius:999px;background:linear-gradient(135deg,#25D366,#16A34A);color:#fff;font-size:17px;font-weight:900;text-align:center;text-decoration:none\">💬 WhatsApp me for a 10-minute demo</a><p style=\"color:#64748b;font-size:13px;line-height:1.6\">${esc(b.trustLine||'')}</p><hr style=\"border:0;border-top:1px solid #e2e8f0;margin:24px 0\"><p style=\"margin:0;font-size:14px;line-height:1.6\"><strong>${esc(cfg.company.senderName)}</strong><br>${esc(cfg.company.senderTitle)} · ${esc(cfg.company.legalName)}<br><a href=\"${esc(cfg.company.website)}\" style=\"color:#16a34a\">${esc(cfg.company.website)}</a></p></div></td></tr></table></td></tr></table></body></html>`;}\nfunction fallback(j){return{subject:`${j.businessName}: WhatsApp growth idea`,body:`Hi ${j.businessName} team,\\n\\nI found ${j.businessName}${j.city?' in '+j.city:''} online. SRLINES centralizes WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and sales follow-up in one CRM.\\n\\nWould a 10-minute WhatsApp demo be useful? ${cfg.company.whatsappCtaUrl}\\n\\n${cfg.company.signature}`};}\nfor(const item of items){const j=item.json;if(!j.qualified)continue;let em=fallback(j);try{const key=cfg.deepseek.apiKey;if(!key||key.startsWith('PASTE_'))throw Error('Configure cfg.deepseek.apiKey');const prompt=`Write compliant B2B cold-email JSON {subject,body}; honest personalization only; under 150 words; strong WhatsApp CTA ${cfg.company.whatsappCtaUrl}. Lead:${JSON.stringify({businessName:j.businessName,city:j.city,industry:j.industry,website:j.website,score:j.score})}`;const res=await this.helpers.httpRequest({method:'POST',url:cfg.deepseek.apiUrl,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:{model:cfg.deepseek.model,temperature:.75,messages:[{role:'user',content:prompt}],response_format:{type:'json_object'}},json:true,timeout:120000});em={...em,...JSON.parse(res.choices?.[0]?.message?.content||'{}')};}catch(e){em.aiEmailError=e.message;}const emailBody=String(em.body||'');out.push({json:{...j,emailSubject:String(em.subject||'SRLINES demo').slice(0,140),emailBody,emailHtml:html(j,emailBody),fromEmail:cfg.company.senderEmail,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});}return out.slice(0,cfg.limits.maxEmailsPerRun);"
       },
       "id": "3ea7bcd6-ea66-4203-8339-3b90245e3241",
       "name": "DeepSeek Personalized Email",
@@ -574,7 +574,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg = $('Runtime Config').first().json;\n\n// Get leads from the previous node (DeepSeek Personalized Email output)\nconst items = $input.all();\nconst leadsToProcess = items.map(item => item.json);\n\n// Get email history from Google Sheets\nasync function getEmailHistory() {\n    try {\n        const result = await this.helpers.httpRequest({\n            method: 'GET',\n            url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${cfg.sheets.emailHistory}`,\n            headers: {\n                'Authorization': 'Bearer ' + (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token\n            },\n            json: true,\n            timeout: 10000\n        });\n        \n        const history = {};\n        if (result.values && result.values.length > 1) {\n            const header = result.values[0];\n            const emailIndex = header.indexOf('email');\n            const lastSentIndex = header.indexOf('lastSent');\n            const statusIndex = header.indexOf('status');\n            const repliedIndex = header.indexOf('replied');\n            const campaignIndex = header.indexOf('campaign');\n            \n            if (emailIndex !== -1 && lastSentIndex !== -1) {\n                for (let i = 1; i < result.values.length; i++) {\n                    const row = result.values[i];\n                    if (row[emailIndex] && row[lastSentIndex]) {\n                        const email = String(row[emailIndex]).toLowerCase().trim();\n                        // Only consider our campaign\n                        if (!campaignIndex || row[campaignIndex] === 'SRLINES Pakistan B2B' || !row[campaignIndex]) {\n                            const status = statusIndex !== -1 ? row[statusIndex] : '';\n                            const replied = repliedIndex !== -1 \n                                ? (row[repliedIndex] === 'true' || row[repliedIndex] === 'TRUE' || row[repliedIndex] === '1')\n                                : (status === 'replied');\n                            \n                            history[email] = {\n                                lastSent: row[lastSentIndex],\n                                status: status,\n                                replied: replied,\n                                rowIndex: i\n                            };\n                        }\n                    }\n                }\n            }\n        }\n        return history;\n    } catch (error) {\n        console.log('Error reading email history:', error);\n        return {};\n    }\n}\n\n// Get blacklist (bounced emails)\nasync function getBlacklistEmails() {\n    try {\n        const result = await this.helpers.httpRequest({\n            method: 'GET',\n            url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${cfg.sheets.blacklist}`,\n            headers: {\n                'Authorization': 'Bearer ' + (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token\n            },\n            json: true,\n            timeout: 10000\n        });\n        const emails = new Set();\n        if (result.values && result.values.length > 1) {\n            const header = result.values[0];\n            const valueIndex = header.indexOf('value');\n            if (valueIndex !== -1) {\n                for (let i = 1; i < result.values.length; i++) {\n                    if (result.values[i][valueIndex]) {\n                        emails.add(String(result.values[i][valueIndex]).toLowerCase().trim());\n                    }\n                }\n            }\n        }\n        return emails;\n    } catch (error) {\n        console.log('Error reading blacklist:', error);\n        return new Set();\n    }\n}\n\n// Get reply log\nasync function getReplyLogEmails() {\n    try {\n        const result = await this.helpers.httpRequest({\n            method: 'GET',\n            url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${cfg.sheets.replyLog}`,\n            headers: {\n                'Authorization': 'Bearer ' + (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token\n            },\n            json: true,\n            timeout: 10000\n        });\n        const emails = new Set();\n        if (result.values && result.values.length > 1) {\n            const header = result.values[0];\n            const emailIndex = header.indexOf('email');\n            if (emailIndex !== -1) {\n                for (let i = 1; i < result.values.length; i++) {\n                    if (result.values[i][emailIndex]) {\n                        emails.add(String(result.values[i][emailIndex]).toLowerCase().trim());\n                    }\n                }\n            }\n        }\n        return emails;\n    } catch (error) {\n        console.log('Error reading reply log:', error);\n        return new Set();\n    }\n}\n\n// Get all exclusion data\nconst emailHistory = await getEmailHistory.call(this);\nconst blacklistedEmails = await getBlacklistEmails.call(this);\nconst replyLogEmails = await getReplyLogEmails.call(this);\n\n// Combine all emails that should be skipped\nconst skipEmails = new Set([...blacklistedEmails, ...replyLogEmails]);\n\n// Add emails marked as replied in history\nfor (const [email, data] of Object.entries(emailHistory)) {\n    if (data.replied === true) {\n        skipEmails.add(email);\n    }\n}\n\nconst cooldownMs = cfg.limits.emailCooldownDays * 86400000;\nconst now = Date.now();\n\nconst out = [];\nconst processedEmails = new Set(); // Track to prevent duplicates in this run\nconst skippedLog = [];\n\nconsole.log(`📊 Processing ${leadsToProcess.length} leads`);\nconsole.log(`🚫 Skipping ${skipEmails.size} emails (blacklisted or replied)`);\n\n// Process each lead\nfor (const lead of leadsToProcess) {\n    const email = String(lead.email || '').toLowerCase().trim();\n    \n    // Skip if no email\n    if (!email) {\n        skippedLog.push({email: 'missing', reason: 'no_email', business: lead.businessName});\n        continue;\n    }\n    \n    // Skip if already processed in this run\n    if (processedEmails.has(email)) {\n        skippedLog.push({email, reason: 'duplicate_in_run', business: lead.businessName});\n        continue;\n    }\n    \n    // CRITICAL: Skip if blacklisted (bounced)\n    if (blacklistedEmails.has(email)) {\n        skippedLog.push({email, reason: 'blacklisted_bounced', business: lead.businessName});\n        console.log(`❌ Skipping bounced email: ${email}`);\n        continue;\n    }\n    \n    // CRITICAL: Skip if replied\n    if (replyLogEmails.has(email)) {\n        skippedLog.push({email, reason: 'replied', business: lead.businessName});\n        console.log(`❌ Skipping replied email: ${email}`);\n        continue;\n    }\n    \n    // Skip if replied in history\n    if (emailHistory[email] && emailHistory[email].replied === true) {\n        skippedLog.push({email, reason: 'replied_in_history', business: lead.businessName});\n        console.log(`❌ Skipping replied email (history): ${email}`);\n        continue;\n    }\n    \n    // Check cooldown period\n    if (emailHistory[email] && emailHistory[email].lastSent) {\n        const lastSentTime = new Date(emailHistory[email].lastSent).getTime();\n        const daysSinceLastSent = (now - lastSentTime) / (24 * 60 * 60 * 1000);\n        \n        if (daysSinceLastSent < cfg.limits.emailCooldownDays) {\n            skippedLog.push({\n                email, \n                reason: `cooldown_${daysSinceLastSent.toFixed(1)}_days`, \n                business: lead.businessName,\n                daysRemaining: (cfg.limits.emailCooldownDays - daysSinceLastSent).toFixed(1)\n            });\n            console.log(`⏳ Skipping email in cooldown: ${email}, days since last sent: ${daysSinceLastSent.toFixed(1)}`);\n            continue;\n        }\n    }\n    \n    // If we get here, email is valid to send\n    processedEmails.add(email);\n    const lastSent = new Date().toISOString();\n    \n    out.push({\n        json: {\n            ...lead,\n            email: email,\n            lastSent: lastSent,\n            campaign: 'SRLINES Pakistan B2B',\n            status: 'sent_initial',\n            followupStage: 0,\n            replied: false,\n            shouldSend: true,\n            // Keep track for logging\n            isNewEmail: !emailHistory[email],\n            daysSinceLastContact: emailHistory[email] ? \n                ((now - new Date(emailHistory[email].lastSent).getTime()) / (24 * 60 * 60 * 1000)).toFixed(1) : \n                'never'\n        }\n    });\n}\n\n// Log summary\nconsole.log(`\\n📊 Summary:`);\nconsole.log(`   ✅ Emails to send: ${out.length}`);\nconsole.log(`   ⏭️  Skipped: ${skippedLog.length}`);\nconsole.log(`   📧 Total leads checked: ${leadsToProcess.length}`);\n\n// Show skipped reasons\nconst skipReasons = {};\nfor (const skip of skippedLog) {\n    skipReasons[skip.reason] = (skipReasons[skip.reason] || 0) + 1;\n}\nconsole.log(`\\n📋 Skip reasons:`, skipReasons);\n\n// If no emails to send, stop this branch cleanly so Gmail does not send status rows.\nif (out.length === 0) {\n    console.log(`\\n⚠️ No emails ready to send. All ${leadsToProcess.length} leads were skipped.`);\n    \n    return [];\n}\n\nconsole.log(`\\n✅ Ready to send ${out.length} emails`);\nreturn out;"
+        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst normalize=value=>String(value||'').trim().toLowerCase(), key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\n// Google Sheets OAuth is handled by the Get Emails History node; Code nodes in n8n 2.x cannot access credentials directly.\nconst sent=new Set($('Get Emails History').all().map(item=>normalize(field(item.json,'email','email address','emailaddress'))).filter(Boolean));\nconst inRun=new Set(),out=[];for(const item of $input.all()){const lead=item.json,email=normalize(lead.email);if(!email||sent.has(email)||inRun.has(email))continue;inRun.add(email);const now=new Date().toISOString();out.push({json:{...lead,email,id:`${email}-initial`,timestamp:now,lastSent:now,campaign:cfg.campaign.name,status:'sent_initial',followupStage:0,replied:false,shouldSend:true,notes:'Initial outreach; history prevents repeat initial sends.'}});}return out;"
       },
       "id": "83f96442-408c-46a6-80b8-f8706aeb0d64",
       "name": "Email Cooldown Deduplication",
@@ -1151,7 +1151,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg = $('Runtime Config').first().json;\n// Input: rows from Email_History. Output: due follow-ups only.\nconst rows = $input.all().map(i=>i.json);\nconst stop = new Set((cfg.followup.stopStatuses || []).map(s => String(s).toLowerCase()));\nconst latest = new Map();\nconst now = Date.now();\nfunction render(t, r){ return String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl); }\nfor (const r of rows) {\n const email = String(r.email || '').toLowerCase().trim(); if (!email) continue;\n const t = new Date(r.lastSent || r.timestamp || 0).getTime();\n const prev = latest.get(email);\n if (!prev || t > prev._time) latest.set(email, {...r, _time: t});\n}\nconst out=[];\nfor (const r of latest.values()) {\n const email=String(r.email||'').toLowerCase().trim();\n const status=String(r.status||'').toLowerCase();\n const replied = r.replied === true || String(r.replied).toLowerCase() === 'true';\n if(!email || replied || stop.has(status) || status.includes('bounced') || status.includes('unsubscribed') || status.includes('complained')) continue;\n const stage=Number(r.followupStage||0); const next=(cfg.followup.sequence||[]).find(s=>Number(s.stage)===stage+1); if(!next) continue;\n const last=Number(r._time || new Date(r.lastSent||r.timestamp||0).getTime()); if(!last || now-last < Number(next.delayDays||999)*86400000) continue;\n out.push({json:{...r,email,emailSubject:render(next.subject,r),emailBody:render(next.body,r),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});\n if(out.length >= cfg.followup.maxFollowupsPerRun) break;\n}\nreturn out;"
+        "jsCode": "const cfg=$('Runtime Config').first().json,rows=$input.all().map(i=>i.json);if(!cfg.followup?.enabled)return[];const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));const render=(t,r)=>String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl);function html(r,body){const b=cfg.company.brand||{};return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>@media(max-width:620px){.w{width:100%!important}.c{padding:24px 20px!important}.cta{display:block!important;width:100%!important;box-sizing:border-box!important}}</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial\"><table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td align=\"center\" style=\"padding:18px 10px\"><table class=\"w\" width=\"600\" style=\"width:600px;max-width:600px;background:#fff;border-radius:28px;overflow:hidden\"><tr><td style=\"padding:24px 32px;background:linear-gradient(135deg,${b.dark||'#052E16'},${b.primary||'#16A34A'});color:#fff\"><strong style=\"font-size:30px\">${esc(b.logoText||'SRLINES')}</strong><br><span style=\"color:#dcfce7\">${esc(cfg.company.tagline)}</span></td></tr><tr><td class=\"c\" style=\"padding:30px 32px\">${String(body).split(/\\n{2,}/).map(p=>`<p style=\"color:#334155;line-height:1.65\">${esc(p).replace(/\\n/g,'<br>')}</p>`).join('')}<a class=\"cta\" href=\"${esc(cfg.company.whatsappCtaUrl)}\" style=\"display:inline-block;padding:16px 22px;border-radius:999px;background:#16a34a;color:#fff;font-weight:900;text-decoration:none\">💬 Reply on WhatsApp</a><hr style=\"border:0;border-top:1px solid #e2e8f0;margin:22px 0\"><p style=\"font-size:14px\"><strong>${esc(cfg.company.senderName)}</strong><br>${esc(cfg.company.senderTitle)} · <a href=\"${esc(cfg.company.website)}\">${esc(cfg.company.website)}</a></p></td></tr></table></td></tr></table></body></html>`;}const latest=new Map(),now=Date.now(),stop=new Set((cfg.followup.stopStatuses||[]).map(norm=>String(norm).toLowerCase()));for(const r of rows){const e=String(r.email||'').toLowerCase().trim(),t=new Date(r.lastSent||r.timestamp||0).getTime();if(e&&Number.isFinite(t)&&(!latest.has(e)||t>latest.get(e)._time))latest.set(e,{...r,_time:t});}const out=[];for(const r of latest.values()){const e=String(r.email||'').toLowerCase().trim(),s=String(r.status||'').toLowerCase(),stage=Number(r.followupStage||0),next=(cfg.followup.sequence||[]).find(x=>Number(x.stage)===stage+1);if(!e||r.replied===true||String(r.replied).toLowerCase()==='true'||stop.has(s)||/replied|bounce|undeliver|unsubscribe|complaint/.test(s)||!next||now-r._time<Number(next.delayDays||999)*86400000)continue;const emailBody=render(next.body,r);out.push({json:{...r,_suppressionSource:'candidate',email:e,emailSubject:render(next.subject,r),emailBody,emailHtml:html(r,emailBody),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});if(out.length>=cfg.followup.maxFollowupsPerRun)break;}return out;"
       },
       "id": "b799e219-1f85-4fe8-b8c5-f91c30af7667",
       "name": "Follow-up Sequence Builder (manual/cron branch)",
@@ -1239,7 +1239,6 @@
             "status": "={{$json.status}}",
             "notes": "={{$json.notes}}"
           },
-          "matchingColumns": [],
           "schema": [
             {
               "id": "timestamp",
@@ -1332,7 +1331,9 @@
           "id": "JOJNkcLhn4iH3jm5",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "notesInFlow": true,
+      "notes": "Append Gmail reply events. Both send guards normalize existing Reply_Log headers and suppress these addresses."
     },
     {
       "parameters": {
@@ -1472,7 +1473,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg = $('Runtime Config').first().json;\nasync function sheetSet(tab, col){ try{ const res=await this.helpers.httpRequest({method:'GET',url:`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${tab}`,headers:{Authorization:'Bearer '+(await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token},json:true,timeout:10000}); const vals=res.values||[]; if(vals.length<2) return new Set(); const idx=vals[0].indexOf(col); if(idx<0) return new Set(); return new Set(vals.slice(1).map(r=>String(r[idx]||'').toLowerCase().trim()).filter(Boolean)); }catch(e){ console.log(`Could not read ${tab}:`, e.message); return new Set(); }}\nconst replies=await sheetSet.call(this,cfg.sheets.replyLog,'email'); const blacklist=await sheetSet.call(this,cfg.sheets.blacklist,'value');\nconst inRun=new Set(); const out=[];\nfor(const item of items){ const j=item.json; const email=String(j.email||'').toLowerCase().trim(); if(!email||inRun.has(email)||replies.has(email)||blacklist.has(email)) continue; inRun.add(email); out.push({json:{...j,email,shouldSend:true}}); }\nreturn out;"
+        "jsCode": "const normalize=value=>String(value||'').trim().toLowerCase();\nconst key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\nconst replies=new Set(), blacklist=new Set(), sentStages=new Set(), candidates=[];\nfor(const item of $input.all()){const row=item.json, source=row._suppressionSource;\n if(source==='candidate'){candidates.push(row);continue;}\n const email=normalize(field(row,'email','email address','emailaddress'));\n if(!email) continue;\n if(source==='reply') replies.add(email);\n if(source==='blacklist'&&(!field(row,'type')||normalize(field(row,'type'))==='email')) blacklist.add(normalize(field(row,'value','email','email address','emailaddress')));\n}\nconst inRun=new Set(), out=[];\nfor(const row of candidates){const email=normalize(row.email),stage=Number(row.followupStage||0),stageKey=`${email}:${stage}`;\n // Reply_Log, Blacklist, duplicate stages, and duplicate items all stop a follow-up before Gmail.\n if(!email||!stage||replies.has(email)||blacklist.has(email)||sentStages.has(stageKey)||inRun.has(stageKey))continue;\n inRun.add(stageKey);out.push({json:{...row,email,id:`${email}-followup-${stage}`,shouldSend:true}});\n}\nreturn out;"
       },
       "id": "5e135617-28c8-4e86-b80a-b6859311c92f",
       "name": "Follow-up Suppression Check",
@@ -1821,6 +1822,118 @@
         -1392,
         -752
       ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Runtime Config').first().json.sheets.documentId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={ $('Runtime Config').first().json.sheets.replyLog }",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "e1b44759-6b47-47e1-bf78-cda136cf2653",
+      "name": "Get Reply_Log for Follow-up Suppression",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        0,
+        864
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Runtime Config').first().json.sheets.documentId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={ $('Runtime Config').first().json.sheets.blacklist }",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "1d3e6ecb-1263-43c9-bff5-8881d1e5ebbb",
+      "name": "Get Blacklist for Follow-up Suppression",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        0,
+        976
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item=>({json:{...item.json,_suppressionSource:'reply'}}));"
+      },
+      "id": "532baa09-a91e-4ed9-8ccf-bae303a7cb32",
+      "name": "Tag Reply_Log Suppression Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        864
+      ],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item=>({json:{...item.json,_suppressionSource:'blacklist'}}));"
+      },
+      "id": "3296e54b-9236-4748-81cb-70c3b103d33c",
+      "name": "Tag Blacklist Suppression Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        976
+      ],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "16a42af1-40b2-4320-a97a-83f09b80adce",
+      "name": "Combine Follow-up Suppression Sources",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        448,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "a80e5fe6-bae2-452d-8861-9610fb6ebdef",
+      "name": "Combine Follow-up Candidates and Suppression",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        672,
+        808
+      ]
     }
   ],
   "pinData": {},
@@ -1845,6 +1958,16 @@
           },
           {
             "node": "Gmail Search Bounced Emails",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Reply_Log for Follow-up Suppression",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Blacklist for Follow-up Suppression",
             "type": "main",
             "index": 0
           }
@@ -2129,7 +2252,7 @@
       "main": [
         [
           {
-            "node": "Follow-up Suppression Check",
+            "node": "Combine Follow-up Candidates and Suppression",
             "type": "main",
             "index": 0
           }
@@ -2174,6 +2297,72 @@
         [
           {
             "node": "Runtime Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Reply_Log for Follow-up Suppression": {
+      "main": [
+        [
+          {
+            "node": "Tag Reply_Log Suppression Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Blacklist for Follow-up Suppression": {
+      "main": [
+        [
+          {
+            "node": "Tag Blacklist Suppression Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Reply_Log Suppression Rows": {
+      "main": [
+        [
+          {
+            "node": "Combine Follow-up Suppression Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Blacklist Suppression Rows": {
+      "main": [
+        [
+          {
+            "node": "Combine Follow-up Suppression Sources",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combine Follow-up Suppression Sources": {
+      "main": [
+        [
+          {
+            "node": "Combine Follow-up Candidates and Suppression",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combine Follow-up Candidates and Suppression": {
+      "main": [
+        [
+          {
+            "node": "Follow-up Suppression Check",
             "type": "main",
             "index": 0
           }
