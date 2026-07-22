@@ -1,0 +1,2197 @@
+{
+  "name": "SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst executionId = `${now.toISOString()}-${Math.random().toString(36).slice(2, 10)}`;\n\n// n8n plan note: this workflow intentionally keeps API keys and IDs here instead of env vars.\n// Replace every PASTE_* value before activating. Do not commit real production secrets.\nreturn [{ json: {\n  executionId,\n  now: now.toISOString(),\n  timezone: 'Asia/Karachi',\n  campaign: { name: 'SRLINES Pakistan B2B', consentNote: 'Cold B2B outreach. Stop immediately on bounce, reply, unsubscribe, or complaint.' },\n  company: {\n    name: 'SRLINES',\n    senderName: 'Shahid Rasool',\n    senderTitle: 'CEO',\n    senderEmail: 'srlines.wcrm@gmail.com',\n    replyTo: 'srlines.wcrm@gmail.com',\n    whatsappCtaUrl: 'https://wa.me/923283897926?text=Hi%20SRLINES%2C%20I%20saw%20your%20email%20and%20want%20a%20WhatsApp%20CRM%20demo',\n    signature: 'Shahid Rasool\\nCEO\\nSRLINES SOFTWARE HOUSE\\nWhatsApp demo: https://wa.me/923283897926',\n    products: ['Official Meta Cloud API', 'WhatsApp CRM', 'Omni Inbox', 'Facebook Messenger', 'Instagram DM', 'Sales Pipeline Kanban CRM', 'Chatbots', 'Shopify WhatsApp App Integration', 'N8N Native Node', 'Bitrix24 app']\n  },\n  limits: { keywordsPerRun: 4, minScoreToEmail: 60, emailCooldownDays: 180, maxEmailsPerRun: 50, minDelaySeconds: 25, maxDelaySeconds: 90 },\n  emailValidation: { enabled: true, requireMx: true, dnsProvider: 'https://dns.google/resolve', timeoutMs: 8000, blockedDomains: ['example.com','test.com','invalid.com'], blockedLocalParts: ['no-reply','noreply','donotreply','do-not-reply','support','help','privacy','abuse'] },\n  followup: {\n    enabled: true,\n    maxFollowupsPerRun: 25,\n    stopStatuses: ['replied','bounced','complained','unsubscribed'],\n    sequence: [\n      { stage: 1, delayDays: 3, subject: 'Quick WhatsApp idea for {{businessName}}', body: 'Hi {{businessName}} team,\\n\\nI found {{businessName}} online while reviewing active businesses in {{city}}. A quick idea: SRLINES can centralize WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and lead follow-up in one CRM.\\n\\nIf you want, message me on WhatsApp and I will show a 10-minute demo tailored to your business: {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 2, delayDays: 7, subject: 'Should I send a WhatsApp CRM demo?', body: 'Hi {{businessName}} team,\\n\\nMany businesses lose inquiries because chats, orders, and reminders stay scattered. SRLINES helps teams respond faster with WhatsApp Cloud API, Omni Inbox, chatbots, and a sales pipeline.\\n\\nWould you like me to share a short walkthrough on WhatsApp? {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 3, delayDays: 14, subject: 'Close the loop?', body: 'Hi {{businessName}} team,\\n\\nI do not want to keep emailing if this is not useful. If improving WhatsApp/Meta lead handling is a priority, send me one WhatsApp message and I will suggest the best setup: {{whatsappCtaUrl}}\\n\\nOtherwise, I will close the loop here.\\n\\n{{signature}}' }\n    ]\n  },\n  sheets: { documentId: '19dwAu86RfoMcWcUp8li8DKbQhP7tUBqG2TZVR7hTPhk', keywords: 'Keywords', rawLeads: 'Raw_Leads', qualifiedLeads: 'Qualified_Leads', emailHistory: 'Email_History', campaignReport: 'Campaign_Report', replyLog: 'Reply_Log', followupQueue: 'Followup_Queue', blacklist: 'Blacklist', industryStats: 'Industry_Stats' },\n  deepseek: { apiKey: 'sk-987549f470cd401dbb3eef7b36c79931', apiUrl: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },\n  scraper: { baseUrl: 'http://localhost:3000', maxResultsPerKeyword: 4, delayBetweenRequests: 1000 },\n  gmailSearch: { replyQuery: 'to:srlines.wcrm@gmail.com newer_than:30d -from:me', bounceQuery: '(from:mailer-daemon OR from:postmaster OR subject:(Delivery Status Notification) OR subject:(Undelivered Mail Returned)) newer_than:30d' },\n  instructions: 'Configure placeholders in this Runtime Config node, Google Sheets OAuth, Gmail OAuth, and your local scraper URL before activating.'\n}}];"
+      },
+      "id": "0799cd15-583d-4182-9547-252f603afadb",
+      "name": "Runtime Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1408,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $input.first().json;\n\n// Track what keywords have been used before (from static data)\nconst data = $getWorkflowStaticData('global');\nconst usedKeywordsKey = 'used_keywords_history';\nif (!data[usedKeywordsKey]) {\n    data[usedKeywordsKey] = [];\n}\n\n// Get today's date for seed\nconst today = new Date();\nconst dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();\n\n// Expanded lists for diversity\nconst allCities = [\n    'Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad', \n    'Sialkot', 'Multan', 'Peshawar', 'Gujranwala', 'Hyderabad', \n    'Quetta', 'Bahawalpur', 'Sargodha', 'Rahim Yar Khan', 'Kasur',\n    'Mardan', 'Mingora', 'Sahiwal', 'Okara', 'Wah Cantt',\n    'Dera Ghazi Khan', 'Mirpur Khas', 'Chiniot', 'Kamoke', 'Mandi Bahauddin',\n    'Jhelum', 'Sadiqabad', 'Jacobabad', 'Shikarpur', 'Khanewal',\n    'Hafizabad', 'Kohat', 'Kashmore', 'Larkana', 'Tando Allahyar'\n];\n\nconst allIndustries = [\n    'Shopify store', 'WooCommerce store', 'E-commerce website', 'Online boutique',\n    'Furniture showroom', 'Home decor store', 'Interior design studio',\n    'Real estate agency', 'Property developer', 'Construction company',\n    'Dental clinic', 'Medical clinic', 'Dermatology clinic', 'Eye hospital',\n    'Law firm', 'Legal consultancy', 'Advocate office',\n    'Car dealer', 'Auto workshop', 'Car rental service', 'Tire shop',\n    'Restaurant', 'Cafe', 'Bakery', 'Food delivery service',\n    'Boutique', 'Clothing store', 'Shoe store', 'Jewelry store',\n    'Gym', 'Fitness center', 'Yoga studio', 'Sports club',\n    'Travel agency', 'Tour operator', 'Hotel', 'Guest house',\n    'Pharmacy', 'Medical store', 'Chemist shop',\n    'Digital marketing agency', 'IT services', 'Software house',\n    'Electronics store', 'Mobile shop', 'Computer store',\n    'Salon', 'Spa', 'Beauty parlor',\n    'School', 'College', 'Academy', 'Tuition center',\n    'Auto parts store', 'Motorcycle dealer', 'Bicycle shop',\n    'Hardware store', 'Paint shop', 'Sanitary store',\n    'Supermarket', 'Grocery store', 'Convenience store'\n];\n\nconst allIntents = [\n    'CRM for lead management', 'WhatsApp integration', 'Chatbot automation', \n    'Sales pipeline CRM', 'Meta inbox management', 'Omni channel communication', \n    'Customer support automation', 'Lead generation', 'Follow-up automation',\n    'Marketing automation', 'Customer engagement', 'Inquiry management',\n    'Booking management', 'Appointment scheduling', 'Order tracking',\n    'Customer feedback', 'Review management', 'Loyalty program'\n];\n\n// Create a more specific prompt that forces diversity\nconst industryExamples = allIndustries.slice(0, 15).join(', ');\nconst cityExamples = allCities.slice(0, 10).join(', ');\n\nconst user = `Generate ${cfg.limits.keywordsPerRun} COMPLETELY UNIQUE Google Maps search keywords for Pakistan.\n\nIMPORTANT RULES:\n1. DO NOT repeat the same industry or city in more than 2 keywords\n2. Mix different cities and industries\n3. Avoid these common keywords if possible: \"Shopify store\", \"Real estate agency\", \"Digital marketing agency\"\n4. Include a diverse mix of industries like: ${industryExamples}\n5. Include diverse cities like: ${cityExamples}\n6. Each keyword must be unique and searchable on Google Maps\n7. Keywords should target businesses that need WhatsApp CRM, chatbots, or sales automation\n\nReturn ONLY JSON: {\"keywords\":[{\"keyword\":\"...\",\"city\":\"...\",\"industry\":\"...\",\"intent\":\"...\"}]}`;\n\nlet parsed;\nlet usedFallback = false;\n\ntry {\n    const key = cfg.deepseek.apiKey;\n    if (!key || key === 'PASTE_DEEPSEEK_API_KEY_HERE') {\n        throw new Error('Configure DeepSeek API key');\n    }\n    \n    // Use higher temperature and add randomness with date seed\n    const temperature = 1.2 + (Math.random() * 0.3); // 1.2 to 1.5\n    const seed = dateSeed + Math.floor(Math.random() * 100);\n    \n    const res = await this.helpers.httpRequest({\n        method: 'POST',\n        url: cfg.deepseek.apiUrl,\n        headers: {\n            Authorization: `Bearer ${key}`,\n            'Content-Type': 'application/json'\n        },\n        body: {\n            model: cfg.deepseek.model,\n            temperature: temperature,\n            messages: [\n                { \n                    role: 'system', \n                    content: `You are a Pakistani B2B sales director for SRLINES. Generate EXTREMELY DIVERSE keywords. Today's seed is ${seed}. Focus on unique combinations.` \n                },\n                { \n                    role: 'user', \n                    content: user \n                }\n            ],\n            response_format: { type: 'json_object' }\n        },\n        json: true,\n        timeout: 120000\n    });\n    \n    parsed = JSON.parse(res.choices?.[0]?.message?.content || '{}');\n    \n    // Check if we got enough unique keywords\n    const keywords = parsed.keywords || [];\n    const uniqueIndustries = new Set(keywords.map(k => k.industry));\n    const uniqueCities = new Set(keywords.map(k => k.city));\n    \n    if (uniqueIndustries.size < 5 || uniqueCities.size < 3) {\n        console.log('⚠️ Not enough diversity in API response, using fallback');\n        usedFallback = true;\n        throw new Error('Not enough diversity');\n    }\n    \n} catch (e) {\n    console.log('Using enhanced fallback with more diversity:', e.message);\n    usedFallback = true;\n    \n    // Enhanced fallback with better randomization\n    const shuffledCities = [...allCities];\n    const shuffledIndustries = [...allIndustries];\n    const shuffledIntents = [...allIntents];\n    \n    // Use multiple seeds for better shuffling\n    const seed1 = dateSeed + Math.floor(Math.random() * 1000);\n    const seed2 = dateSeed + 500 + Math.floor(Math.random() * 1000);\n    const seed3 = dateSeed + 1000 + Math.floor(Math.random() * 1000);\n    \n    // Shuffle with multiple passes for better randomness\n    for (let pass = 0; pass < 3; pass++) {\n        const currentSeed = [seed1, seed2, seed3][pass % 3];\n        for (let i = shuffledCities.length - 1; i > 0; i--) {\n            const j = (i + currentSeed) % (i + 1);\n            [shuffledCities[i], shuffledCities[j]] = [shuffledCities[j], shuffledCities[i]];\n        }\n        for (let i = shuffledIndustries.length - 1; i > 0; i--) {\n            const j = (i + currentSeed * 2) % (i + 1);\n            [shuffledIndustries[i], shuffledIndustries[j]] = [shuffledIndustries[j], shuffledIndustries[i]];\n        }\n    }\n    \n    // Generate keywords with forced diversity\n    const numKeywords = cfg.limits.keywordsPerRun || 30;\n    const selectedIndustries = [];\n    const selectedCities = [];\n    \n    // Ensure we don't repeat industries and cities too often\n    for (let i = 0; i < numKeywords; i++) {\n        const industryIndex = (i * 3 + 1) % shuffledIndustries.length;\n        const cityIndex = (i * 7 + 5) % shuffledCities.length;\n        const intentIndex = (i * 11 + 3) % shuffledIntents.length;\n        \n        selectedIndustries.push(shuffledIndustries[industryIndex]);\n        selectedCities.push(shuffledCities[cityIndex]);\n    }\n    \n    parsed = {\n        keywords: Array.from({ length: numKeywords }, (_, i) => ({\n            keyword: `${selectedIndustries[i]} in ${selectedCities[i]}`,\n            city: selectedCities[i],\n            industry: selectedIndustries[i],\n            intent: shuffledIntents[i % shuffledIntents.length]\n        }))\n    };\n}\n\n// Deduplicate and ensure diversity\nconst seen = new Set();\nconst seenIndustries = new Set();\nconst seenCities = new Set();\nconst results = [];\n\nconst keywords = parsed.keywords || [];\n\nfor (const k of keywords) {\n    const keyword = String(k.keyword || '').trim();\n    const industry = String(k.industry || '').trim();\n    const city = String(k.city || '').trim();\n    \n    if (!keyword) continue;\n    \n    const key = keyword.toLowerCase();\n    const industryKey = industry.toLowerCase();\n    const cityKey = city.toLowerCase();\n    \n    // Skip duplicates\n    if (seen.has(key)) continue;\n    \n    // Try to maintain diversity - skip if we have too many of same industry or city\n    const industryCount = seenIndustries.has(industryKey) ? 0 : 1;\n    const cityCount = seenCities.has(cityKey) ? 0 : 1;\n    \n    // Allow up to 3 keywords per industry/city if we have enough total\n    const maxPerIndustry = Math.min(3, Math.ceil(keywords.length / 10) + 1);\n    const maxPerCity = Math.min(3, Math.ceil(keywords.length / 10) + 1);\n    \n    // Only enforce diversity if we have enough keywords\n    if (results.length > 5 && results.length < keywords.length - 2) {\n        // Check if industry is overused\n        let industryOverused = false;\n        let cityOverused = false;\n        \n        let industryCountTotal = 0;\n        let cityCountTotal = 0;\n        for (const r of results) {\n            if (r.industry?.toLowerCase() === industryKey) industryCountTotal++;\n            if (r.city?.toLowerCase() === cityKey) cityCountTotal++;\n        }\n        \n        if (industryCountTotal >= maxPerIndustry) industryOverused = true;\n        if (cityCountTotal >= maxPerCity) cityOverused = true;\n        \n        // If overused, only add if we have very few keywords left\n        if ((industryOverused || cityOverused) && results.length < keywords.length - 2) {\n            continue;\n        }\n    }\n    \n    seen.add(key);\n    seenIndustries.add(industryKey);\n    seenCities.add(cityKey);\n    \n    results.push({\n        json: {\n            ...cfg,\n            keyword: keyword,\n            keywordCity: city || '',\n            keywordIndustry: industry || '',\n            keywordIntent: k.intent || 'commercial',\n            keywordDiversity: 'high'\n        }\n    });\n    \n    // Stop if we have enough\n    if (results.length >= (cfg.limits.keywordsPerRun || 30)) break;\n}\n\n// If we don't have enough keywords, generate more with fallback\nif (results.length < (cfg.limits.keywordsPerRun || 30)) {\n    console.log(`⚠️ Only generated ${results.length} keywords. Adding more from fallback.`);\n    \n    const remaining = (cfg.limits.keywordsPerRun || 30) - results.length;\n    const fallbackCities = allCities.slice(10, 10 + remaining * 2);\n    const fallbackIndustries = allIndustries.slice(15, 15 + remaining * 2);\n    \n    for (let i = 0; i < remaining && i < fallbackCities.length && i < fallbackIndustries.length; i++) {\n        const keyword = `${fallbackIndustries[i % fallbackIndustries.length]} in ${fallbackCities[i % fallbackCities.length]}`;\n        const key = keyword.toLowerCase();\n        \n        if (!seen.has(key)) {\n            seen.add(key);\n            results.push({\n                json: {\n                    ...cfg,\n                    keyword: keyword,\n                    keywordCity: fallbackCities[i % fallbackCities.length],\n                    keywordIndustry: fallbackIndustries[i % fallbackIndustries.length],\n                    keywordIntent: 'lead generation',\n                    keywordDiversity: 'fallback'\n                }\n            });\n        }\n    }\n}\n\n// Store used keywords history to avoid repeats in future runs\nif (results.length > 0) {\n    const newKeywords = results.map(r => r.json.keyword.toLowerCase());\n    data[usedKeywordsKey] = [...data[usedKeywordsKey], ...newKeywords].slice(-500); // Keep last 500\n}\n\n// Sort by diversity flag to prioritize diverse keywords\nresults.sort((a, b) => {\n    if (a.json.keywordDiversity === 'high' && b.json.keywordDiversity !== 'high') return -1;\n    if (a.json.keywordDiversity !== 'high' && b.json.keywordDiversity === 'high') return 1;\n    return 0;\n});\n\nconsole.log(`✅ Generated ${results.length} diverse keywords`);\n\n// Always return something\nif (results.length === 0) {\n    // Ultra fallback with maximum diversity\n    const ultraFallback = [\n        { keyword: 'Car dealer in Faisalabad', city: 'Faisalabad', industry: 'Auto dealer', intent: 'WhatsApp inquiries' },\n        { keyword: 'Pharmacy in Peshawar', city: 'Peshawar', industry: 'Pharmacy', intent: 'Order management' },\n        { keyword: 'Gym in Islamabad', city: 'Islamabad', industry: 'Gym', intent: 'Membership management' },\n        { keyword: 'Digital marketing agency in Lahore', city: 'Lahore', industry: 'Digital marketing', intent: 'Lead generation' },\n        { keyword: 'Salon in Rawalpindi', city: 'Rawalpindi', industry: 'Salon', intent: 'Booking management' }\n    ];\n    \n    return ultraFallback.map(k => ({\n        json: {\n            ...cfg,\n            keyword: k.keyword,\n            keywordCity: k.city,\n            keywordIndustry: k.industry,\n            keywordIntent: k.intent\n        }\n    }));\n}\n\nreturn results;"
+      },
+      "id": "109ed104-87f5-4c6f-afd7-c40b6f8a47df",
+      "name": "DeepSeek Keyword Strategy",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -976,
+        -752
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$json.sheets.documentId}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{$json.sheets.keywords}}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "now",
+              "displayName": "now",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "keyword",
+              "displayName": "keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "keywordCity",
+              "displayName": "keywordCity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "keywordIndustry",
+              "displayName": "keywordIndustry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "keywordIntent",
+              "displayName": "keywordIntent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "keywordStatus",
+              "displayName": "keywordStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "firstSeen",
+              "displayName": "firstSeen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timezone",
+              "displayName": "timezone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "limits",
+              "displayName": "limits",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sheets",
+              "displayName": "sheets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "deepseek",
+              "displayName": "deepseek",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "scraper",
+              "displayName": "scraper",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "instructions",
+              "displayName": "instructions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "98b382a9-fa3c-4755-bd3d-3b4776e28a9b",
+      "name": "Log Keyword to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -832,
+        -752
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ================================================================\n// GOOGLE MAPS SCRAPER - WITH WEBSITE SCRAPING\n// Extracts emails from websites\n// ================================================================\n\n/**\n * CONFIGURATION\n * Load settings from incoming workflow data or use defaults\n */\nconst incomingConfig = $input.first()?.json || {};\n\nconst config = {\n    BASE_URL: incomingConfig.scraper?.baseUrl || 'http://localhost:3000',\n    maxResults: incomingConfig.scraper?.maxResultsPerKeyword || 20,\n    delayBetweenRequests: incomingConfig.scraper?.delayBetweenRequests || 1000\n};\n\n// ================================================================\n// EMAIL VALIDATION UTILITIES\n// ================================================================\n\n/**\n * Validates if a string is a legitimate business email address\n * Filters out test accounts, images, and common fake domains\n * \n * @param {string} email - Email address to validate\n * @returns {boolean} - True if email passes all validation checks\n */\nfunction isValidEmail(email) {\n    // Basic type and format checks\n    if (!email || typeof email !== 'string') return false;\n    \n    email = email.trim().toLowerCase();\n    \n    // Check against standard email regex pattern\n    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;\n    if (!emailRegex.test(email)) return false;\n    \n    // Basic structural checks\n    if (!email.includes('@') || !email.includes('.')) return false;\n    \n    const parts = email.split('@');\n    if (parts.length !== 2) return false;\n    \n    const [localPart, domain] = parts;\n    \n    // Minimum length requirements\n    if (localPart.length < 2) return false;\n    if (domain.length < 3 || !domain.includes('.')) return false;\n    \n    // Validate TLD\n    const tld = domain.split('.').pop();\n    if (!tld || tld.length < 2) return false;\n    \n    // Filter out test/placeholder patterns\n    const fakePatterns = [\n        /^test/i, /^example/i, /^sample/i, /^demo/i,\n        /^noreply/i, /^no-?reply/i, /^admin@/i,\n        /^user@/i, /^email@/i, /^your@/i,\n        /^logo-/i, /-color@/, /@2x\\.png/, /\\.png$/, /\\.jpg$/, /\\.jpeg$/, /\\.gif$/,\n        /^[0-9]+@/,\n        /^[a-zA-Z]@/,\n    ];\n    \n    for (const pattern of fakePatterns) {\n        if (pattern.test(email)) return false;\n    }\n    \n    // Block known fake domains\n    const fakeDomains = [\n        'example.com', 'test.com', 'sample.com', 'demo.com',\n        'domain.com', 'yourdomain.com', 'website.com',\n        'yoursite.com', 'email.com', 'mail.com',\n        'localhost', 'local', 'invalid', 'placeholder',\n        'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'\n    ];\n    \n    for (const fakeDomain of fakeDomains) {\n        if (domain === fakeDomain || domain.endsWith('.' + fakeDomain)) {\n            return false;\n        }\n    }\n    \n    // Filter out image file extensions\n    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico'];\n    for (const ext of imageExtensions) {\n        if (email.includes(ext)) return false;\n    }\n    \n    // Filter out code file extensions\n    const fileExtensions = ['.css', '.js', '.json', '.xml', '.html', '.php', '.asp'];\n    for (const ext of fileExtensions) {\n        if (email.includes(ext)) return false;\n    }\n    \n    // Ensure local part contains at least one letter\n    if (!/[a-zA-Z]/.test(localPart)) return false;\n    \n    return true;\n}\n\n/**\n * Extracts and validates all emails from a text string\n * \n * @param {string} text - Text to search for emails\n * @returns {string[]} - Array of unique valid email addresses\n */\nfunction extractEmails(text) {\n    if (!text) return [];\n    \n    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g;\n    const matches = text.match(emailRegex) || [];\n    \n    const validEmails = [];\n    const seen = new Set();\n    \n    for (const email of matches) {\n        const cleanEmail = email.trim().toLowerCase();\n        \n        if (!seen.has(cleanEmail) && isValidEmail(cleanEmail)) {\n            seen.add(cleanEmail);\n            validEmails.push(cleanEmail);\n        }\n    }\n    \n    return validEmails;\n}\n\n/**\n * Validates if a URL is a legitimate business website\n * Excludes social media platforms and search engines\n * \n * @param {string} url - URL to validate\n * @returns {boolean} - True if URL is valid and not a social platform\n */\nfunction isValidWebsite(url) {\n    if (!url || typeof url !== 'string') return false;\n    \n    url = url.trim().toLowerCase();\n    \n    // Must have proper protocol\n    if (!url.startsWith('http://') && !url.startsWith('https://')) return false;\n    \n    // Exclude social media and search platforms\n    const excludedDomains = [\n        'google.com', 'google.se', 'maps.google', 'gstatic',\n        'facebook.com', 'instagram.com', 'linkedin.com', 'twitter.com'\n    ];\n    \n    for (const domain of excludedDomains) {\n        if (url.includes(domain)) return false;\n    }\n    \n    return true;\n}\n\n// ================================================================\n// WEBSITE SCRAPING\n// ================================================================\n\n/**\n * Scrapes a website for email addresses\n * \n * @param {string} websiteUrl - URL of the website to scrape\n * @returns {Promise<{emails: string[], success: boolean}>} \n *          Object containing extracted emails and success status\n */\nasync function scrapeWebsite(websiteUrl) {\n    try {\n        // Fetch the website HTML\n        const html = await this.helpers.request({\n            method: 'GET',\n            url: websiteUrl,\n            headers: {\n                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'\n            },\n            timeout: 15000,\n            rejectUnauthorized: false\n        });\n        \n        // Extract emails from the HTML content\n        const emails = extractEmails(html);\n        \n        // Also extract mailto: links\n        const mailtoRegex = /mailto:([^\"'\\s<>]+)/gi;\n        let match;\n        while ((match = mailtoRegex.exec(html)) !== null) {\n            const email = match[1].trim();\n            if (isValidEmail(email) && !emails.includes(email)) {\n                emails.push(email);\n            }\n        }\n        \n        return {\n            emails: [...new Set(emails)],\n            success: true\n        };\n        \n    } catch (error) {\n        return {\n            emails: [],\n            success: false\n        };\n    }\n}\n\n// ================================================================\n// MAIN EXECUTION\n// ================================================================\n\n/**\n * Main workflow execution\n * Searches Google Maps, scrapes websites, and extracts emails\n */\nasync function main() {\n    // Get workflow input data\n    const items = $input.all();\n    const workflowContext = (items && items.length > 0) ? items[0].json : {};\n    \n    // Extract search keywords\n    let keywords = '';\n    if (items && items.length > 0) {\n        const item = items[0].json;\n        keywords = item.keywords || item.query || item.search || item.keyword || '';\n    }\n    \n    // Fallback keyword if none provided\n    if (!keywords || keywords.trim() === '') {\n        keywords = 'real estate agent in karachi';\n    }\n    \n    console.log(`🔍 Searching: \"${keywords}\"`);\n    \n    // -------- SEARCH GOOGLE MAPS --------\n    \n    let searchResult;\n    try {\n        searchResult = await this.helpers.request({\n            method: 'POST',\n            url: `${config.BASE_URL}/api/scrape/search`,\n            headers: { 'Content-Type': 'application/json' },\n            body: JSON.stringify({\n                query: keywords,\n                maxResults: config.maxResults\n            }),\n            json: true,\n            timeout: 60000\n        });\n    } catch (error) {\n        return [{\n            json: {\n                error: `Search failed: ${error.message}`,\n                success: false,\n                timestamp: new Date().toISOString()\n            }\n        }];\n    }\n    \n    // Handle search errors\n    if (!searchResult.success) {\n        return [{\n            json: {\n                error: `Search error: ${searchResult.error}`,\n                success: false,\n                timestamp: new Date().toISOString()\n            }\n        }];\n    }\n    \n    const places = searchResult.data?.results || [];\n    console.log(`✅ Found ${places.length} total results`);\n    \n    // -------- PROCESS RESULTS --------\n    \n    const validResults = [];\n    let processedCount = 0;\n    \n    for (let i = 0; i < places.length; i++) {\n        const place = places[i];\n        processedCount++;\n        console.log(`📋 ${i+1}/${places.length}: ${place.title}`);\n        \n        // Skip invalid entries\n        if (!place.title || place.title.includes('Logga in') || place.title.includes('Google Maps')) {\n            console.log(`   ⚠️ Skipping invalid entry`);\n            continue;\n        }\n        \n        let primaryEmail = 'N/A';\n        let allEmails = [];\n        \n        // Check if website exists and is valid\n        if (place.website && place.website !== 'N/A' && isValidWebsite(place.website)) {\n            console.log(`   🌐 Scraping website: ${place.website}`);\n            \n            const websiteData = await scrapeWebsite.call(this, place.website);\n            \n            if (websiteData.success && websiteData.emails.length > 0) {\n                allEmails = websiteData.emails;\n                \n                // Prefer business emails over generic providers\n                const businessEmails = allEmails.filter(email => {\n                    const domain = email.split('@')[1];\n                    return domain && !['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'].includes(domain);\n                });\n                \n                primaryEmail = businessEmails.length > 0 ? businessEmails[0] : allEmails[0];\n                console.log(`   📧 Found ${allEmails.length} emails: ${allEmails.join(', ')}`);\n            } else {\n                console.log(`   ⚠️ No emails found on website`);\n            }\n        } else {\n            console.log(`   ⚠️ No valid website to scrape`);\n        }\n        \n        // Only keep results with valid emails\n        if (primaryEmail !== 'N/A') {\n            const result = {\n                name: place.title || 'N/A',\n                phone: place.phone || 'N/A',\n                email: primaryEmail,\n                website: place.website || 'N/A',\n                rating: place.rating || 0,\n                reviews: place.reviews || 0,\n                keyword: keywords,\n                keywordCity: workflowContext.keywordCity || '',\n                keywordIndustry: workflowContext.keywordIndustry || '',\n                keywordIntent: workflowContext.keywordIntent || '',\n                executionId: workflowContext.executionId || '',\n                timestamp: new Date().toISOString()\n            };\n            \n            validResults.push(result);\n            console.log(`   ✅ KEPT - Email: ${primaryEmail}`);\n        } else {\n            console.log(`   ❌ SKIPPED - No valid email found`);\n        }\n        \n        // Delay between requests\n        if (i < places.length - 1) {\n            await new Promise(resolve => setTimeout(resolve, config.delayBetweenRequests));\n        }\n    }\n    \n    // Print summary\n    console.log(`\\n📊 Summary:`);\n    console.log(`   Total processed: ${processedCount}`);\n    console.log(`   Valid results with emails: ${validResults.length}`);\n    console.log(`   Skipped: ${processedCount - validResults.length}`);\n    \n    // -------- RETURN RESULTS --------\n    \n    if (validResults.length > 0) {\n        return validResults.map(result => ({\n            json: result\n        }));\n    }\n    \n    // Fallback response when no results found\n    return [{\n        json: {\n            message: 'No businesses with valid email addresses found',\n            searchKeywords: keywords,\n            keyword: keywords,\n            keywordCity: workflowContext.keywordCity || '',\n            keywordIndustry: workflowContext.keywordIndustry || '',\n            keywordIntent: workflowContext.keywordIntent || '',\n            executionId: workflowContext.executionId || '',\n            totalProcessed: processedCount,\n            success: true,\n            timestamp: new Date().toISOString()\n        }\n    }];\n}\n\n// Execute the workflow\nreturn await main();"
+      },
+      "id": "d92ce76b-3051-4563-b7a8-685af0a96a71",
+      "name": "Google Maps Scraper",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        -928
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function clean(v){return(v??'').toString().trim()}function phone(v){return clean(v).replace(/[\\s().-]/g,'')}function dom(url){try{return new URL(url.startsWith('http')?url:'https://'+url).hostname.replace(/^www\\./,'').toLowerCase()}catch{return''}}return items.map(item=>{const j=item.json;const email=clean(j.email||j.emails?.[0]||'').toLowerCase();const website=clean(j.website||j.url||j.site||'');return{json:{...j,businessName:clean(j.name||j.title||j.businessName||j.placeName),email,phone:phone(j.phone||j.telephone),website,domain:dom(website),city:clean(j.city||j.keywordCity),industry:clean(j.industry||j.keywordIndustry),rating:Number(j.rating||0),reviews:Number(String(j.reviews||j.reviewCount||0).replace(/\\D/g,''))||0,normalizedAt:new Date().toISOString()}}}).filter(i=>i.json.businessName&&i.json.email);"
+      },
+      "id": "b323a9ed-2eee-4fd5-9e62-0ce2384c6204",
+      "name": "Normalize & Require Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        -752
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst cfg = $('Runtime Config').first().json;\nconst validation = cfg.emailValidation || {};\nconst data = $getWorkflowStaticData('global');\ndata.invalidEmails ||= {};\ndata.domainMxCache ||= {};\n\nconst disposableDomains = new Set([\n  'mailinator.com','10minutemail.com','guerrillamail.com','tempmail.com','yopmail.com','trashmail.com'\n]);\nconst blockedDomains = new Set([...(validation.blockedDomains || []), ...disposableDomains].map(d => String(d).toLowerCase()));\nconst blockedLocalParts = new Set((validation.blockedLocalParts || []).map(v => String(v).toLowerCase()));\nconst provider = validation.dnsProvider || 'https://dns.google/resolve';\nconst timeout = validation.timeoutMs || 8000;\n\nfunction syntax(email) {\n  if (!email || typeof email !== 'string') return false;\n  if (email.length > 254) return false;\n  const parts = email.split('@');\n  if (parts.length !== 2) return false;\n  const [local, domain] = parts;\n  if (!local || !domain || local.length > 64) return false;\n  if (local.startsWith('.') || local.endsWith('.') || local.includes('..')) return false;\n  if (!/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(local)) return false;\n  if (!/^(?!-)(?:[a-z0-9-]{1,63}\\.)+[a-z]{2,63}$/i.test(domain)) return false;\n  return true;\n}\nfunction getDomain(email) { return String(email).toLowerCase().split('@')[1] || ''; }\nfunction getLocal(email) { return String(email).toLowerCase().split('@')[0] || ''; }\nasync function lookupMx(domain) {\n  const cached = data.domainMxCache[domain];\n  if (cached && Date.now() - new Date(cached.checkedAt).getTime() < 7 * 86400000) return cached;\n  let result = {domain, checkedAt: new Date().toISOString(), hasMx: false, mxRecords: [], reason: 'mx_lookup_failed'};\n  try {\n    const res = await this.helpers.httpRequest({method:'GET',url:provider,qs:{name:domain,type:'MX'},json:true,timeout});\n    const records = (res.Answer || []).filter(a => Number(a.type) === 15).map(a => String(a.data || '').trim()).filter(Boolean);\n    result = {domain, checkedAt: new Date().toISOString(), hasMx: records.length > 0, mxRecords: records, reason: records.length ? 'mx_found' : 'no_mx_records'};\n  } catch (e) {\n    result.reason = `mx_lookup_error: ${e.message}`;\n  }\n  data.domainMxCache[domain] = result;\n  return result;\n}\n\nconst out = [];\nfor (const item of items) {\n  const j = item.json;\n  const email = String(j.email || '').trim().toLowerCase();\n  const domain = getDomain(email);\n  const local = getLocal(email);\n  let status = 'valid';\n  let reason = 'syntax_and_mx_valid';\n  let mx = {hasMx: true, mxRecords: []};\n\n  if (data.invalidEmails[email]) {\n    status = 'invalid'; reason = data.invalidEmails[email].reason || 'previously_bounced_or_invalid';\n  } else if (!syntax(email)) {\n    status = 'invalid'; reason = 'invalid_email_syntax';\n  } else if (blockedDomains.has(domain)) {\n    status = 'invalid'; reason = 'blocked_or_disposable_domain';\n  } else if (blockedLocalParts.has(local)) {\n    status = 'invalid'; reason = 'blocked_role_or_no_reply_local_part';\n  } else if (validation.enabled !== false && validation.requireMx !== false) {\n    mx = await lookupMx.call(this, domain);\n    if (!mx.hasMx) { status = 'invalid'; reason = mx.reason || 'no_mx_records'; }\n  }\n\n  if (status === 'valid') {\n    out.push({json:{...j,emailValidationStatus:status,emailValidationReason:reason,emailMxRecords:(mx.mxRecords || []).join(' | '),emailMxCheckedAt:mx.checkedAt || new Date().toISOString()}});\n  } else {\n    data.invalidEmails[email] = {email, domain, reason, checkedAt: new Date().toISOString(), businessName: j.businessName || ''};\n  }\n}\nreturn out;\n"
+      },
+      "id": "3f521f67-158e-48ca-8bb4-d2c4271fba7d",
+      "name": "DNS MX Email Validation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        -752
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "async function fetchText(url){try{return await this.helpers.httpRequest({url,method:'GET',timeout:15000,headers:{'User-Agent':'SRLINES lead research bot'},json:false})}catch{return''}}const out=[];for(const item of items){const j=item.json;let html='';if(j.website)html=await fetchText.call(this,j.website);const text=String(html).replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').slice(0,12000);const lower=(text+' '+j.website).toLowerCase();out.push({json:{...j,websiteText:text,signals:{hasWebsite:!!j.website,hasCompanyEmail:!!j.email&&!/@(gmail|yahoo|hotmail|outlook)\\./i.test(j.email),usesGmail:/@(gmail|yahoo|hotmail|outlook)\\./i.test(j.email),shopify:/cdn\\.shopify|myshopify|shopify/i.test(html),whatsapp:/wa\\.me|api\\.whatsapp|whatsapp/i.test(html),facebook:/facebook\\.com|fb\\.com/i.test(html),instagram:/instagram\\.com/i.test(html),ecommerce:/cart|checkout|shopify|woocommerce|add to cart/i.test(lower)}}})}return out;"
+      },
+      "id": "60da5a5f-9991-4797-932b-ef8f771f3dd7",
+      "name": "Website Enrichment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        -736
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function h(j){let s=0;if(j.signals.shopify)s+=30;if(j.signals.hasWebsite)s+=20;if(j.signals.hasCompanyEmail)s+=15;if(j.signals.facebook)s+=5;if(j.signals.instagram)s+=5;if(j.reviews>100)s+=10;if(j.signals.usesGmail)s-=5;if(!j.signals.hasWebsite)s-=50;if(!j.email)s=-999;return Math.max(0,Math.min(100,s))}const cfg=$('Runtime Config').first().json;const out=[];for(const item of items){const j=item.json;const base=h(j);let ai={score:base,priority:base>=85?'Hot':base>=70?'Warm':'Low',pain_points:[],crm:'Unknown',shopify:!!j.signals.shopify,industry:j.industry};try{const key=cfg.deepseek.apiKey;if(!key||key==='PASTE_DEEPSEEK_API_KEY_HERE')throw new Error('Configure cfg.deepseek.apiKey in Runtime Config');const prompt=`Evaluate this Pakistani B2B lead for SRLINES. Return only JSON with score, priority, industry, employees, crm, shopify, pain_points, personalization_angle. Lead: ${JSON.stringify({businessName:j.businessName,city:j.city,industry:j.industry,email:j.email,website:j.website,rating:j.rating,reviews:j.reviews,signals:j.signals,websiteText:j.websiteText?.slice(0,4000)})}`;const res=await this.helpers.httpRequest({method:'POST',url:cfg.deepseek.apiUrl,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:{model:cfg.deepseek.model,temperature:.35,messages:[{role:'user',content:prompt}],response_format:{type:'json_object'}},json:true,timeout:120000});ai={...ai,...JSON.parse(res.choices?.[0]?.message?.content||'{}')}}catch(e){ai.error=e.message}const finalScore=Math.round(Math.max(base,Number(ai.score)||0));out.push({json:{...j,aiAnalysis:ai,score:finalScore,priority:ai.priority||(finalScore>=85?'Hot':finalScore>=70?'Warm':'Low'),qualified:finalScore>=cfg.limits.minScoreToEmail}})}return out;"
+      },
+      "id": "3b31a807-20bb-415b-8c6d-b7d0d3be3211",
+      "name": "DeepSeek Lead Scoring",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        -736
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.qualified}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "12906f92-0f91-42c1-a4f1-0ed2bc116ff5",
+      "name": "Qualified Only",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -752
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.qualifiedLeads}}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "normalizedAt",
+              "displayName": "normalizedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "keyword",
+              "displayName": "keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "businessName",
+              "displayName": "businessName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "domain",
+              "displayName": "domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "industry",
+              "displayName": "industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "rating",
+              "displayName": "rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reviews",
+              "displayName": "reviews",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "priority",
+              "displayName": "priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "qualified",
+              "displayName": "qualified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "aiAnalysis",
+              "displayName": "aiAnalysis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "signals",
+              "displayName": "signals",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "websiteText",
+              "displayName": "websiteText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "leadStatus",
+              "displayName": "leadStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5c59f8ff-3741-43de-a542-8bac4ae44c29",
+      "name": "Append Qualified Lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -960,
+        -272
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg=$('Runtime Config').first().json;const out=[];\nfunction fallback(j){return{subject:`${j.businessName}: WhatsApp growth idea`,body:`Hi ${j.businessName} team,\\n\\nI found ${j.businessName}${j.city?' in '+j.city:''} online and noticed your business activity. SRLINES helps businesses manage WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and sales follow-up from one CRM.\\n\\nIf faster WhatsApp replies and better lead tracking would help, message me here for a short demo: ${cfg.company.whatsappCtaUrl}\\n\\n${cfg.company.signature}`}}\nfor(const item of items){const j=item.json;if(!j.qualified)continue;let em=fallback(j);try{const key=cfg.deepseek.apiKey;if(!key||key.startsWith('PASTE_'))throw new Error('Configure cfg.deepseek.apiKey in Runtime Config');const prompt=`Write one concise compliant B2B cold email. Requirements: honest personalization only from provided data; mention we found them online/saw their activity; strong WhatsApp CTA with this exact link: ${cfg.company.whatsappCtaUrl}; no fake claims; subject under 70 chars; body under 150 words; include signature. Return JSON {subject,body}. Sender: ${JSON.stringify(cfg.company)} Lead: ${JSON.stringify({businessName:j.businessName,city:j.city,industry:j.industry,website:j.website,score:j.score,analysis:j.aiAnalysis,signals:j.signals})}`;const res=await this.helpers.httpRequest({method:'POST',url:cfg.deepseek.apiUrl,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:{model:cfg.deepseek.model,temperature:.85,messages:[{role:'user',content:prompt}],response_format:{type:'json_object'}},json:true,timeout:120000});em={...em,...JSON.parse(res.choices?.[0]?.message?.content||'{}')}}catch(e){em.aiEmailError=e.message}out.push({json:{...j,emailSubject:String(em.subject||'SRLINES demo').slice(0,140),emailBody:String(em.body||''),fromEmail:cfg.company.senderEmail,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}})}return out.slice(0,cfg.limits.maxEmailsPerRun);"
+      },
+      "id": "3ea7bcd6-ea66-4203-8339-3b90245e3241",
+      "name": "DeepSeek Personalized Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -768,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Runtime Config').first().json.sheets.documentId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Runtime Config').first().json.sheets.emailHistory }}",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -768,
+        -480
+      ],
+      "id": "89f54d59-ed47-4cca-aa9f-478a12acdd85",
+      "name": "Get Emails History",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Runtime Config').first().json;\n\n// Get leads from the previous node (DeepSeek Personalized Email output)\nconst items = $input.all();\nconst leadsToProcess = items.map(item => item.json);\n\n// Get email history from Google Sheets\nasync function getEmailHistory() {\n    try {\n        const result = await this.helpers.httpRequest({\n            method: 'GET',\n            url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${cfg.sheets.emailHistory}`,\n            headers: {\n                'Authorization': 'Bearer ' + (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token\n            },\n            json: true,\n            timeout: 10000\n        });\n        \n        const history = {};\n        if (result.values && result.values.length > 1) {\n            const header = result.values[0];\n            const emailIndex = header.indexOf('email');\n            const lastSentIndex = header.indexOf('lastSent');\n            const statusIndex = header.indexOf('status');\n            const repliedIndex = header.indexOf('replied');\n            const campaignIndex = header.indexOf('campaign');\n            \n            if (emailIndex !== -1 && lastSentIndex !== -1) {\n                for (let i = 1; i < result.values.length; i++) {\n                    const row = result.values[i];\n                    if (row[emailIndex] && row[lastSentIndex]) {\n                        const email = String(row[emailIndex]).toLowerCase().trim();\n                        // Only consider our campaign\n                        if (!campaignIndex || row[campaignIndex] === 'SRLINES Pakistan B2B' || !row[campaignIndex]) {\n                            const status = statusIndex !== -1 ? row[statusIndex] : '';\n                            const replied = repliedIndex !== -1 \n                                ? (row[repliedIndex] === 'true' || row[repliedIndex] === 'TRUE' || row[repliedIndex] === '1')\n                                : (status === 'replied');\n                            \n                            history[email] = {\n                                lastSent: row[lastSentIndex],\n                                status: status,\n                                replied: replied,\n                                rowIndex: i\n                            };\n                        }\n                    }\n                }\n            }\n        }\n        return history;\n    } catch (error) {\n        console.log('Error reading email history:', error);\n        return {};\n    }\n}\n\n// Get blacklist (bounced emails)\nasync function getBlacklistEmails() {\n    try {\n        const result = await this.helpers.httpRequest({\n            method: 'GET',\n            url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${cfg.sheets.blacklist}`,\n            headers: {\n                'Authorization': 'Bearer ' + (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token\n            },\n            json: true,\n            timeout: 10000\n        });\n        const emails = new Set();\n        if (result.values && result.values.length > 1) {\n            const header = result.values[0];\n            const valueIndex = header.indexOf('value');\n            if (valueIndex !== -1) {\n                for (let i = 1; i < result.values.length; i++) {\n                    if (result.values[i][valueIndex]) {\n                        emails.add(String(result.values[i][valueIndex]).toLowerCase().trim());\n                    }\n                }\n            }\n        }\n        return emails;\n    } catch (error) {\n        console.log('Error reading blacklist:', error);\n        return new Set();\n    }\n}\n\n// Get reply log\nasync function getReplyLogEmails() {\n    try {\n        const result = await this.helpers.httpRequest({\n            method: 'GET',\n            url: `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${cfg.sheets.replyLog}`,\n            headers: {\n                'Authorization': 'Bearer ' + (await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token\n            },\n            json: true,\n            timeout: 10000\n        });\n        const emails = new Set();\n        if (result.values && result.values.length > 1) {\n            const header = result.values[0];\n            const emailIndex = header.indexOf('email');\n            if (emailIndex !== -1) {\n                for (let i = 1; i < result.values.length; i++) {\n                    if (result.values[i][emailIndex]) {\n                        emails.add(String(result.values[i][emailIndex]).toLowerCase().trim());\n                    }\n                }\n            }\n        }\n        return emails;\n    } catch (error) {\n        console.log('Error reading reply log:', error);\n        return new Set();\n    }\n}\n\n// Get all exclusion data\nconst emailHistory = await getEmailHistory.call(this);\nconst blacklistedEmails = await getBlacklistEmails.call(this);\nconst replyLogEmails = await getReplyLogEmails.call(this);\n\n// Combine all emails that should be skipped\nconst skipEmails = new Set([...blacklistedEmails, ...replyLogEmails]);\n\n// Add emails marked as replied in history\nfor (const [email, data] of Object.entries(emailHistory)) {\n    if (data.replied === true) {\n        skipEmails.add(email);\n    }\n}\n\nconst cooldownMs = cfg.limits.emailCooldownDays * 86400000;\nconst now = Date.now();\n\nconst out = [];\nconst processedEmails = new Set(); // Track to prevent duplicates in this run\nconst skippedLog = [];\n\nconsole.log(`📊 Processing ${leadsToProcess.length} leads`);\nconsole.log(`🚫 Skipping ${skipEmails.size} emails (blacklisted or replied)`);\n\n// Process each lead\nfor (const lead of leadsToProcess) {\n    const email = String(lead.email || '').toLowerCase().trim();\n    \n    // Skip if no email\n    if (!email) {\n        skippedLog.push({email: 'missing', reason: 'no_email', business: lead.businessName});\n        continue;\n    }\n    \n    // Skip if already processed in this run\n    if (processedEmails.has(email)) {\n        skippedLog.push({email, reason: 'duplicate_in_run', business: lead.businessName});\n        continue;\n    }\n    \n    // CRITICAL: Skip if blacklisted (bounced)\n    if (blacklistedEmails.has(email)) {\n        skippedLog.push({email, reason: 'blacklisted_bounced', business: lead.businessName});\n        console.log(`❌ Skipping bounced email: ${email}`);\n        continue;\n    }\n    \n    // CRITICAL: Skip if replied\n    if (replyLogEmails.has(email)) {\n        skippedLog.push({email, reason: 'replied', business: lead.businessName});\n        console.log(`❌ Skipping replied email: ${email}`);\n        continue;\n    }\n    \n    // Skip if replied in history\n    if (emailHistory[email] && emailHistory[email].replied === true) {\n        skippedLog.push({email, reason: 'replied_in_history', business: lead.businessName});\n        console.log(`❌ Skipping replied email (history): ${email}`);\n        continue;\n    }\n    \n    // Check cooldown period\n    if (emailHistory[email] && emailHistory[email].lastSent) {\n        const lastSentTime = new Date(emailHistory[email].lastSent).getTime();\n        const daysSinceLastSent = (now - lastSentTime) / (24 * 60 * 60 * 1000);\n        \n        if (daysSinceLastSent < cfg.limits.emailCooldownDays) {\n            skippedLog.push({\n                email, \n                reason: `cooldown_${daysSinceLastSent.toFixed(1)}_days`, \n                business: lead.businessName,\n                daysRemaining: (cfg.limits.emailCooldownDays - daysSinceLastSent).toFixed(1)\n            });\n            console.log(`⏳ Skipping email in cooldown: ${email}, days since last sent: ${daysSinceLastSent.toFixed(1)}`);\n            continue;\n        }\n    }\n    \n    // If we get here, email is valid to send\n    processedEmails.add(email);\n    const lastSent = new Date().toISOString();\n    \n    out.push({\n        json: {\n            ...lead,\n            email: email,\n            lastSent: lastSent,\n            campaign: 'SRLINES Pakistan B2B',\n            status: 'sent_initial',\n            followupStage: 0,\n            replied: false,\n            shouldSend: true,\n            // Keep track for logging\n            isNewEmail: !emailHistory[email],\n            daysSinceLastContact: emailHistory[email] ? \n                ((now - new Date(emailHistory[email].lastSent).getTime()) / (24 * 60 * 60 * 1000)).toFixed(1) : \n                'never'\n        }\n    });\n}\n\n// Log summary\nconsole.log(`\\n📊 Summary:`);\nconsole.log(`   ✅ Emails to send: ${out.length}`);\nconsole.log(`   ⏭️  Skipped: ${skippedLog.length}`);\nconsole.log(`   📧 Total leads checked: ${leadsToProcess.length}`);\n\n// Show skipped reasons\nconst skipReasons = {};\nfor (const skip of skippedLog) {\n    skipReasons[skip.reason] = (skipReasons[skip.reason] || 0) + 1;\n}\nconsole.log(`\\n📋 Skip reasons:`, skipReasons);\n\n// If no emails to send, stop this branch cleanly so Gmail does not send status rows.\nif (out.length === 0) {\n    console.log(`\\n⚠️ No emails ready to send. All ${leadsToProcess.length} leads were skipped.`);\n    \n    return [];\n}\n\nconsole.log(`\\n✅ Ready to send ${out.length} emails`);\nreturn out;"
+      },
+      "id": "83f96442-408c-46a6-80b8-f8706aeb0d64",
+      "name": "Email Cooldown Deduplication",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg=$('Runtime Config').first().json;const ms=(cfg.limits.minDelaySeconds+Math.random()*(cfg.limits.maxDelaySeconds-cfg.limits.minDelaySeconds))*1000;await new Promise(r=>setTimeout(r,ms));return items;"
+      },
+      "id": "1ea191fa-c7c5-479a-ac75-d5b8adb03a1d",
+      "name": "Random Rate Limit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.emailSubject }}",
+        "message": "={{ $json.emailBody }}",
+        "options": {
+          "replyTo": "={{ $json.replyTo }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        -272
+      ],
+      "id": "e285f6a2-2a0c-410a-9b2c-8ad52edcb8d4",
+      "name": "Send a message",
+      "webhookId": "2d7d439d-b36e-453c-bb1c-9ade320786dd",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BnYJ9LBiL4qlRcEf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.emailHistory}}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Email Cooldown Deduplication').item.json.id }}",
+            "executionId": "={{ $('Email Cooldown Deduplication').item.json.executionId }}",
+            "timestamp": "={{ $('Email Cooldown Deduplication').item.json.timestamp }}",
+            "businessName": "={{ $('Email Cooldown Deduplication').item.json.businessName }}",
+            "email": "={{ $('Email Cooldown Deduplication').item.json.email }}",
+            "phone": "={{ $('Email Cooldown Deduplication').item.json.phone }}",
+            "website": "={{ $('Email Cooldown Deduplication').item.json.website }}",
+            "domain": "={{ $('Email Cooldown Deduplication').item.json.domain }}",
+            "city": "={{ $('Email Cooldown Deduplication').item.json.city }}",
+            "industry": "={{ $('Email Cooldown Deduplication').item.json.industry }}",
+            "score": "={{ $('Email Cooldown Deduplication').item.json.score }}",
+            "priority": "={{ $('Email Cooldown Deduplication').item.json.priority }}",
+            "emailSubject": "={{ $('Email Cooldown Deduplication').item.json.emailSubject }}",
+            "emailBody": "={{ $('Email Cooldown Deduplication').item.json.emailBody }}",
+            "fromEmail": "={{ $('Email Cooldown Deduplication').item.json.fromEmail }}",
+            "replyTo": "={{ $('Email Cooldown Deduplication').item.json.replyTo }}",
+            "lastSent": "={{ $('Email Cooldown Deduplication').item.json.lastSent }}",
+            "campaign": "={{ $('Email Cooldown Deduplication').item.json.campaign }}",
+            "status": "={{ $('Email Cooldown Deduplication').item.json.status }}",
+            "error": "={{ $('Email Cooldown Deduplication').item.json.error }}",
+            "notes": "={{ $('Email Cooldown Deduplication').item.json.notes }}",
+            "threadId": "={{ $('Email Cooldown Deduplication').item.json.threadId }}",
+            "labelIds": "={{ $('Email Cooldown Deduplication').item.json.labelIds }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "businessName",
+              "displayName": "businessName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "domain",
+              "displayName": "domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "industry",
+              "displayName": "industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "priority",
+              "displayName": "priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailSubject",
+              "displayName": "emailSubject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailBody",
+              "displayName": "emailBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fromEmail",
+              "displayName": "fromEmail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "replyTo",
+              "displayName": "replyTo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lastSent",
+              "displayName": "lastSent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "campaign",
+              "displayName": "campaign",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "threadId",
+              "displayName": "threadId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "labelIds",
+              "displayName": "labelIds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "cd9737e1-487d-4b3e-aeb9-9fdda54dcaea",
+      "name": "Append Email History",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        720,
+        -272
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const all=$input.all().map(i=>i.json);const cfg=$('Runtime Config').first().json;return[{json:{executionId:cfg.executionId,date:new Date().toISOString(),businessesProcessed:all.length,qualified:all.filter(x=>x.qualified).length,emailsPrepared:all.filter(x=>x.emailSubject).length,emailsSent:all.length,topIndustries:[...new Set(all.map(x=>x.industry).filter(Boolean))].slice(0,10).join(', '),status:'completed'}}];"
+      },
+      "id": "c1a1f583-f0f9-4f9a-ab67-51fc55975c60",
+      "name": "Build Campaign Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        -480
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.campaignReport}}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "keywordCount",
+              "displayName": "keywordCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "businessesProcessed",
+              "displayName": "businessesProcessed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailsFound",
+              "displayName": "emailsFound",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "duplicatesSkipped",
+              "displayName": "duplicatesSkipped",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "qualified",
+              "displayName": "qualified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "rejected",
+              "displayName": "rejected",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailsPrepared",
+              "displayName": "emailsPrepared",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailsSent",
+              "displayName": "emailsSent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sendFailures",
+              "displayName": "sendFailures",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "topIndustries",
+              "displayName": "topIndustries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bestCity",
+              "displayName": "bestCity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recommendations",
+              "displayName": "recommendations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2781d87a-662c-4736-b733-ab32a26f9d11",
+      "name": "Append Campaign Report",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        704,
+        -480
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 1. Lead Discovery\nCron → config → AI keywords → Google Maps scraping.",
+        "height": 780,
+        "width": 504,
+        "color": 5
+      },
+      "id": "e5c79010-0109-4e7d-a167-9daac4675e84",
+      "name": "SECTION 1 - Lead Discovery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1584,
+        -880
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -640,
+        -752
+      ],
+      "id": "bcb9ed62-2c64-484c-aea2-31e1b3612622",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -48,
+        -896
+      ],
+      "id": "05c33c1d-ccd3-4e31-8250-6321418d5c03",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -224,
+        -384
+      ],
+      "id": "0fd8d3e7-c185-499a-bfef-b2a992a09a59",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Runtime Config').first().json;\n// Input: rows from Email_History. Output: due follow-ups only.\nconst rows = $input.all().map(i=>i.json);\nconst stop = new Set((cfg.followup.stopStatuses || []).map(s => String(s).toLowerCase()));\nconst latest = new Map();\nconst now = Date.now();\nfunction render(t, r){ return String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl); }\nfor (const r of rows) {\n const email = String(r.email || '').toLowerCase().trim(); if (!email) continue;\n const t = new Date(r.lastSent || r.timestamp || 0).getTime();\n const prev = latest.get(email);\n if (!prev || t > prev._time) latest.set(email, {...r, _time: t});\n}\nconst out=[];\nfor (const r of latest.values()) {\n const email=String(r.email||'').toLowerCase().trim();\n const status=String(r.status||'').toLowerCase();\n const replied = r.replied === true || String(r.replied).toLowerCase() === 'true';\n if(!email || replied || stop.has(status) || status.includes('bounced') || status.includes('unsubscribed') || status.includes('complained')) continue;\n const stage=Number(r.followupStage||0); const next=(cfg.followup.sequence||[]).find(s=>Number(s.stage)===stage+1); if(!next) continue;\n const last=Number(r._time || new Date(r.lastSent||r.timestamp||0).getTime()); if(!last || now-last < Number(next.delayDays||999)*86400000) continue;\n out.push({json:{...r,email,emailSubject:render(next.subject,r),emailBody:render(next.body,r),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});\n if(out.length >= cfg.followup.maxFollowupsPerRun) break;\n}\nreturn out;"
+      },
+      "id": "b799e219-1f85-4fe8-b8c5-f91c30af7667",
+      "name": "Follow-up Sequence Builder (manual/cron branch)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Reply & Bounce Sync\nRuns from Runtime Config on every execution. Gmail reply search appends Reply_Log; Gmail bounce search appends Blacklist. These tabs are checked before initial and follow-up sends.",
+        "height": 360,
+        "width": 1040,
+        "color": 6
+      },
+      "id": "eaf6a596-2702-4c1c-b903-3285fe83f86c",
+      "name": "SECTION 4 - Reply & Bounce Sync",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1632,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "q": "={{$('Runtime Config').first().json.gmailSearch.replyQuery}}"
+        }
+      },
+      "id": "bd67d767-f6d4-4e11-ac08-922bccd09c07",
+      "name": "Gmail Search Replied Emails",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1408,
+        96
+      ],
+      "webhookId": "0727dbff-d1e0-4c86-974a-5edaef199169",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BnYJ9LBiL4qlRcEf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Runtime Config').first().json;\nconst my = String(cfg.company.senderEmail || '').toLowerCase();\nfunction header(m, name){ const h=(m.payload?.headers||[]).find(x=>String(x.name).toLowerCase()===name.toLowerCase()); return h?.value || ''; }\nfunction emailFrom(v){ const m=String(v||'').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i); return m ? m[0].toLowerCase() : ''; }\nconst seen=new Set(), out=[];\nfor (const item of items) { const m=item.json; const from=emailFrom(header(m,'From') || m.from || m.sender); if(!from || from===my || seen.has(from)) continue; seen.add(from); out.push({json:{timestamp:new Date().toISOString(),email:from,businessName:'',threadId:m.threadId||m.id||'',subject:header(m,'Subject')||m.subject||'',snippet:m.snippet||'',status:'replied',notes:'Detected by Gmail reply search'}}); }\nreturn out;"
+      },
+      "id": "f4052bf8-3795-4c60-814a-a0b1ad041aa9",
+      "name": "Extract Replied Emails for Reply_Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1168,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.replyLog}}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{$json.timestamp}}",
+            "email": "={{$json.email}}",
+            "businessName": "={{$json.businessName}}",
+            "threadId": "={{$json.threadId}}",
+            "subject": "={{$json.subject}}",
+            "snippet": "={{$json.snippet}}",
+            "status": "={{$json.status}}",
+            "notes": "={{$json.notes}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "businessName",
+              "displayName": "businessName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "threadId",
+              "displayName": "threadId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "snippet",
+              "displayName": "snippet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "93827930-e3a2-47c7-9ef7-cc52e9e2cbee",
+      "name": "Append Reply_Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -928,
+        96
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "q": "={{$('Runtime Config').first().json.gmailSearch.bounceQuery}}"
+        }
+      },
+      "id": "20957491-f181-46ac-a08c-d495a2b539ae",
+      "name": "Gmail Search Bounced Emails",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1408,
+        256
+      ],
+      "webhookId": "8a603086-b89c-4aea-acff-62a71efae42b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BnYJ9LBiL4qlRcEf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Runtime Config').first().json;\nfunction header(m, name){ const h=(m.payload?.headers||[]).find(x=>String(x.name).toLowerCase()===name.toLowerCase()); return h?.value || ''; }\nconst textOf = m => [m.snippet, header(m,'To'), header(m,'X-Failed-Recipients'), header(m,'Final-Recipient'), header(m,'Original-Recipient'), header(m,'Subject')].filter(Boolean).join(' ');\nconst seen=new Set(), out=[];\nfor (const item of items) { const m=item.json; const text=textOf(m); const emails=[...text.matchAll(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/ig)].map(x=>x[0].toLowerCase()).filter(e=>!e.includes('mailer-daemon')&&!e.includes('postmaster')); for (const email of emails) { if(seen.has(email)) continue; seen.add(email); out.push({json:{timestamp:new Date().toISOString(),type:'email',value:email,source:'gmail_bounce_search',reason:'hard_or_soft_bounce_detected',notes:`Thread ${m.threadId||m.id||''}`}}); } }\nreturn out;"
+      },
+      "id": "1bf6ae50-a2cf-460f-869e-e5a06f14504e",
+      "name": "Extract Bounced Emails for Blacklist",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1168,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.blacklist}}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{$json.timestamp}}",
+            "type": "={{$json.type}}",
+            "value": "={{$json.value}}",
+            "source": "={{$json.source}}",
+            "reason": "={{$json.reason}}",
+            "notes": "={{$json.notes}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "value",
+              "displayName": "value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "4ccb5fba-1907-432f-93b3-4823c28bdabc",
+      "name": "Append Blacklist Bounces",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -928,
+        256
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Runtime Config').first().json;\nasync function sheetSet(tab, col){ try{ const res=await this.helpers.httpRequest({method:'GET',url:`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheets.documentId}/values/${tab}`,headers:{Authorization:'Bearer '+(await this.helpers.getCredentials('googleSheetsOAuth2Api')).access_token},json:true,timeout:10000}); const vals=res.values||[]; if(vals.length<2) return new Set(); const idx=vals[0].indexOf(col); if(idx<0) return new Set(); return new Set(vals.slice(1).map(r=>String(r[idx]||'').toLowerCase().trim()).filter(Boolean)); }catch(e){ console.log(`Could not read ${tab}:`, e.message); return new Set(); }}\nconst replies=await sheetSet.call(this,cfg.sheets.replyLog,'email'); const blacklist=await sheetSet.call(this,cfg.sheets.blacklist,'value');\nconst inRun=new Set(); const out=[];\nfor(const item of items){ const j=item.json; const email=String(j.email||'').toLowerCase().trim(); if(!email||inRun.has(email)||replies.has(email)||blacklist.has(email)) continue; inRun.add(email); out.push({json:{...j,email,shouldSend:true}}); }\nreturn out;"
+      },
+      "id": "5e135617-28c8-4e86-b80a-b6859311c92f",
+      "name": "Follow-up Suppression Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg=$('Runtime Config').first().json;const ms=(cfg.limits.minDelaySeconds+Math.random()*(cfg.limits.maxDelaySeconds-cfg.limits.minDelaySeconds))*1000;await new Promise(r=>setTimeout(r,ms));return items;"
+      },
+      "id": "12a69dfe-06e3-439e-850f-c21f6a7ef655",
+      "name": "Follow-up Rate Limit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.email}}",
+        "subject": "={{$json.emailSubject}}",
+        "message": "={{$json.emailBody}}",
+        "options": {
+          "replyTo": "={{$json.replyTo}}"
+        }
+      },
+      "id": "5359fab6-6ee6-4a90-a12d-460013b2e788",
+      "name": "Send Follow-up Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        48
+      ],
+      "webhookId": "8e3e6d6b-92ad-4f1d-8381-d23c50bfd487",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BnYJ9LBiL4qlRcEf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.emailHistory}}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{$('Follow-up Suppression Check').item.json.id || $('Follow-up Suppression Check').item.json.email + '-' + $('Follow-up Suppression Check').item.json.followupStage}}",
+            "executionId": "={{$('Runtime Config').first().json.executionId}}",
+            "timestamp": "={{new Date().toISOString()}}",
+            "businessName": "={{$('Follow-up Suppression Check').item.json.businessName}}",
+            "email": "={{$('Follow-up Suppression Check').item.json.email}}",
+            "phone": "={{$('Follow-up Suppression Check').item.json.phone}}",
+            "website": "={{$('Follow-up Suppression Check').item.json.website}}",
+            "domain": "={{$('Follow-up Suppression Check').item.json.domain}}",
+            "city": "={{$('Follow-up Suppression Check').item.json.city}}",
+            "industry": "={{$('Follow-up Suppression Check').item.json.industry}}",
+            "score": "={{$('Follow-up Suppression Check').item.json.score}}",
+            "priority": "={{$('Follow-up Suppression Check').item.json.priority}}",
+            "emailSubject": "={{$('Follow-up Suppression Check').item.json.emailSubject}}",
+            "emailBody": "={{$('Follow-up Suppression Check').item.json.emailBody}}",
+            "fromEmail": "={{$('Runtime Config').first().json.company.senderEmail}}",
+            "replyTo": "={{$('Follow-up Suppression Check').item.json.replyTo}}",
+            "lastSent": "={{$('Follow-up Suppression Check').item.json.lastSent}}",
+            "campaign": "={{$('Follow-up Suppression Check').item.json.campaign}}",
+            "status": "={{$('Follow-up Suppression Check').item.json.status}}",
+            "error": "",
+            "notes": "follow-up drip sent",
+            "followupStage": "={{$('Follow-up Suppression Check').item.json.followupStage}}",
+            "replied": "false",
+            "whatsappCtaUrl": "={{$('Follow-up Suppression Check').item.json.whatsappCtaUrl}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "businessName",
+              "displayName": "businessName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "domain",
+              "displayName": "domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "industry",
+              "displayName": "industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "priority",
+              "displayName": "priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailSubject",
+              "displayName": "emailSubject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailBody",
+              "displayName": "emailBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fromEmail",
+              "displayName": "fromEmail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "replyTo",
+              "displayName": "replyTo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lastSent",
+              "displayName": "lastSent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "campaign",
+              "displayName": "campaign",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "followupStage",
+              "displayName": "followupStage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "replied",
+              "displayName": "replied",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "whatsappCtaUrl",
+              "displayName": "whatsappCtaUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d1e3e785-96bd-4b94-997c-be021ffa2de4",
+      "name": "Append Follow-up Email History",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        752,
+        48
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 15,
+              "unit": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "f9d431b6-daaa-485b-a849-70569adab328",
+      "name": "Cron - 15 x Minutes PKT",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1392,
+        -752
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Runtime Config": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek Keyword Strategy",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Emails History",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail Search Replied Emails",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail Search Bounced Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Keyword Strategy": {
+      "main": [
+        [
+          {
+            "node": "Log Keyword to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Keyword to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Maps Scraper": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize & Require Email": {
+      "main": [
+        [
+          {
+            "node": "DNS MX Email Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DNS MX Email Validation": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website Enrichment": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek Lead Scoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Lead Scoring": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualified Only": {
+      "main": [
+        [
+          {
+            "node": "Append Qualified Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Qualified Lead": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek Personalized Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Personalized Email": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Emails History": {
+      "main": [
+        [
+          {
+            "node": "Follow-up Sequence Builder (manual/cron branch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Cooldown Deduplication": {
+      "main": [
+        [
+          {
+            "node": "Random Rate Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Random Rate Limit": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append Email History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Email History": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Campaign Report": {
+      "main": [
+        [
+          {
+            "node": "Append Campaign Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Normalize & Require Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Maps Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Qualified Only",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Website Enrichment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [
+          {
+            "node": "Build Campaign Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Cooldown Deduplication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Search Replied Emails": {
+      "main": [
+        [
+          {
+            "node": "Extract Replied Emails for Reply_Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Replied Emails for Reply_Log": {
+      "main": [
+        [
+          {
+            "node": "Append Reply_Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Search Bounced Emails": {
+      "main": [
+        [
+          {
+            "node": "Extract Bounced Emails for Blacklist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Bounced Emails for Blacklist": {
+      "main": [
+        [
+          {
+            "node": "Append Blacklist Bounces",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-up Sequence Builder (manual/cron branch)": {
+      "main": [
+        [
+          {
+            "node": "Follow-up Suppression Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-up Suppression Check": {
+      "main": [
+        [
+          {
+            "node": "Follow-up Rate Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Follow-up Rate Limit": {
+      "main": [
+        [
+          {
+            "node": "Send Follow-up Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Follow-up Gmail": {
+      "main": [
+        [
+          {
+            "node": "Append Follow-up Email History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron - 15 x Minutes PKT": {
+      "main": [
+        [
+          {
+            "node": "Runtime Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "668b560f-43fe-4c1e-957f-d9f3ff1e0eda",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6f4ddd19d6e6b74f777c7351e64ff05ded166492207f0e052776641ed9097a69"
+  },
+  "id": "kMiQxBEGSwOQuzd0",
+  "tags": []
+}
