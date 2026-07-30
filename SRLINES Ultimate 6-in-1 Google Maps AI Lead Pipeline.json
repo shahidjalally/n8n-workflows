@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "jsCode": "const now = new Date();\nconst executionId = `${now.toISOString()}-${Math.random().toString(36).slice(2, 10)}`;\n\n// n8n plan note: this workflow intentionally keeps API keys and IDs here instead of env vars.\n// Replace every PASTE_* value before activating. Do not commit real production secrets.\nreturn [{ json: {\n  executionId,\n  now: now.toISOString(),\n  timezone: 'Asia/Karachi',\n  campaign: { name: 'SRLINES Pakistan B2B', consentNote: 'Cold B2B outreach. Stop immediately on bounce, reply, unsubscribe, or complaint.' },\n  company: {\n    name: 'SRLINES',\n    senderName: 'Shahid Rasool',\n    senderTitle: 'CEO',\n    senderEmail: 'srlines.wcrm@gmail.com',\n    replyTo: 'srlines.wcrm@gmail.com',\n    whatsappCtaUrl: 'https://wa.me/923283897926?text=Hi%20SRLINES%2C%20I%20saw%20your%20email%20and%20want%20a%20WhatsApp%20CRM%20demo',\n    signature: 'Shahid Rasool\\nCEO\\nSRLINES SOFTWARE HOUSE\\nWhatsApp demo: https://wa.me/923283897926',\n    products: ['Official Meta Cloud API', 'WhatsApp CRM', 'Omni Inbox', 'Facebook Messenger', 'Instagram DM', 'Sales Pipeline Kanban CRM', 'Chatbots', 'Shopify WhatsApp App Integration', 'N8N Native Node', 'Bitrix24 app']\n  },\n  limits: { keywordsPerRun: 4, minScoreToEmail: 60, emailCooldownDays: 180, maxEmailsPerRun: 50, minDelaySeconds: 25, maxDelaySeconds: 90 },\n  emailValidation: { enabled: true, requireMx: true, dnsProvider: 'https://dns.google/resolve', timeoutMs: 8000, blockedDomains: ['example.com','test.com','invalid.com'], blockedLocalParts: ['no-reply','noreply','donotreply','do-not-reply','support','help','privacy','abuse'] },\n  followup: {\n    enabled: true,\n    maxFollowupsPerRun: 25,\n    stopStatuses: ['replied','bounced','complained','unsubscribed'],\n    sequence: [\n      { stage: 1, delayDays: 3, subject: 'Quick WhatsApp idea for {{businessName}}', body: 'Hi {{businessName}} team,\\n\\nI found {{businessName}} online while reviewing active businesses in {{city}}. A quick idea: SRLINES can centralize WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and lead follow-up in one CRM.\\n\\nIf you want, message me on WhatsApp and I will show a 10-minute demo tailored to your business: {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 2, delayDays: 7, subject: 'Should I send a WhatsApp CRM demo?', body: 'Hi {{businessName}} team,\\n\\nMany businesses lose inquiries because chats, orders, and reminders stay scattered. SRLINES helps teams respond faster with WhatsApp Cloud API, Omni Inbox, chatbots, and a sales pipeline.\\n\\nWould you like me to share a short walkthrough on WhatsApp? {{whatsappCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 3, delayDays: 14, subject: 'Close the loop?', body: 'Hi {{businessName}} team,\\n\\nI do not want to keep emailing if this is not useful. If improving WhatsApp/Meta lead handling is a priority, send me one WhatsApp message and I will suggest the best setup: {{whatsappCtaUrl}}\\n\\nOtherwise, I will close the loop here.\\n\\n{{signature}}' }\n    ]\n  },\n  sheets: { documentId: '19dwAu86RfoMcWcUp8li8DKbQhP7tUBqG2TZVR7hTPhk', keywords: 'Keywords', rawLeads: 'Raw_Leads', qualifiedLeads: 'Qualified_Leads', emailHistory: 'Email_History', campaignReport: 'Campaign_Report', replyLog: 'Reply_Log', followupQueue: 'Followup_Queue', blacklist: 'Blacklist', industryStats: 'Industry_Stats' },\n  deepseek: { apiKey: 'sk-987549f470cd401dbb3eef7b36c79931', apiUrl: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },\n  scraper: { baseUrl: 'http://localhost:3000', maxResultsPerKeyword: 4, delayBetweenRequests: 1000 },\n  gmailSearch: { replyQuery: 'in:inbox to:srlines.wcrm@gmail.com newer_than:365d -from:srlines.wcrm@gmail.com', bounceQuery: '(from:mailer-daemon OR from:postmaster OR subject:(Delivery Status Notification) OR subject:(Undelivered Mail Returned)) newer_than:30d' },\n  instructions: 'Configure placeholders in this Runtime Config node, Google Sheets OAuth, Gmail OAuth, and your local scraper URL before activating.'\n}}];"
+        "jsCode": "const now = new Date();\nconst executionId = `${now.toISOString()}-${Math.random().toString(36).slice(2, 10)}`;\n\n// n8n plan note: this workflow intentionally keeps API keys and IDs here instead of env vars.\n// Replace every PASTE_* value before activating. Do not commit real production secrets.\nreturn [{ json: {\n  executionId,\n  now: now.toISOString(),\n  timezone: 'Asia/Karachi',\n  campaign: { name: 'SRLINES Pakistan B2B', consentNote: 'Cold B2B outreach. Stop immediately on bounce, reply, unsubscribe, or complaint.' },\n  company: {\n    name: 'SRLINES',\n    senderName: 'Shahid Rasool',\n    senderTitle: 'CEO',\n    senderEmail: 'srlines.wcrm@gmail.com',\n    replyTo: 'srlines.wcrm@gmail.com',\n    whatsappCtaUrl: 'https://wa.me/923283897926?text=Hi%20SRLINES%2C%20I%20saw%20your%20email%20and%20want%20a%20WhatsApp%20CRM%20demo',\n    youtubeCtaUrl: 'https://youtube.com/shorts/gFChGKdtI0o?si=KQ2ydx96IktM7zmM',\n    youtubeThumbnailUrl: 'https://i.ytimg.com/vi/gFChGKdtI0o/hqdefault.jpg',\n    website: 'https://srlines.com',\n    legalName: 'SRLINES SOFTWARE HOUSE',\n    tagline: 'Turn every conversation into a sales opportunity',\n    brand: { logoText: 'SRLINES', primary: '#0f766e', dark: '#0f172a', accent: '#14b8a6', trustLine: 'Official Meta Cloud API, omnichannel inbox, automation, and sales pipeline expertise.' },\n    signature: 'Shahid Rasool\\nCEO\\nSRLINES SOFTWARE HOUSE\\nWhatsApp demo: https://wa.me/923283897926',\n    products: ['Official Meta Cloud API', 'WhatsApp CRM', 'Omni Inbox', 'Facebook Messenger', 'Instagram DM', 'Sales Pipeline Kanban CRM', 'Chatbots', 'Shopify WhatsApp App Integration', 'N8N Native Node', 'Bitrix24 app']\n  },\n  limits: { keywordsPerRun: 4, minScoreToEmail: 60, emailCooldownDays: 180, maxEmailsPerRun: 50, minDelaySeconds: 25, maxDelaySeconds: 90 },\n  emailValidation: { enabled: true, requireMx: true, dnsProvider: 'https://dns.google/resolve', timeoutMs: 8000, blockedDomains: ['example.com','test.com','invalid.com'], blockedLocalParts: ['no-reply','noreply','donotreply','do-not-reply','support','help','privacy','abuse'] },\n  followup: {\n    enabled: true,\n    maxFollowupsPerRun: 25,\n    stopStatuses: ['replied','bounced','complained','unsubscribed'],\n    sequence: [\n      { stage: 1, delayDays: 3, subject: 'Quick WhatsApp idea for {{businessName}}', body: 'Hi {{businessName}} team,\\n\\nI found {{businessName}} online while reviewing active businesses in {{city}}. A quick idea: SRLINES can centralize WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and lead follow-up in one CRM.\\n\\nIf you want, message me on WhatsApp and I will show a 10-minute demo tailored to your business: {{whatsappCtaUrl}}\\n\\nOr watch our 60-second overview: {{youtubeCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 2, delayDays: 7, subject: 'Should I send a WhatsApp CRM demo?', body: 'Hi {{businessName}} team,\\n\\nMany businesses lose inquiries because chats, orders, and reminders stay scattered. SRLINES helps teams respond faster with WhatsApp Cloud API, Omni Inbox, chatbots, and a sales pipeline.\\n\\nWould you like me to share a short walkthrough on WhatsApp? {{whatsappCtaUrl}}\\n\\nOr watch our 60-second overview: {{youtubeCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 3, delayDays: 14, subject: 'Close the loop?', body: 'Hi {{businessName}} team,\\n\\nI do not want to keep emailing if this is not useful. If improving WhatsApp/Meta lead handling is a priority, send me one WhatsApp message and I will suggest the best setup: {{whatsappCtaUrl}}\\n\\nYou can also watch the short overview: {{youtubeCtaUrl}}\\n\\nOtherwise, I will close the loop here.\\n\\n{{signature}}' }\n    ]\n  },\n  sheets: { documentId: '19dwAu86RfoMcWcUp8li8DKbQhP7tUBqG2TZVR7hTPhk', keywords: 'Keywords', rawLeads: 'Raw_Leads', qualifiedLeads: 'Qualified_Leads', emailHistory: 'Email_History', campaignReport: 'Campaign_Report', replyLog: 'Reply_Log', followupQueue: 'Followup_Queue', blacklist: 'Blacklist', industryStats: 'Industry_Stats' },\n  deepseek: { apiKey: 'sk-987549f470cd401dbb3eef7b36c79931', apiUrl: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },\n  scraper: { baseUrl: 'http://localhost:3000', maxResultsPerKeyword: 4, delayBetweenRequests: 1000 },\n  gmailSearch: { replyQuery: 'in:inbox to:srlines.wcrm@gmail.com newer_than:365d -from:srlines.wcrm@gmail.com', bounceQuery: '(from:mailer-daemon OR from:postmaster OR subject:(Delivery Status Notification) OR subject:(Undelivered Mail Returned)) newer_than:30d' },\n  instructions: 'Configure placeholders in this Runtime Config node, Google Sheets OAuth, Gmail OAuth, and your local scraper URL before activating.'\n}}];"
       },
       "id": "cd166c73-de66-4ae7-84a4-db14eaadc13b",
       "name": "Runtime Config",
@@ -16,7 +16,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg = $input.first().json;\n\n// Track what keywords have been used before (from static data)\nconst data = $getWorkflowStaticData('global');\nconst usedKeywordsKey = 'used_keywords_history';\nif (!data[usedKeywordsKey]) {\n    data[usedKeywordsKey] = [];\n}\n\n// Get today's date for seed\nconst today = new Date();\nconst dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();\n\n// Expanded lists for diversity\nconst allCities = [\n    'Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad', \n    'Sialkot', 'Multan', 'Peshawar', 'Gujranwala', 'Hyderabad', \n    'Quetta', 'Bahawalpur', 'Sargodha', 'Rahim Yar Khan', 'Kasur',\n    'Mardan', 'Mingora', 'Sahiwal', 'Okara', 'Wah Cantt',\n    'Dera Ghazi Khan', 'Mirpur Khas', 'Chiniot', 'Kamoke', 'Mandi Bahauddin',\n    'Jhelum', 'Sadiqabad', 'Jacobabad', 'Shikarpur', 'Khanewal',\n    'Hafizabad', 'Kohat', 'Kashmore', 'Larkana', 'Tando Allahyar'\n];\n\nconst allIndustries = [\n    'Shopify store', 'WooCommerce store', 'E-commerce website', 'Online boutique',\n    'Furniture showroom', 'Home decor store', 'Interior design studio',\n    'Real estate agency', 'Property developer', 'Construction company',\n    'Dental clinic', 'Medical clinic', 'Dermatology clinic', 'Eye hospital',\n    'Law firm', 'Legal consultancy', 'Advocate office',\n    'Car dealer', 'Auto workshop', 'Car rental service', 'Tire shop',\n    'Restaurant', 'Cafe', 'Bakery', 'Food delivery service',\n    'Boutique', 'Clothing store', 'Shoe store', 'Jewelry store',\n    'Gym', 'Fitness center', 'Yoga studio', 'Sports club',\n    'Travel agency', 'Tour operator', 'Hotel', 'Guest house',\n    'Pharmacy', 'Medical store', 'Chemist shop',\n    'Digital marketing agency', 'IT services', 'Software house',\n    'Electronics store', 'Mobile shop', 'Computer store',\n    'Salon', 'Spa', 'Beauty parlor',\n    'School', 'College', 'Academy', 'Tuition center',\n    'Auto parts store', 'Motorcycle dealer', 'Bicycle shop',\n    'Hardware store', 'Paint shop', 'Sanitary store',\n    'Supermarket', 'Grocery store', 'Convenience store'\n];\n\nconst allIntents = [\n    'CRM for lead management', 'WhatsApp integration', 'Chatbot automation', \n    'Sales pipeline CRM', 'Meta inbox management', 'Omni channel communication', \n    'Customer support automation', 'Lead generation', 'Follow-up automation',\n    'Marketing automation', 'Customer engagement', 'Inquiry management',\n    'Booking management', 'Appointment scheduling', 'Order tracking',\n    'Customer feedback', 'Review management', 'Loyalty program'\n];\n\n// Create a more specific prompt that forces diversity\nconst industryExamples = allIndustries.slice(0, 15).join(', ');\nconst cityExamples = allCities.slice(0, 10).join(', ');\n\nconst user = `Generate ${cfg.limits.keywordsPerRun} COMPLETELY UNIQUE Google Maps search keywords for Pakistan.\n\nIMPORTANT RULES:\n1. DO NOT repeat the same industry or city in more than 2 keywords\n2. Mix different cities and industries\n3. Avoid these common keywords if possible: \"Shopify store\", \"Real estate agency\", \"Digital marketing agency\"\n4. Include a diverse mix of industries like: ${industryExamples}\n5. Include diverse cities like: ${cityExamples}\n6. Each keyword must be unique and searchable on Google Maps\n7. Keywords should target businesses that need WhatsApp CRM, chatbots, or sales automation\n\nReturn ONLY JSON: {\"keywords\":[{\"keyword\":\"...\",\"city\":\"...\",\"industry\":\"...\",\"intent\":\"...\"}]}`;\n\nlet parsed;\nlet usedFallback = false;\n\ntry {\n    const key = cfg.deepseek.apiKey;\n    if (!key || key === 'PASTE_DEEPSEEK_API_KEY_HERE') {\n        throw new Error('Configure DeepSeek API key');\n    }\n    \n    // Use higher temperature and add randomness with date seed\n    const temperature = 1.2 + (Math.random() * 0.3); // 1.2 to 1.5\n    const seed = dateSeed + Math.floor(Math.random() * 100);\n    \n    const res = await this.helpers.httpRequest({\n        method: 'POST',\n        url: cfg.deepseek.apiUrl,\n        headers: {\n            Authorization: `Bearer ${key}`,\n            'Content-Type': 'application/json'\n        },\n        body: {\n            model: cfg.deepseek.model,\n            temperature: temperature,\n            messages: [\n                { \n                    role: 'system', \n                    content: `You are a Pakistani B2B sales director for SRLINES. Generate EXTREMELY DIVERSE keywords. Today's seed is ${seed}. Focus on unique combinations.` \n                },\n                { \n                    role: 'user', \n                    content: user \n                }\n            ],\n            response_format: { type: 'json_object' }\n        },\n        json: true,\n        timeout: 120000\n    });\n    \n    parsed = JSON.parse(res.choices?.[0]?.message?.content || '{}');\n    \n    // Check if we got enough unique keywords\n    const keywords = parsed.keywords || [];\n    const uniqueIndustries = new Set(keywords.map(k => k.industry));\n    const uniqueCities = new Set(keywords.map(k => k.city));\n    \n    if (uniqueIndustries.size < 5 || uniqueCities.size < 3) {\n        console.log('⚠️ Not enough diversity in API response, using fallback');\n        usedFallback = true;\n        throw new Error('Not enough diversity');\n    }\n    \n} catch (e) {\n    console.log('Using enhanced fallback with more diversity:', e.message);\n    usedFallback = true;\n    \n    // Enhanced fallback with better randomization\n    const shuffledCities = [...allCities];\n    const shuffledIndustries = [...allIndustries];\n    const shuffledIntents = [...allIntents];\n    \n    // Use multiple seeds for better shuffling\n    const seed1 = dateSeed + Math.floor(Math.random() * 1000);\n    const seed2 = dateSeed + 500 + Math.floor(Math.random() * 1000);\n    const seed3 = dateSeed + 1000 + Math.floor(Math.random() * 1000);\n    \n    // Shuffle with multiple passes for better randomness\n    for (let pass = 0; pass < 3; pass++) {\n        const currentSeed = [seed1, seed2, seed3][pass % 3];\n        for (let i = shuffledCities.length - 1; i > 0; i--) {\n            const j = (i + currentSeed) % (i + 1);\n            [shuffledCities[i], shuffledCities[j]] = [shuffledCities[j], shuffledCities[i]];\n        }\n        for (let i = shuffledIndustries.length - 1; i > 0; i--) {\n            const j = (i + currentSeed * 2) % (i + 1);\n            [shuffledIndustries[i], shuffledIndustries[j]] = [shuffledIndustries[j], shuffledIndustries[i]];\n        }\n    }\n    \n    // Generate keywords with forced diversity\n    const numKeywords = cfg.limits.keywordsPerRun || 30;\n    const selectedIndustries = [];\n    const selectedCities = [];\n    \n    // Ensure we don't repeat industries and cities too often\n    for (let i = 0; i < numKeywords; i++) {\n        const industryIndex = (i * 3 + 1) % shuffledIndustries.length;\n        const cityIndex = (i * 7 + 5) % shuffledCities.length;\n        const intentIndex = (i * 11 + 3) % shuffledIntents.length;\n        \n        selectedIndustries.push(shuffledIndustries[industryIndex]);\n        selectedCities.push(shuffledCities[cityIndex]);\n    }\n    \n    parsed = {\n        keywords: Array.from({ length: numKeywords }, (_, i) => ({\n            keyword: `${selectedIndustries[i]} in ${selectedCities[i]}`,\n            city: selectedCities[i],\n            industry: selectedIndustries[i],\n            intent: shuffledIntents[i % shuffledIntents.length]\n        }))\n    };\n}\n\n// Deduplicate and ensure diversity\nconst seen = new Set();\nconst seenIndustries = new Set();\nconst seenCities = new Set();\nconst results = [];\n\nconst keywords = parsed.keywords || [];\n\nfor (const k of keywords) {\n    const keyword = String(k.keyword || '').trim();\n    const industry = String(k.industry || '').trim();\n    const city = String(k.city || '').trim();\n    \n    if (!keyword) continue;\n    \n    const key = keyword.toLowerCase();\n    const industryKey = industry.toLowerCase();\n    const cityKey = city.toLowerCase();\n    \n    // Skip duplicates\n    if (seen.has(key)) continue;\n    \n    // Try to maintain diversity - skip if we have too many of same industry or city\n    const industryCount = seenIndustries.has(industryKey) ? 0 : 1;\n    const cityCount = seenCities.has(cityKey) ? 0 : 1;\n    \n    // Allow up to 3 keywords per industry/city if we have enough total\n    const maxPerIndustry = Math.min(3, Math.ceil(keywords.length / 10) + 1);\n    const maxPerCity = Math.min(3, Math.ceil(keywords.length / 10) + 1);\n    \n    // Only enforce diversity if we have enough keywords\n    if (results.length > 5 && results.length < keywords.length - 2) {\n        // Check if industry is overused\n        let industryOverused = false;\n        let cityOverused = false;\n        \n        let industryCountTotal = 0;\n        let cityCountTotal = 0;\n        for (const r of results) {\n            if (r.industry?.toLowerCase() === industryKey) industryCountTotal++;\n            if (r.city?.toLowerCase() === cityKey) cityCountTotal++;\n        }\n        \n        if (industryCountTotal >= maxPerIndustry) industryOverused = true;\n        if (cityCountTotal >= maxPerCity) cityOverused = true;\n        \n        // If overused, only add if we have very few keywords left\n        if ((industryOverused || cityOverused) && results.length < keywords.length - 2) {\n            continue;\n        }\n    }\n    \n    seen.add(key);\n    seenIndustries.add(industryKey);\n    seenCities.add(cityKey);\n    \n    results.push({\n        json: {\n            ...cfg,\n            keyword: keyword,\n            keywordCity: city || '',\n            keywordIndustry: industry || '',\n            keywordIntent: k.intent || 'commercial',\n            keywordDiversity: 'high'\n        }\n    });\n    \n    // Stop if we have enough\n    if (results.length >= (cfg.limits.keywordsPerRun || 30)) break;\n}\n\n// If we don't have enough keywords, generate more with fallback\nif (results.length < (cfg.limits.keywordsPerRun || 30)) {\n    console.log(`⚠️ Only generated ${results.length} keywords. Adding more from fallback.`);\n    \n    const remaining = (cfg.limits.keywordsPerRun || 30) - results.length;\n    const fallbackCities = allCities.slice(10, 10 + remaining * 2);\n    const fallbackIndustries = allIndustries.slice(15, 15 + remaining * 2);\n    \n    for (let i = 0; i < remaining && i < fallbackCities.length && i < fallbackIndustries.length; i++) {\n        const keyword = `${fallbackIndustries[i % fallbackIndustries.length]} in ${fallbackCities[i % fallbackCities.length]}`;\n        const key = keyword.toLowerCase();\n        \n        if (!seen.has(key)) {\n            seen.add(key);\n            results.push({\n                json: {\n                    ...cfg,\n                    keyword: keyword,\n                    keywordCity: fallbackCities[i % fallbackCities.length],\n                    keywordIndustry: fallbackIndustries[i % fallbackIndustries.length],\n                    keywordIntent: 'lead generation',\n                    keywordDiversity: 'fallback'\n                }\n            });\n        }\n    }\n}\n\n// Store used keywords history to avoid repeats in future runs\nif (results.length > 0) {\n    const newKeywords = results.map(r => r.json.keyword.toLowerCase());\n    data[usedKeywordsKey] = [...data[usedKeywordsKey], ...newKeywords].slice(-500); // Keep last 500\n}\n\n// Sort by diversity flag to prioritize diverse keywords\nresults.sort((a, b) => {\n    if (a.json.keywordDiversity === 'high' && b.json.keywordDiversity !== 'high') return -1;\n    if (a.json.keywordDiversity !== 'high' && b.json.keywordDiversity === 'high') return 1;\n    return 0;\n});\n\nconsole.log(`✅ Generated ${results.length} diverse keywords`);\n\n// Always return something\nif (results.length === 0) {\n    // Ultra fallback with maximum diversity\n    const ultraFallback = [\n        { keyword: 'Car dealer in Faisalabad', city: 'Faisalabad', industry: 'Auto dealer', intent: 'WhatsApp inquiries' },\n        { keyword: 'Pharmacy in Peshawar', city: 'Peshawar', industry: 'Pharmacy', intent: 'Order management' },\n        { keyword: 'Gym in Islamabad', city: 'Islamabad', industry: 'Gym', intent: 'Membership management' },\n        { keyword: 'Digital marketing agency in Lahore', city: 'Lahore', industry: 'Digital marketing', intent: 'Lead generation' },\n        { keyword: 'Salon in Rawalpindi', city: 'Rawalpindi', industry: 'Salon', intent: 'Booking management' }\n    ];\n    \n    return ultraFallback.map(k => ({\n        json: {\n            ...cfg,\n            keyword: k.keyword,\n            keywordCity: k.city,\n            keywordIndustry: k.industry,\n            keywordIntent: k.intent\n        }\n    }));\n}\n\nreturn results;"
+        "jsCode": "const cfg = $input.first().json;\n\n// Track what keywords have been used before (from static data)\nconst data = $getWorkflowStaticData('global');\nconst usedKeywordsKey = 'used_keywords_history';\nif (!data[usedKeywordsKey]) {\n    data[usedKeywordsKey] = [];\n}\n\n// Get today's date for seed\nconst today = new Date();\nconst dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();\n\n// Expanded lists for diversity\nconst allCities = [\n    'Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad', \n    'Sialkot', 'Multan', 'Peshawar', 'Gujranwala', 'Hyderabad', \n    'Quetta', 'Bahawalpur', 'Sargodha', 'Rahim Yar Khan', 'Kasur',\n    'Mardan', 'Mingora', 'Sahiwal', 'Okara', 'Wah Cantt',\n    'Dera Ghazi Khan', 'Mirpur Khas', 'Chiniot', 'Kamoke', 'Mandi Bahauddin',\n    'Jhelum', 'Sadiqabad', 'Jacobabad', 'Shikarpur', 'Khanewal',\n    'Hafizabad', 'Kohat', 'Kashmore', 'Larkana', 'Tando Allahyar'\n];\n\nconst allIndustries = [\n    'Shopify store', 'WooCommerce store', 'E-commerce website', 'Online boutique',\n    'Furniture showroom', 'Home decor store', 'Interior design studio',\n    'Real estate agency', 'Property developer', 'Construction company',\n    'Dental clinic', 'Medical clinic', 'Dermatology clinic', 'Eye hospital',\n    'Law firm', 'Legal consultancy', 'Advocate office',\n    'Car dealer', 'Auto workshop', 'Car rental service', 'Tire shop',\n    'Restaurant', 'Cafe', 'Bakery', 'Food delivery service',\n    'Boutique', 'Clothing store', 'Shoe store', 'Jewelry store',\n    'Gym', 'Fitness center', 'Yoga studio', 'Sports club',\n    'Travel agency', 'Tour operator', 'Hotel', 'Guest house',\n    'Pharmacy', 'Medical store', 'Chemist shop',\n    'Digital marketing agency', 'IT services', 'Software house',\n    'Electronics store', 'Mobile shop', 'Computer store',\n    'Salon', 'Spa', 'Beauty parlor',\n    'School', 'College', 'Academy', 'Tuition center',\n    'Auto parts store', 'Motorcycle dealer', 'Bicycle shop',\n    'Hardware store', 'Paint shop', 'Sanitary store',\n    'Supermarket', 'Grocery store', 'Convenience store'\n];\n\nconst allIntents = [\n    'CRM for lead management', 'WhatsApp integration', 'Chatbot automation', \n    'Sales pipeline CRM', 'Meta inbox management', 'Omni channel communication', \n    'Customer support automation', 'Lead generation', 'Follow-up automation',\n    'Marketing automation', 'Customer engagement', 'Inquiry management',\n    'Booking management', 'Appointment scheduling', 'Order tracking',\n    'Customer feedback', 'Review management', 'Loyalty program'\n];\n\n// Create a more specific prompt that forces diversity\nconst industryExamples = allIndustries.slice(0, 15).join(', ');\nconst cityExamples = allCities.slice(0, 10).join(', ');\n\nconst previousKeywords = data[usedKeywordsKey].slice(-200);\nconst promptNonce = `${dateSeed}-${Math.random().toString(36).slice(2, 10)}`;\nconst user = `Generate exactly ${cfg.limits.keywordsPerRun} fresh, high-intent Google Maps searches for B2B lead discovery in Pakistan.\n\nCampaign context: SRLINES sells WhatsApp CRM, Official Meta Cloud API, omnichannel inbox, chatbots, and sales-pipeline automation.\nSpin nonce: ${promptNonce}\nRecently used keywords (never repeat or lightly rephrase these): ${JSON.stringify(previousKeywords)}\n\nRULES:\n1. Use a different industry and city for every result.\n2. Rotate the buying signal across WhatsApp-heavy inquiries, missed follow-up, bookings, multi-branch support, ecommerce orders, and social DMs.\n3. Prefer specific business categories that plausibly receive frequent customer messages; avoid generic terms such as \"business\" or \"company\".\n4. The keyword itself must sound like a natural Google Maps query: \"<category> in <city>\". Do not put CRM product terms in the Maps query.\n5. Do not reuse any industry/city pair from the recent list.\n6. Return exactly the requested count and ONLY valid JSON matching:\n{\"keywords\":[{\"keyword\":\"...\",\"city\":\"...\",\"industry\":\"...\",\"intent\":\"...\"}]}`;\n\nlet parsed;\nlet usedFallback = false;\n\ntry {\n    const key = cfg.deepseek.apiKey;\n    if (!key || key === 'PASTE_DEEPSEEK_API_KEY_HERE') {\n        throw new Error('Configure DeepSeek API key');\n    }\n    \n    // Use higher temperature and add randomness with date seed\n    const temperature = 1.2 + (Math.random() * 0.3); // 1.2 to 1.5\n    const seed = dateSeed + Math.floor(Math.random() * 100);\n    \n    const res = await this.helpers.httpRequest({\n        method: 'POST',\n        url: cfg.deepseek.apiUrl,\n        headers: {\n            Authorization: `Bearer ${key}`,\n            'Content-Type': 'application/json'\n        },\n        body: {\n            model: cfg.deepseek.model,\n            temperature: temperature,\n            messages: [\n                { \n                    role: 'system', \n                    content: `You are a Pakistani B2B sales director for SRLINES. Generate EXTREMELY DIVERSE keywords. Today's seed is ${seed}. Use the nonce to spin genuinely new category/city combinations while preserving commercial relevance.` \n                },\n                { \n                    role: 'user', \n                    content: user \n                }\n            ],\n            response_format: { type: 'json_object' }\n        },\n        json: true,\n        timeout: 120000\n    });\n    \n    parsed = JSON.parse(res.choices?.[0]?.message?.content || '{}');\n    \n    // Check if we got enough unique keywords\n    const keywords = parsed.keywords || [];\n    const uniqueIndustries = new Set(keywords.map(k => k.industry));\n    const uniqueCities = new Set(keywords.map(k => k.city));\n    \n    const expectedDiversity = Math.min(Number(cfg.limits.keywordsPerRun || 4), keywords.length);\n    if (keywords.length < Number(cfg.limits.keywordsPerRun || 4) || uniqueIndustries.size < expectedDiversity || uniqueCities.size < expectedDiversity) {\n        console.log('⚠️ Not enough diversity in API response, using fallback');\n        usedFallback = true;\n        throw new Error('Not enough diversity');\n    }\n    \n} catch (e) {\n    console.log('Using enhanced fallback with more diversity:', e.message);\n    usedFallback = true;\n    \n    // Enhanced fallback with better randomization\n    const shuffledCities = [...allCities];\n    const shuffledIndustries = [...allIndustries];\n    const shuffledIntents = [...allIntents];\n    \n    // Use multiple seeds for better shuffling\n    const seed1 = dateSeed + Math.floor(Math.random() * 1000);\n    const seed2 = dateSeed + 500 + Math.floor(Math.random() * 1000);\n    const seed3 = dateSeed + 1000 + Math.floor(Math.random() * 1000);\n    \n    // Shuffle with multiple passes for better randomness\n    for (let pass = 0; pass < 3; pass++) {\n        const currentSeed = [seed1, seed2, seed3][pass % 3];\n        for (let i = shuffledCities.length - 1; i > 0; i--) {\n            const j = (i + currentSeed) % (i + 1);\n            [shuffledCities[i], shuffledCities[j]] = [shuffledCities[j], shuffledCities[i]];\n        }\n        for (let i = shuffledIndustries.length - 1; i > 0; i--) {\n            const j = (i + currentSeed * 2) % (i + 1);\n            [shuffledIndustries[i], shuffledIndustries[j]] = [shuffledIndustries[j], shuffledIndustries[i]];\n        }\n    }\n    \n    // Generate keywords with forced diversity\n    const numKeywords = cfg.limits.keywordsPerRun || 30;\n    const selectedIndustries = [];\n    const selectedCities = [];\n    \n    // Ensure we don't repeat industries and cities too often\n    for (let i = 0; i < numKeywords; i++) {\n        const industryIndex = (i * 3 + 1) % shuffledIndustries.length;\n        const cityIndex = (i * 7 + 5) % shuffledCities.length;\n        const intentIndex = (i * 11 + 3) % shuffledIntents.length;\n        \n        selectedIndustries.push(shuffledIndustries[industryIndex]);\n        selectedCities.push(shuffledCities[cityIndex]);\n    }\n    \n    parsed = {\n        keywords: Array.from({ length: numKeywords }, (_, i) => ({\n            keyword: `${selectedIndustries[i]} in ${selectedCities[i]}`,\n            city: selectedCities[i],\n            industry: selectedIndustries[i],\n            intent: shuffledIntents[i % shuffledIntents.length]\n        }))\n    };\n}\n\n// Deduplicate and ensure diversity\nconst seen = new Set();\nconst seenIndustries = new Set();\nconst seenCities = new Set();\nconst results = [];\n\nconst keywords = parsed.keywords || [];\n\nfor (const k of keywords) {\n    const keyword = String(k.keyword || '').trim();\n    const industry = String(k.industry || '').trim();\n    const city = String(k.city || '').trim();\n    \n    if (!keyword) continue;\n    \n    const key = keyword.toLowerCase();\n    const industryKey = industry.toLowerCase();\n    const cityKey = city.toLowerCase();\n    \n    // Skip duplicates\n    if (seen.has(key)) continue;\n    \n    // Try to maintain diversity - skip if we have too many of same industry or city\n    const industryCount = seenIndustries.has(industryKey) ? 0 : 1;\n    const cityCount = seenCities.has(cityKey) ? 0 : 1;\n    \n    // Allow up to 3 keywords per industry/city if we have enough total\n    const maxPerIndustry = Math.min(3, Math.ceil(keywords.length / 10) + 1);\n    const maxPerCity = Math.min(3, Math.ceil(keywords.length / 10) + 1);\n    \n    // Only enforce diversity if we have enough keywords\n    if (results.length > 5 && results.length < keywords.length - 2) {\n        // Check if industry is overused\n        let industryOverused = false;\n        let cityOverused = false;\n        \n        let industryCountTotal = 0;\n        let cityCountTotal = 0;\n        for (const r of results) {\n            if (r.industry?.toLowerCase() === industryKey) industryCountTotal++;\n            if (r.city?.toLowerCase() === cityKey) cityCountTotal++;\n        }\n        \n        if (industryCountTotal >= maxPerIndustry) industryOverused = true;\n        if (cityCountTotal >= maxPerCity) cityOverused = true;\n        \n        // If overused, only add if we have very few keywords left\n        if ((industryOverused || cityOverused) && results.length < keywords.length - 2) {\n            continue;\n        }\n    }\n    \n    seen.add(key);\n    seenIndustries.add(industryKey);\n    seenCities.add(cityKey);\n    \n    results.push({\n        json: {\n            ...cfg,\n            keyword: keyword,\n            keywordCity: city || '',\n            keywordIndustry: industry || '',\n            keywordIntent: k.intent || 'commercial',\n            keywordDiversity: 'high'\n        }\n    });\n    \n    // Stop if we have enough\n    if (results.length >= (cfg.limits.keywordsPerRun || 30)) break;\n}\n\n// If we don't have enough keywords, generate more with fallback\nif (results.length < (cfg.limits.keywordsPerRun || 30)) {\n    console.log(`⚠️ Only generated ${results.length} keywords. Adding more from fallback.`);\n    \n    const remaining = (cfg.limits.keywordsPerRun || 30) - results.length;\n    const fallbackCities = allCities.slice(10, 10 + remaining * 2);\n    const fallbackIndustries = allIndustries.slice(15, 15 + remaining * 2);\n    \n    for (let i = 0; i < remaining && i < fallbackCities.length && i < fallbackIndustries.length; i++) {\n        const keyword = `${fallbackIndustries[i % fallbackIndustries.length]} in ${fallbackCities[i % fallbackCities.length]}`;\n        const key = keyword.toLowerCase();\n        \n        if (!seen.has(key)) {\n            seen.add(key);\n            results.push({\n                json: {\n                    ...cfg,\n                    keyword: keyword,\n                    keywordCity: fallbackCities[i % fallbackCities.length],\n                    keywordIndustry: fallbackIndustries[i % fallbackIndustries.length],\n                    keywordIntent: 'lead generation',\n                    keywordDiversity: 'fallback'\n                }\n            });\n        }\n    }\n}\n\n// Store used keywords history to avoid repeats in future runs\nif (results.length > 0) {\n    const newKeywords = results.map(r => r.json.keyword.toLowerCase());\n    data[usedKeywordsKey] = [...data[usedKeywordsKey], ...newKeywords].slice(-500); // Keep last 500\n}\n\n// Sort by diversity flag to prioritize diverse keywords\nresults.sort((a, b) => {\n    if (a.json.keywordDiversity === 'high' && b.json.keywordDiversity !== 'high') return -1;\n    if (a.json.keywordDiversity !== 'high' && b.json.keywordDiversity === 'high') return 1;\n    return 0;\n});\n\nconsole.log(`✅ Generated ${results.length} diverse keywords`);\n\n// Always return something\nif (results.length === 0) {\n    // Ultra fallback with maximum diversity\n    const ultraFallback = [\n        { keyword: 'Car dealer in Faisalabad', city: 'Faisalabad', industry: 'Auto dealer', intent: 'WhatsApp inquiries' },\n        { keyword: 'Pharmacy in Peshawar', city: 'Peshawar', industry: 'Pharmacy', intent: 'Order management' },\n        { keyword: 'Gym in Islamabad', city: 'Islamabad', industry: 'Gym', intent: 'Membership management' },\n        { keyword: 'Digital marketing agency in Lahore', city: 'Lahore', industry: 'Digital marketing', intent: 'Lead generation' },\n        { keyword: 'Salon in Rawalpindi', city: 'Rawalpindi', industry: 'Salon', intent: 'Booking management' }\n    ];\n    \n    return ultraFallback.map(k => ({\n        json: {\n            ...cfg,\n            keyword: k.keyword,\n            keywordCity: k.city,\n            keywordIndustry: k.industry,\n            keywordIntent: k.intent\n        }\n    }));\n}\n\nreturn results;"
       },
       "id": "12178dff-1493-498f-bab4-3d9b1de949d8",
       "name": "DeepSeek Keyword Strategy",
@@ -532,7 +532,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json, out=[];\nconst esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\nfunction html(lead,body){const b=cfg.company.brand||{},cta=cfg.company.whatsappCtaUrl;const name=esc(lead.businessName||'your business');return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>@media only screen and (max-width:620px){.wrap{width:100%!important}.content,.hero{padding:24px 20px!important}.cta{display:block!important;width:100%!important;box-sizing:border-box!important}.grid{display:block!important}.tile{margin:0 0 10px!important}}</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a\"><div style=\"display:none;max-height:0;overflow:hidden\">SRLINES WhatsApp CRM demo for ${name}</div><table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td align=\"center\" style=\"padding:18px 10px\"><table class=\"wrap\" role=\"presentation\" width=\"600\" cellspacing=\"0\" cellpadding=\"0\" style=\"width:600px;max-width:600px\"><tr><td style=\"overflow:hidden;border-radius:28px;background:#fff;box-shadow:0 18px 55px rgba(15,23,42,.12)\"><div class=\"hero\" style=\"padding:34px 32px;background:linear-gradient(135deg,${b.dark||'#052E16'},${b.primary||'#16A34A'},${b.accent||'#22C55E'});color:#fff\"><div style=\"font-size:13px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#dcfce7\">${esc(cfg.company.tagline)}</div><div style=\"margin-top:10px;font-size:38px;font-weight:900;letter-spacing:-.04em\">${esc(b.logoText||cfg.company.name)}</div><div style=\"margin-top:16px;font-size:17px;line-height:1.55\">One inbox for WhatsApp, Instagram, Facebook, chatbots, and faster sales follow-up.</div></div><div class=\"content\" style=\"padding:30px 32px\"><div style=\"display:inline-block;padding:8px 12px;border-radius:999px;background:#ecfdf5;color:#16a34a;font-size:13px;font-weight:800\">A personal idea for ${name}</div><h1 style=\"font-size:25px;line-height:1.2\">Turn inquiries into conversations</h1>${String(body||'').split(/\\n{2,}/).map(x=>`<p style=\"color:#334155;font-size:16px;line-height:1.65\">${esc(x).replace(/\\n/g,'<br>')}</p>`).join('')}<div class=\"grid\" style=\"display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0\"><div class=\"tile\" style=\"padding:14px;border:1px solid #dcfce7;border-radius:16px\"><strong>Business</strong><br><span style=\"color:#64748b\">${name}</span></div><div class=\"tile\" style=\"padding:14px;border:1px solid #dcfce7;border-radius:16px\"><strong>Location</strong><br><span style=\"color:#64748b\">${esc(lead.city||'Pakistan')}</span></div></div><a class=\"cta\" href=\"${esc(cta)}\" style=\"display:inline-block;padding:17px 24px;border-radius:999px;background:linear-gradient(135deg,#25D366,#16A34A);color:#fff;font-size:17px;font-weight:900;text-align:center;text-decoration:none\">💬 WhatsApp me for a 10-minute demo</a><p style=\"color:#64748b;font-size:13px;line-height:1.6\">${esc(b.trustLine||'')}</p><hr style=\"border:0;border-top:1px solid #e2e8f0;margin:24px 0\"><p style=\"margin:0;font-size:14px;line-height:1.6\"><strong>${esc(cfg.company.senderName)}</strong><br>${esc(cfg.company.senderTitle)} · ${esc(cfg.company.legalName)}<br><a href=\"${esc(cfg.company.website)}\" style=\"color:#16a34a\">${esc(cfg.company.website)}</a></p></div></td></tr></table></td></tr></table></body></html>`;}\nfunction fallback(j){return{subject:`${j.businessName}: WhatsApp growth idea`,body:`Hi ${j.businessName} team,\\n\\nI found ${j.businessName}${j.city?' in '+j.city:''} online. SRLINES centralizes WhatsApp, Facebook Messenger, Instagram DMs, chatbot replies, and sales follow-up in one CRM.\\n\\nWould a 10-minute WhatsApp demo be useful? ${cfg.company.whatsappCtaUrl}\\n\\n${cfg.company.signature}`};}\nfor(const item of items){const j=item.json;if(!j.qualified)continue;let em=fallback(j);try{const key=cfg.deepseek.apiKey;if(!key||key.startsWith('PASTE_'))throw Error('Configure cfg.deepseek.apiKey');const prompt=`Write compliant B2B cold-email JSON {subject,body}; honest personalization only; under 150 words; strong WhatsApp CTA ${cfg.company.whatsappCtaUrl}. Lead:${JSON.stringify({businessName:j.businessName,city:j.city,industry:j.industry,website:j.website,score:j.score})}`;const res=await this.helpers.httpRequest({method:'POST',url:cfg.deepseek.apiUrl,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:{model:cfg.deepseek.model,temperature:.75,messages:[{role:'user',content:prompt}],response_format:{type:'json_object'}},json:true,timeout:120000});em={...em,...JSON.parse(res.choices?.[0]?.message?.content||'{}')};}catch(e){em.aiEmailError=e.message;}const emailBody=String(em.body||'');out.push({json:{...j,emailSubject:String(em.subject||'SRLINES demo').slice(0,140),emailBody,emailHtml:html(j,emailBody),fromEmail:cfg.company.senderEmail,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});}return out.slice(0,cfg.limits.maxEmailsPerRun);"
+        "jsCode": "const cfg=$('Runtime Config').first().json, out=[];\nconst esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\nfunction html(lead,body){const c=cfg.company,b=c.brand||{},name=esc(lead.businessName||'your business'),city=esc(lead.city||'Pakistan');const paras=String(body||'').split(/\\n{2,}/).filter(Boolean).map(x=>`<p style=\"margin:0 0 16px;color:#334155;font-size:16px;line-height:1.65\">${esc(x).replace(/\\n/g,'<br>')}</p>`).join('');return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"x-apple-disable-message-reformatting\"><style>body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}table,td{mso-table-lspace:0;mso-table-rspace:0}table{border-collapse:collapse!important}@media only screen and (max-width:620px){.shell{width:100%!important}.pad{padding:24px 18px!important}.button{display:block!important;width:100%!important;box-sizing:border-box!important}.cta-cell{display:block!important;width:100%!important;padding:0 0 12px!important}.headline{font-size:28px!important}}</style></head><body style=\"margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a\"><div style=\"display:none;max-height:0;overflow:hidden;opacity:0\">A practical WhatsApp CRM idea for ${name}</div><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f1f5f9\"><tr><td align=\"center\" style=\"padding:16px 8px\"><table class=\"shell\" role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:100%;max-width:600px;background:#fff;border-radius:18px;overflow:hidden\"><tr><td class=\"pad\" style=\"padding:24px;background:${b.dark||'#0f172a'};color:#fff\"><div style=\"font-size:26px;font-weight:800;letter-spacing:.03em\">${esc(b.logoText||c.name)}</div><div style=\"margin-top:6px;color:#ccfbf1;font-size:14px;line-height:1.5\">${esc(c.tagline||'')}</div></td></tr><tr><td class=\"pad\" style=\"padding:32px\"><div style=\"display:inline-block;padding:7px 11px;border-radius:999px;background:#f0fdfa;color:${b.primary||'#0f766e'};font-size:12px;font-weight:700\">Prepared for ${name} · ${city}</div><h1 class=\"headline\" style=\"margin:18px 0 16px;font-size:32px;line-height:1.2;letter-spacing:-.02em\">Make every customer conversation count.</h1>${paras}<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:24px 0 12px\"><tr><td class=\"cta-cell\" width=\"50%\" style=\"padding-right:6px\"><a class=\"button\" href=\"${esc(c.whatsappCtaUrl)}\" style=\"display:block;padding:15px 12px;border-radius:10px;background:#16a34a;color:#fff;font-size:15px;font-weight:700;text-align:center;text-decoration:none\">Message on WhatsApp</a></td><td class=\"cta-cell\" width=\"50%\" style=\"padding-left:6px\"><a class=\"button\" href=\"${esc(c.youtubeCtaUrl)}\" style=\"display:block;padding:15px 12px;border-radius:10px;background:#dc2626;color:#fff;font-size:15px;font-weight:700;text-align:center;text-decoration:none\">Watch 60-sec video</a></td></tr></table><a href=\"${esc(c.youtubeCtaUrl)}\" style=\"display:block;margin-top:18px;text-decoration:none\"><img src=\"${esc(c.youtubeThumbnailUrl)}\" width=\"536\" alt=\"Watch the SRLINES product overview on YouTube\" style=\"display:block;width:100%;max-width:536px;height:auto;border:0;border-radius:12px\"><span style=\"display:block;padding-top:8px;color:#475569;font-size:13px;text-align:center\">Tap to watch on YouTube</span></a></td></tr><tr><td class=\"pad\" style=\"padding:22px 32px;background:#f8fafc;border-top:1px solid #e2e8f0\"><p style=\"margin:0 0 10px;font-size:14px;line-height:1.6\"><strong>${esc(c.senderName)}</strong> · ${esc(c.senderTitle)}<br>${esc(c.legalName)}<br><a href=\"${esc(c.website)}\" style=\"color:${b.primary||'#0f766e'}\">${esc(c.website)}</a> · <a href=\"${esc(c.whatsappCtaUrl)}\" style=\"color:${b.primary||'#0f766e'}\">+92 328 3897926</a></p><p style=\"margin:0;color:#64748b;font-size:11px;line-height:1.5\">You are receiving this one-to-one business introduction because your public business contact appeared relevant. Reply “unsubscribe” and we will stop future email.</p></td></tr></table></td></tr></table></body></html>`;}\nfunction fallback(j){return{subject:`${j.businessName}: a simpler way to manage customer chats`,body:`Hi ${j.businessName} team,\\n\\nI noticed your business${j.city?' in '+j.city:''} and thought this may be useful: SRLINES brings WhatsApp, Instagram, Facebook Messenger, chatbot replies, and sales follow-up into one practical CRM.\\n\\nYour team can respond faster, keep ownership clear, and stop promising inquiries from slipping through the cracks.\\n\\nWould you be open to a quick look? Choose WhatsApp or the 60-second video below.`};}\nfor(const item of items){const j=item.json;if(!j.qualified)continue;let em=fallback(j);try{const key=cfg.deepseek.apiKey;if(!key||key.startsWith('PASTE_'))throw Error('Configure cfg.deepseek.apiKey');const prompt=`Return only JSON {\"subject\":\"...\",\"body\":\"...\"} for a professional B2B cold email. Requirements: 90-130 words; plain-language, honest personalization using only supplied lead facts; no hype, invented claims, spam phrases, or fake urgency; explain one relevant customer-conversation problem and SRLINES' WhatsApp/Meta CRM benefit; do not include URLs because the HTML template supplies two CTAs; end by inviting the reader to choose WhatsApp or a 60-second video. Lead: ${JSON.stringify({businessName:j.businessName,city:j.city,industry:j.industry,website:j.website,score:j.score,signals:j.signals})}`;const res=await this.helpers.httpRequest({method:'POST',url:cfg.deepseek.apiUrl,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:{model:cfg.deepseek.model,temperature:.9,messages:[{role:'system',content:'You are a precise, respectful B2B lifecycle copywriter. Vary the angle and phrasing for every lead.'},{role:'user',content:prompt}],response_format:{type:'json_object'}},json:true,timeout:120000});em={...em,...JSON.parse(res.choices?.[0]?.message?.content||'{}')};}catch(e){em.aiEmailError=e.message;}const emailBody=String(em.body||'');out.push({json:{...j,emailSubject:String(em.subject||'A customer-conversation idea').slice(0,140),emailBody,emailHtml:html(j,emailBody),fromEmail:cfg.company.senderEmail,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl,youtubeCtaUrl:cfg.company.youtubeCtaUrl}});}return out.slice(0,cfg.limits.maxEmailsPerRun);"
       },
       "id": "242d791e-2e06-4c64-abcc-44c496e66beb",
       "name": "DeepSeek Personalized Email",
@@ -574,14 +574,14 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst normalize=value=>String(value||'').trim().toLowerCase(), key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\n// Google Sheets OAuth is handled by the Get Emails History node; Code nodes in n8n 2.x cannot access credentials directly.\nconst sent=new Set($('Get Emails History1').all().map(item=>normalize(field(item.json,'email','email address','emailaddress'))).filter(Boolean));\nconst inRun=new Set(),out=[];for(const item of $input.all()){const lead=item.json,email=normalize(lead.email);if(!email||sent.has(email)||inRun.has(email))continue;inRun.add(email);const now=new Date().toISOString();out.push({json:{...lead,email,id:`${email}-initial`,timestamp:now,lastSent:now,campaign:cfg.campaign.name,status:'sent_initial',followupStage:0,replied:false,shouldSend:true,notes:'Initial outreach; history prevents repeat initial sends.'}});}return out;"
+        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst normalize=value=>String(value||'').trim().toLowerCase(), key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\nconst sent=new Set($('Get Emails History1').all().map(item=>normalize(field(item.json,'email','email address','emailaddress'))).filter(Boolean));\nconst blacklist=new Set();for(const item of $('Get Blacklist for Initial Suppression').all()){const row=item.json,type=normalize(field(row,'type'));const value=normalize(field(row,'value','email','email address','emailaddress'));const status=normalize(field(row,'status'));if(value&&(!type||type==='email')&&status!=='inactive'&&status!=='expired')blacklist.add(value);}\nconst inRun=new Set(),out=[];for(const item of $('DeepSeek Personalized Email').all()){const lead=item.json,email=normalize(lead.email);if(!email||sent.has(email)||blacklist.has(email)||inRun.has(email))continue;inRun.add(email);const now=new Date().toISOString();out.push({json:{...lead,email,id:`${email}-initial`,timestamp:now,lastSent:now,campaign:cfg.campaign.name,status:'sent_initial',followupStage:0,replied:false,shouldSend:true,notes:'Initial outreach allowed only after Email_History and Blacklist suppression.'}});}return out;"
       },
       "id": "10023e51-3e26-4a76-aaa7-4174d8a09bdb",
       "name": "Email Cooldown Deduplication",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        320,
+        480,
         848
       ]
     },
@@ -594,7 +594,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        496,
+        672,
         848
       ]
     },
@@ -602,7 +602,7 @@
       "parameters": {
         "sendTo": "={{ $json.email }}",
         "subject": "={{ $json.emailSubject }}",
-        "message": "={{ $json.emailBody }}",
+        "message": "={{ $json.emailHtml }}",
         "options": {
           "replyTo": "={{ $json.replyTo }}"
         }
@@ -610,7 +610,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        672,
+        864,
         848
       ],
       "id": "0f3f5760-55ed-4a7f-ae61-d3b08d74e4d1",
@@ -888,7 +888,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
-        832,
+        1056,
         848
       ],
       "credentials": {
@@ -1151,7 +1151,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json,rows=$input.all().map(i=>i.json);if(!cfg.followup?.enabled)return[];const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));const render=(t,r)=>String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl);function html(r,body){const b=cfg.company.brand||{};return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>@media(max-width:620px){.w{width:100%!important}.c{padding:24px 20px!important}.cta{display:block!important;width:100%!important;box-sizing:border-box!important}}</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial\"><table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"><tr><td align=\"center\" style=\"padding:18px 10px\"><table class=\"w\" width=\"600\" style=\"width:600px;max-width:600px;background:#fff;border-radius:28px;overflow:hidden\"><tr><td style=\"padding:24px 32px;background:linear-gradient(135deg,${b.dark||'#052E16'},${b.primary||'#16A34A'});color:#fff\"><strong style=\"font-size:30px\">${esc(b.logoText||'SRLINES')}</strong><br><span style=\"color:#dcfce7\">${esc(cfg.company.tagline)}</span></td></tr><tr><td class=\"c\" style=\"padding:30px 32px\">${String(body).split(/\\n{2,}/).map(p=>`<p style=\"color:#334155;line-height:1.65\">${esc(p).replace(/\\n/g,'<br>')}</p>`).join('')}<a class=\"cta\" href=\"${esc(cfg.company.whatsappCtaUrl)}\" style=\"display:inline-block;padding:16px 22px;border-radius:999px;background:#16a34a;color:#fff;font-weight:900;text-decoration:none\">💬 Reply on WhatsApp</a><hr style=\"border:0;border-top:1px solid #e2e8f0;margin:22px 0\"><p style=\"font-size:14px\"><strong>${esc(cfg.company.senderName)}</strong><br>${esc(cfg.company.senderTitle)} · <a href=\"${esc(cfg.company.website)}\">${esc(cfg.company.website)}</a></p></td></tr></table></td></tr></table></body></html>`;}const latest=new Map(),now=Date.now(),stop=new Set((cfg.followup.stopStatuses||[]).map(norm=>String(norm).toLowerCase()));for(const r of rows){const e=String(r.email||'').toLowerCase().trim(),t=new Date(r.lastSent||r.timestamp||0).getTime();if(e&&Number.isFinite(t)&&(!latest.has(e)||t>latest.get(e)._time))latest.set(e,{...r,_time:t});}const out=[];for(const r of latest.values()){const e=String(r.email||'').toLowerCase().trim(),s=String(r.status||'').toLowerCase(),stage=Number(r.followupStage||0),next=(cfg.followup.sequence||[]).find(x=>Number(x.stage)===stage+1);if(!e||r.replied===true||String(r.replied).toLowerCase()==='true'||stop.has(s)||/replied|bounce|undeliver|unsubscribe|complaint/.test(s)||!next||now-r._time<Number(next.delayDays||999)*86400000)continue;const emailBody=render(next.body,r);out.push({json:{...r,_suppressionSource:'candidate',email:e,emailSubject:render(next.subject,r),emailBody,emailHtml:html(r,emailBody),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});if(out.length>=cfg.followup.maxFollowupsPerRun)break;}return out;"
+        "jsCode": "const cfg=$('Runtime Config').first().json,rows=$input.all().map(i=>i.json);if(!cfg.followup?.enabled)return[];const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));const render=(t,r)=>String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl).replace(/{{youtubeCtaUrl}}/g,cfg.company.youtubeCtaUrl);function html(r,body){const c=cfg.company,b=c.brand||{},name=esc(r.businessName||'your business');const paras=String(body||'').split(/\\n{2,}/).filter(Boolean).map(p=>`<p style=\"margin:0 0 16px;color:#334155;font-size:16px;line-height:1.65\">${esc(p).replace(/\\n/g,'<br>')}</p>`).join('');return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>table{border-collapse:collapse!important}@media(max-width:620px){.w{width:100%!important}.p{padding:24px 18px!important}.btn,.cell{display:block!important;width:100%!important;box-sizing:border-box!important}.cell{padding:0 0 12px!important}}</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif\"><table role=\"presentation\" width=\"100%\"><tr><td align=\"center\" style=\"padding:16px 8px\"><table class=\"w\" role=\"presentation\" width=\"600\" style=\"width:100%;max-width:600px;background:#fff;border-radius:18px;overflow:hidden\"><tr><td class=\"p\" style=\"padding:24px;background:${b.dark||'#0f172a'};color:#fff\"><strong style=\"font-size:26px\">${esc(b.logoText||c.name)}</strong><br><span style=\"color:#ccfbf1;font-size:14px\">${esc(c.tagline||'')}</span></td></tr><tr><td class=\"p\" style=\"padding:30px 32px\"><div style=\"color:${b.primary||'#0f766e'};font-size:13px;font-weight:700\">A quick follow-up for ${name}</div><h1 style=\"margin:12px 0 18px;font-size:27px;line-height:1.25;color:#0f172a\">Keep customer conversations moving.</h1>${paras}<table role=\"presentation\" width=\"100%\" style=\"margin-top:22px\"><tr><td class=\"cell\" width=\"50%\" style=\"padding-right:6px\"><a class=\"btn\" href=\"${esc(c.whatsappCtaUrl)}\" style=\"display:block;padding:15px 10px;border-radius:10px;background:#16a34a;color:#fff;font-weight:700;text-align:center;text-decoration:none\">Message on WhatsApp</a></td><td class=\"cell\" width=\"50%\" style=\"padding-left:6px\"><a class=\"btn\" href=\"${esc(c.youtubeCtaUrl)}\" style=\"display:block;padding:15px 10px;border-radius:10px;background:#dc2626;color:#fff;font-weight:700;text-align:center;text-decoration:none\">Watch 60-sec video</a></td></tr></table><a href=\"${esc(c.youtubeCtaUrl)}\"><img src=\"${esc(c.youtubeThumbnailUrl)}\" width=\"536\" alt=\"Watch SRLINES on YouTube\" style=\"display:block;margin-top:18px;width:100%;height:auto;border:0;border-radius:12px\"></a></td></tr><tr><td class=\"p\" style=\"padding:20px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;color:#475569;font-size:13px;line-height:1.6\"><strong>${esc(c.senderName)}</strong> · ${esc(c.senderTitle)}<br>${esc(c.legalName)} · <a href=\"${esc(c.website)}\" style=\"color:${b.primary||'#0f766e'}\">${esc(c.website)}</a><br><span style=\"font-size:11px;color:#64748b\">Reply “unsubscribe” to stop future email.</span></td></tr></table></td></tr></table></body></html>`;}const latest=new Map(),now=Date.now(),stop=new Set((cfg.followup.stopStatuses||[]).map(norm=>String(norm).toLowerCase()));for(const r of rows){const e=String(r.email||'').toLowerCase().trim(),t=new Date(r.lastSent||r.timestamp||0).getTime();if(e&&Number.isFinite(t)&&(!latest.has(e)||t>latest.get(e)._time))latest.set(e,{...r,_time:t});}const out=[];for(const r of latest.values()){const e=String(r.email||'').toLowerCase().trim(),s=String(r.status||'').toLowerCase(),stage=Number(r.followupStage||0),next=(cfg.followup.sequence||[]).find(x=>Number(x.stage)===stage+1);if(!e||r.replied===true||String(r.replied).toLowerCase()==='true'||stop.has(s)||/replied|bounce|undeliver|unsubscribe|complaint/.test(s)||!next||now-r._time<Number(next.delayDays||999)*86400000)continue;const emailBody=render(next.body,r);out.push({json:{...r,_suppressionSource:'candidate',email:e,emailSubject:render(next.subject,r),emailBody,emailHtml:html(r,emailBody),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});if(out.length>=cfg.followup.maxFollowupsPerRun)break;}return out;"
       },
       "id": "61c4b549-a801-4a7a-96f3-239f414e4d84",
       "name": "Follow-up Sequence Builder (manual/cron branch)",
@@ -1204,7 +1204,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg = $('Runtime Config').first().json;\nconst my = String(cfg.company.senderEmail || '').trim().toLowerCase();\nconst header = (message, name) => {\n  const headers = message.payload?.headers || message.headers || [];\n  const found = Array.isArray(headers) && headers.find(entry => String(entry.name || entry.key || '').toLowerCase() === name.toLowerCase());\n  return found?.value || found?.Value || '';\n};\nconst emailFrom = value => {\n  if (Array.isArray(value)) value = value.map(entry => entry?.email || entry?.address || entry?.value || entry).join(',');\n  if (value && typeof value === 'object') value = value.email || value.address || value.value || value.emailAddress || '';\n  const match = String(value || '').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i);\n  return match ? match[0].toLowerCase() : '';\n};\nconst seen = new Set();\nconst out = [];\nfor (const item of $input.all()) {\n  const message = item.json;\n  // Gmail can expose headers in payload, headers, or flattened fields depending on the API response.\n  const from = emailFrom(header(message, 'From') || message.from || message.sender || message.fromEmail);\n  if (!from || from === my || seen.has(from)) continue;\n  seen.add(from);\n  out.push({\n    json: {\n      timestamp: new Date().toISOString(),\n      email: from,\n      businessName: '',\n      threadId: message.threadId || message.thread?.id || message.id || '',\n      subject: header(message, 'Subject') || message.subject || '',\n      snippet: message.snippet || message.textPlain || message.text || '',\n      status: 'replied',\n      notes: 'Detected by Gmail inbox reply search',\n    },\n  });\n}\nreturn out;"
+        "jsCode": "const cfg = $('Runtime Config').first().json;\nconst my = String(cfg.company.senderEmail || '').trim().toLowerCase();\nconst header = (message, name) => {\n  const headers = message.payload?.headers || message.headers || [];\n  const found = Array.isArray(headers) && headers.find(entry => String(entry.name || entry.key || '').toLowerCase() === name.toLowerCase());\n  return found?.value || found?.Value || '';\n};\nconst emailFrom = value => {\n  if (Array.isArray(value)) value = value.map(entry => entry?.email || entry?.address || entry?.value || entry).join(',');\n  if (value && typeof value === 'object') value = value.email || value.address || value.value || value.emailAddress || '';\n  const match = String(value || '').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i);\n  return match ? match[0].toLowerCase() : '';\n};\nconst seen = new Set();\nconst out = [];\nfor (const item of $input.all()) {\n  const message = item.json;\n  // Gmail can expose headers in payload, headers, or flattened fields depending on the API response.\n  const from = emailFrom(header(message, 'From') || message.from || message.sender || message.fromEmail);\n  if (!from || from === my || seen.has(from)) continue;\n  seen.add(from);\n  out.push({\n    json: {\n      executionId: cfg.executionId,\n      repliedAt: new Date().toISOString(),\n      email: from,\n      businessName: '',\n      messageId: message.id || '',\n      threadId: message.threadId || message.thread?.id || message.id || '',\n      snippet: message.snippet || message.textPlain || message.text || '',\n      status: 'replied',\n      action: 'suppress_all_future_email',\n      notes: 'Detected by Gmail inbox reply search',\n    },\n  });\n}\nreturn out;"
       },
       "id": "34b86349-00d2-46d9-b2c1-8bcd43cf9510",
       "name": "Extract Replied Emails for Reply_Log",
@@ -1217,7 +1217,7 @@
     },
     {
       "parameters": {
-        "operation": "append",
+        "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
           "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
@@ -1231,19 +1231,21 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "timestamp": "={{$json.timestamp}}",
+            "executionId": "={{$json.executionId}}",
             "email": "={{$json.email}}",
             "businessName": "={{$json.businessName}}",
-            "threadId": "={{$json.threadId}}",
-            "subject": "={{$json.subject}}",
-            "snippet": "={{$json.snippet}}",
+            "repliedAt": "={{$json.repliedAt}}",
             "status": "={{$json.status}}",
+            "messageId": "={{$json.messageId}}",
+            "threadId": "={{$json.threadId}}",
+            "snippet": "={{$json.snippet}}",
+            "action": "={{$json.action}}",
             "notes": "={{$json.notes}}"
           },
           "schema": [
             {
-              "id": "timestamp",
-              "displayName": "timestamp",
+              "id": "executionId",
+              "displayName": "executionId",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -1269,8 +1271,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "threadId",
-              "displayName": "threadId",
+              "id": "repliedAt",
+              "displayName": "repliedAt",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -1278,8 +1280,26 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "subject",
-              "displayName": "subject",
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "messageId",
+              "displayName": "messageId",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "threadId",
+              "displayName": "threadId",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -1296,8 +1316,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "status",
-              "displayName": "status",
+              "id": "action",
+              "displayName": "action",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -1315,12 +1335,15 @@
             }
           ],
           "attemptToConvertTypes": false,
-          "convertFieldsToString": false
+          "convertFieldsToString": false,
+          "matchingColumns": [
+            "messageId"
+          ]
         },
         "options": {}
       },
       "id": "464b9f47-6278-41a8-98c5-4f94e95931b4",
-      "name": "Append Reply_Log",
+      "name": "Upsert Reply_Log",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
@@ -1374,7 +1397,7 @@
     },
     {
       "parameters": {
-        "operation": "append",
+        "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
           "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
@@ -1388,24 +1411,19 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "timestamp": "={{$json.timestamp}}",
             "type": "={{$json.type}}",
             "value": "={{$json.value}}",
-            "source": "={{$json.source}}",
             "reason": "={{$json.reason}}",
+            "addedAt": "={{$json.timestamp}}",
+            "addedBy": "={{$json.source}}",
+            "expiresAt": "",
+            "status": "active",
             "notes": "={{$json.notes}}"
           },
-          "matchingColumns": [],
+          "matchingColumns": [
+            "value"
+          ],
           "schema": [
-            {
-              "id": "timestamp",
-              "displayName": "timestamp",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
             {
               "id": "type",
               "displayName": "type",
@@ -1419,16 +1437,7 @@
               "id": "value",
               "displayName": "value",
               "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "source",
-              "displayName": "source",
-              "required": false,
-              "defaultMatch": false,
+              "defaultMatch": true,
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
@@ -1436,6 +1445,42 @@
             {
               "id": "reason",
               "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "addedAt",
+              "displayName": "addedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "addedBy",
+              "displayName": "addedBy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "expiresAt",
+              "displayName": "expiresAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -1458,7 +1503,7 @@
         "options": {}
       },
       "id": "fe778b81-fbf5-429d-a952-2468b36971d7",
-      "name": "Append Blacklist Bounces",
+      "name": "Upsert Blacklist Bounces",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
@@ -1474,7 +1519,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const normalize=value=>String(value||'').trim().toLowerCase();\nconst key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\nconst replies=new Set(), blacklist=new Set(), sentStages=new Set(), candidates=[];\nfor(const item of $input.all()){const row=item.json, source=row._suppressionSource;\n if(source==='candidate'){candidates.push(row);continue;}\n const email=normalize(field(row,'email','email address','emailaddress'));\n if(!email) continue;\n if(source==='reply') replies.add(email);\n if(source==='blacklist'&&(!field(row,'type')||normalize(field(row,'type'))==='email')) blacklist.add(normalize(field(row,'value','email','email address','emailaddress')));\n}\nconst inRun=new Set(), out=[];\nfor(const row of candidates){const email=normalize(row.email),stage=Number(row.followupStage||0),stageKey=`${email}:${stage}`;\n // Reply_Log, Blacklist, duplicate stages, and duplicate items all stop a follow-up before Gmail.\n if(!email||!stage||replies.has(email)||blacklist.has(email)||sentStages.has(stageKey)||inRun.has(stageKey))continue;\n inRun.add(stageKey);out.push({json:{...row,email,id:`${email}-followup-${stage}`,shouldSend:true}});\n}\nreturn out;"
+        "jsCode": "const normalize=value=>String(value||'').trim().toLowerCase();\nconst key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\nconst replies=new Set(), blacklist=new Set(), candidates=[];\nfor(const item of $input.all()){const row=item.json, source=row._suppressionSource;\n if(source==='candidate'){candidates.push(row);continue;}\n const email=normalize(field(row,'email','email address','emailaddress'));\n const blockedValue=normalize(field(row,'value','email','email address','emailaddress'));\n if(source==='reply'&&email) replies.add(email);\n if(source==='blacklist'&&blockedValue&&(!field(row,'type')||normalize(field(row,'type'))==='email')&&normalize(field(row,'status'))!=='inactive'&&normalize(field(row,'status'))!=='expired') blacklist.add(blockedValue);\n}\nconst inRun=new Set(), out=[];\nfor(const row of candidates){const email=normalize(row.email),stage=Number(row.followupStage||0),stageKey=`${email}:${stage}`;\n if(!email||!stage||replies.has(email)||blacklist.has(email)||inRun.has(stageKey))continue;\n inRun.add(stageKey);out.push({json:{...row,email,id:`${email}-followup-${stage}`,shouldSend:true}});\n}\nreturn out;"
       },
       "id": "b550d8b0-721d-4740-9d80-432e0e4fa411",
       "name": "Follow-up Suppression Check",
@@ -1494,7 +1539,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        416,
+        1152,
         1168
       ]
     },
@@ -1512,7 +1557,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        640,
+        1376,
         1168
       ],
       "webhookId": "8e3e6d6b-92ad-4f1d-8381-d23c50bfd487",
@@ -1793,7 +1838,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
-        864,
+        1600,
         1168
       ],
       "credentials": {
@@ -1952,6 +1997,207 @@
       ],
       "id": "7bd4afb3-5943-406c-98ae-940cce65172d",
       "name": "Get Emails History1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Runtime Config').first().json.sheets.documentId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Runtime Config').first().json.sheets.blacklist }}",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "320b4d0c-1f8a-4adc-b609-05a7195df93d",
+      "name": "Get Blacklist for Initial Suppression",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        256,
+        848
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JOJNkcLhn4iH3jm5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{$('Runtime Config').first().json.sheets.followupQueue}}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "executionId": "={{$('Runtime Config').first().json.executionId}}",
+            "email": "={{$json.email}}",
+            "businessName": "={{$json.businessName}}",
+            "campaign": "={{$json.campaign}}",
+            "followupStage": "={{$json.followupStage}}",
+            "dueAt": "={{new Date().toISOString()}}",
+            "emailSubject": "={{$json.emailSubject}}",
+            "emailBody": "={{$json.emailBody}}",
+            "fromEmail": "={{$('Runtime Config').first().json.company.senderEmail}}",
+            "replyTo": "={{$json.replyTo}}",
+            "status": "={{$json.status}}",
+            "lastSent": "={{$json.lastSent}}",
+            "notes": "={{'Approved after Reply_Log and Blacklist suppression; queued for Gmail send.'}}"
+          },
+          "matchingColumns": [
+            "email"
+          ],
+          "schema": [
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "businessName",
+              "displayName": "businessName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "campaign",
+              "displayName": "campaign",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "followupStage",
+              "displayName": "followupStage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "dueAt",
+              "displayName": "dueAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailSubject",
+              "displayName": "emailSubject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailBody",
+              "displayName": "emailBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fromEmail",
+              "displayName": "fromEmail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "replyTo",
+              "displayName": "replyTo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lastSent",
+              "displayName": "lastSent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b060511c-bcc6-40ed-adfc-f911baf0486a",
+      "name": "Upsert Followup_Queue",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        928,
+        1168
+      ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "JOJNkcLhn4iH3jm5",
@@ -2243,7 +2489,7 @@
       "main": [
         [
           {
-            "node": "Append Reply_Log",
+            "node": "Upsert Reply_Log",
             "type": "main",
             "index": 0
           }
@@ -2265,7 +2511,7 @@
       "main": [
         [
           {
-            "node": "Append Blacklist Bounces",
+            "node": "Upsert Blacklist Bounces",
             "type": "main",
             "index": 0
           }
@@ -2287,7 +2533,7 @@
       "main": [
         [
           {
-            "node": "Follow-up Rate Limit",
+            "node": "Upsert Followup_Queue",
             "type": "main",
             "index": 0
           }
@@ -2397,7 +2643,30 @@
       "main": [
         [
           {
+            "node": "Get Blacklist for Initial Suppression",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Blacklist for Initial Suppression": {
+      "main": [
+        [
+          {
             "node": "Email Cooldown Deduplication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Reply_Log": {},
+    "Upsert Followup_Queue": {
+      "main": [
+        [
+          {
+            "node": "Follow-up Rate Limit",
             "type": "main",
             "index": 0
           }
