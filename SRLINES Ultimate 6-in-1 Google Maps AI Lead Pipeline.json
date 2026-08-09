@@ -5,26 +5,26 @@
       "parameters": {
         "jsCode": "const now = new Date();\nconst executionId = `${now.toISOString()}-${Math.random().toString(36).slice(2, 10)}`;\n\n// PRODUCTION CHECKLIST: replace every PASTE_* value, verify the SES identity/domain,\n// connect PostgreSQL + SES SMTP credentials, then run one manual low-volume test.\nreturn [{ json: {\n  executionId,\n  now: now.toISOString(),\n  timezone: 'UTC',\n  campaign: {\n    name: 'SRLINES UK-Italy-Spain-UAE B2B',\n    consentNote: 'Relevant one-to-one B2B outreach only. Suppress immediately on reply, bounce, complaint, or unsubscribe.'\n  },\n  markets: [\n    { country: 'United Kingdom', countryCode: 'GB', locale: 'en-GB', language: 'English', cities: ['London','Birmingham','Manchester','Leeds','Glasgow','Liverpool','Bristol','Edinburgh','Sheffield','Leicester'] },\n    { country: 'Italy', countryCode: 'IT', locale: 'it-IT', language: 'Italian', cities: ['Milan','Rome','Naples','Turin','Bologna','Florence','Bari','Palermo','Verona','Padua'] },\n    { country: 'Spain', countryCode: 'ES', locale: 'es-ES', language: 'Spanish', cities: ['Madrid','Barcelona','Valencia','Seville','Zaragoza','Málaga','Murcia','Bilbao','Alicante','Palma'] },\n    { country: 'United Arab Emirates', countryCode: 'AE', locale: 'en-AE', language: 'English', cities: ['Dubai','Abu Dhabi','Sharjah','Ajman','Ras Al Khaimah','Al Ain','Fujairah','Umm Al Quwain'] }\n  ],\n  niches: [\n    { group: 'Real Estate', categories: ['real estate agency','property management company','property developer','commercial real estate agency'] },\n    { group: 'Clinics and Hospitals', categories: ['medical clinic','dental clinic','private hospital','dermatology clinic'] },\n    { group: 'Restaurants and Hotels', categories: ['restaurant','hotel','resort hotel','boutique hotel'] },\n    { group: 'Ecommerce and Retail', categories: ['ecommerce business','fashion retailer','furniture store','electronics retailer'] },\n    { group: 'Recruitment and Visa Manpower', categories: ['recruitment agency','staffing agency','visa consultancy','manpower agency'] },\n    { group: 'Professional Services', categories: ['accounting firm','law firm','business consultancy','digital marketing agency'] }\n  ],\n  company: {\n    name: 'SRLINES', senderName: 'Shahid Rasool', senderTitle: 'CEO',\n    senderEmail: 'noreply@ses.srlines.net', replyTo: 'contact@srlines.net',\n    contactEmail: 'contact@srlines.net', whatsappNumber: '+92 328 3897926',\n    whatsappCtaUrl: 'https://wa.me/923283897926?text=Hi%20SRLINES%2C%20I%20saw%20your%20email%20and%20want%20a%20WhatsApp%20CRM%20demo',\n    youtubeCtaUrl: 'https://youtube.com/shorts/gFChGKdtI0o?si=KQ2ydx96IktM7zmM',\n    youtubeThumbnailUrl: 'https://i.ytimg.com/vi/gFChGKdtI0o/hqdefault.jpg',\n    website: 'https://srlines.net', crmUrl: 'https://crm.srlines.net/', legalName: 'SRLINES SOFTWARE HOUSE (SMC-PRIVATE) LIMITED',\n    companyType: 'Software company and SaaS provider (not a logistics company)',\n    productName: 'wCRM', productCategory: 'WhatsApp-first CRM SaaS',\n    positioning: 'Every customer conversation. One place to grow.',\n    tagline: 'WhatsApp-first CRM for ambitious teams',\n    brand: { logoText: 'wCRM by SRLINES', primary: '#0f766e', dark: '#0f172a', accent: '#14b8a6', trustLine: 'Meta Verified Technology Partner · SECP registered · 750+ businesses served · 99.9% uptime SLA.' },\n    signature: 'Shahid Rasool\\nCEO\\nSRLINES SOFTWARE HOUSE\\nWhatsApp: +92 328 3897926\\nEmail: contact@srlines.net',\n    products: ['Shared WhatsApp team inbox','Visual sales pipeline','Opt-in campaigns','Chat automation','Official WhatsApp Cloud API','Facebook Messenger','Instagram DM','Shopify and WooCommerce integrations','n8n community node'],\n    productContext: 'wCRM is SRLINES SOFTWARE HOUSE’s WhatsApp-first CRM SaaS. It brings sales, support, campaigns and automation into one shared WhatsApp workspace with clear ownership, notes, multilingual routing and follow-up. It runs on Meta’s official Cloud API; customers retain their WABA, phone numbers, templates and data assets. Meta bills messaging directly and SRLINES charges only for the SaaS platform. SRLINES is a Meta Verified Technology Partner and an SECP-registered software company serving 750+ businesses.'\n  },\n  limits: { keywordsPerRun: 4, minScoreToEmail: 60, emailCooldownDays: 180, maxEmailsPerRun: 20, minDelaySeconds: 45, maxDelaySeconds: 120 },\n  emailValidation: { enabled: true, requireMx: true, dnsProvider: 'https://dns.google/resolve', timeoutMs: 8000, blockedDomains: ['example.com','test.com','invalid.com'], blockedLocalParts: ['no-reply','noreply','donotreply','do-not-reply','privacy','abuse'] },\n  followup: {\n    enabled: true, maxFollowupsPerRun: 10,\n    stopStatuses: ['replied','bounced','complained','unsubscribed'],\n    sequence: [\n      { stage: 1, delayDays: 4, subject: 'A WhatsApp CRM idea for {{businessName}}', body: 'Hi {{businessName}} team,\\n\\nI wanted to follow up on the wCRM idea I sent. wCRM by SRLINES brings sales, support, campaigns and automation into one shared WhatsApp workspace, using Meta’s official Cloud API. It helps teams assign owners, keep context and move leads through a visual pipeline.\\n\\nIf this is relevant, I can show a short demo tailored to your operation: {{whatsappCtaUrl}}\\n\\nOr watch the 60-second overview: {{youtubeCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 2, delayDays: 10, subject: 'Should I close the loop?', body: 'Hi {{businessName}} team,\\n\\nOne final note in case improving enquiry response and follow-up is currently a priority. I would be happy to share a short wCRM walkthrough: {{whatsappCtaUrl}}\\n\\nOverview: {{youtubeCtaUrl}}\\n\\nIf it is not relevant, no action is needed and I will close the loop.\\n\\n{{signature}}' }\n    ]\n  },\n  deepseek: { apiKey: 'PASTE_DEEPSEEK_API_KEY_HERE', apiUrl: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },\n  scraper: { baseUrl: 'http://localhost:3000', maxResultsPerKeyword: 10, delayBetweenRequests: 1500 },\n  instructions: 'Configure placeholders and credentials. Verify applicable direct-marketing law and your lawful basis for each market before activation.'\n}}];"
       },
-      "id": "250f695e-e566-41a2-8125-9cb1dfc60ad4",
+      "id": "f3bfbac8-bcc8-4e92-95ec-9a7ba96ed405",
       "name": "Runtime Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1568,
-        1808
+        -1504,
+        256
       ]
     },
     {
       "parameters": {
-        "jsCode": "const cfg = $input.first().json;\nconst data = $getWorkflowStaticData('global');\ndata.usedKeywordPairs ||= [];\nconst limit = Number(cfg.limits.keywordsPerRun || 4);\nconst markets = cfg.markets || [];\nconst niches = cfg.niches || [];\nif (!markets.length || !niches.length) throw new Error('Runtime Config must define markets and niches.');\nconst recent = new Set(data.usedKeywordPairs.slice(-500).map(String));\nconst seed = Math.floor(Date.now() / 86400000);\nconst candidates = [];\nfor (let mi = 0; mi < markets.length; mi++) {\n  const market = markets[(mi + seed) % markets.length];\n  for (let ni = 0; ni < niches.length; ni++) {\n    const niche = niches[(ni + seed) % niches.length];\n    const cities = market.cities || [];\n    const categories = niche.categories || [];\n    if (!cities.length || !categories.length) continue;\n    const city = cities[(seed + mi * 3 + ni) % cities.length];\n    const category = categories[(seed + mi + ni * 2) % categories.length];\n    const keyword = `${category} in ${city}, ${market.country}`;\n    const pair = `${market.countryCode}|${city}|${category}`.toLowerCase();\n    if (!recent.has(pair)) candidates.push({keyword, city, industry:niche.group, category, country:market.country, countryCode:market.countryCode, locale:market.locale, language:market.language, intent:'customer messaging and lead follow-up', pair});\n  }\n}\n// Deterministic daily rotation avoids an AI failure blocking discovery and guarantees market diversity.\ncandidates.sort((a,b) => ((a.pair.length + seed) % 17) - ((b.pair.length + seed) % 17));\nconst chosen=[]; const usedCountries=new Set(); const usedIndustries=new Set();\nfor (const c of candidates) if (!usedCountries.has(c.countryCode) && !usedIndustries.has(c.industry)) { chosen.push(c); usedCountries.add(c.countryCode); usedIndustries.add(c.industry); if(chosen.length===limit) break; }\nfor (const c of candidates) if (chosen.length < limit && !chosen.some(x=>x.pair===c.pair)) chosen.push(c);\nif (!chosen.length) { data.usedKeywordPairs=[]; throw new Error('All keyword pairs exhausted; history reset. Run again.'); }\ndata.usedKeywordPairs = [...data.usedKeywordPairs, ...chosen.map(x=>x.pair)].slice(-500);\nreturn chosen.slice(0,limit).map(c=>({json:{...cfg,keyword:c.keyword,keywordCity:c.city,keywordIndustry:c.industry,keywordCategory:c.category,keywordIntent:c.intent,country:c.country,countryCode:c.countryCode,locale:c.locale,language:c.language,keywordStatus:'generated',firstSeen:new Date().toISOString()}}));"
+        "jsCode": "const cfg = $input.first().json;\n\nconst data = $getWorkflowStaticData('global');\ndata.usedKeywordPairs ||= [];\n\nconst limit = Number(cfg.limits?.keywordsPerRun || 4);\n\nconst markets = cfg.markets || [];\nconst niches = cfg.niches || [];\n\nif (!markets.length || !niches.length) {\n  throw new Error('Runtime Config must define markets and niches.');\n}\n\nconst seed = Math.floor(Date.now() / 86400000);\n\nfunction hashString(str) {\n  let hash = 0;\n\n  for (let i = 0; i < str.length; i++) {\n    hash = ((hash << 5) - hash) + str.charCodeAt(i);\n    hash |= 0;\n  }\n\n  return Math.abs(hash);\n}\n\nfunction buildCandidates(recent) {\n  const candidates = [];\n\n  for (const market of markets) {\n    const cities = market.cities || [];\n\n    if (!cities.length) continue;\n\n    for (const city of cities) {\n      for (const niche of niches) {\n        const categories = niche.categories || [];\n\n        if (!categories.length) continue;\n\n        for (const category of categories) {\n          const keyword = `${category} in ${city}, ${market.country}`;\n\n          const pair = [\n            market.countryCode,\n            city,\n            niche.group,\n            category\n          ]\n            .join('|')\n            .toLowerCase();\n\n          if (recent.has(pair)) continue;\n\n          candidates.push({\n            keyword,\n            city,\n            industry: niche.group,\n            category,\n            country: market.country,\n            countryCode: market.countryCode,\n            locale: market.locale,\n            language: market.language,\n            intent: 'customer messaging and lead follow-up',\n            pair\n          });\n        }\n      }\n    }\n  }\n\n  return candidates;\n}\n\nlet recent = new Set(\n  data.usedKeywordPairs\n    .slice(-5000)\n    .map(String)\n);\n\nlet candidates = buildCandidates(recent);\n\n// If every combination has been exhausted,\n// reset history and continue in same execution.\nif (!candidates.length) {\n  data.usedKeywordPairs = [];\n  recent = new Set();\n  candidates = buildCandidates(recent);\n}\n\nif (!candidates.length) {\n  throw new Error(\n    'No keyword candidates could be generated. Check markets, cities, niches and categories.'\n  );\n}\n\n// Stable daily pseudo-random rotation.\n// Different combinations move around each day.\ncandidates.sort((a, b) => {\n  const scoreA = hashString(`${a.pair}|${seed}`);\n  const scoreB = hashString(`${b.pair}|${seed}`);\n\n  return scoreA - scoreB;\n});\n\nconst chosen = [];\nconst chosenPairs = new Set();\n\nconst usedCountries = new Set();\nconst usedIndustries = new Set();\nconst usedCities = new Set();\n\n// Pass 1:\n// Prefer completely different country + industry + city.\nfor (const c of candidates) {\n  if (\n    !usedCountries.has(c.countryCode) &&\n    !usedIndustries.has(c.industry) &&\n    !usedCities.has(`${c.countryCode}|${c.city}`)\n  ) {\n    chosen.push(c);\n    chosenPairs.add(c.pair);\n\n    usedCountries.add(c.countryCode);\n    usedIndustries.add(c.industry);\n    usedCities.add(`${c.countryCode}|${c.city}`);\n\n    if (chosen.length >= limit) break;\n  }\n}\n\n// Pass 2:\n// Prefer different country + industry.\nif (chosen.length < limit) {\n  for (const c of candidates) {\n    if (chosenPairs.has(c.pair)) continue;\n\n    if (\n      !usedCountries.has(c.countryCode) &&\n      !usedIndustries.has(c.industry)\n    ) {\n      chosen.push(c);\n      chosenPairs.add(c.pair);\n\n      usedCountries.add(c.countryCode);\n      usedIndustries.add(c.industry);\n\n      if (chosen.length >= limit) break;\n    }\n  }\n}\n\n// Pass 3:\n// Prefer industries not already selected.\nif (chosen.length < limit) {\n  for (const c of candidates) {\n    if (chosenPairs.has(c.pair)) continue;\n\n    if (!usedIndustries.has(c.industry)) {\n      chosen.push(c);\n      chosenPairs.add(c.pair);\n\n      usedIndustries.add(c.industry);\n\n      if (chosen.length >= limit) break;\n    }\n  }\n}\n\n// Pass 4:\n// Fill any remaining slots from unused combinations.\nif (chosen.length < limit) {\n  for (const c of candidates) {\n    if (chosenPairs.has(c.pair)) continue;\n\n    chosen.push(c);\n    chosenPairs.add(c.pair);\n\n    if (chosen.length >= limit) break;\n  }\n}\n\n// Keep larger history because the candidate pool\n// can now contain thousands of combinations.\ndata.usedKeywordPairs = [\n  ...data.usedKeywordPairs,\n  ...chosen.map(c => c.pair)\n].slice(-5000);\n\nconst now = new Date().toISOString();\n\nreturn chosen.map(c => ({\n  json: {\n    ...cfg,\n\n    keyword: c.keyword,\n    keywordCity: c.city,\n    keywordIndustry: c.industry,\n    keywordCategory: c.category,\n    keywordIntent: c.intent,\n\n    country: c.country,\n    countryCode: c.countryCode,\n    locale: c.locale,\n    language: c.language,\n\n    keywordStatus: 'generated',\n    firstSeen: now\n  }\n}));"
       },
-      "id": "af30d624-ce68-40ed-8189-fe6ae01f236c",
+      "id": "87311401-38fe-489e-9c71-7e900fce9fc7",
       "name": "DeepSeek Keyword Strategy",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1040,
-        288
+        -976,
+        -1280
       ]
     },
     {
@@ -35,78 +35,84 @@
           "queryReplacement": "={{ [$json.executionId, $json.now, $json.keyword, $json.keywordCity, $json.keywordIndustry, $json.keywordCategory, $json.keywordIntent, $json.country, $json.countryCode, $json.locale, $json.language, $json.keywordStatus] }}"
         }
       },
-      "id": "5acea77e-a498-450c-a4ff-daffcbe23b68",
+      "id": "e0323c2c-d8ce-4236-a37e-e342c7915765",
       "name": "Log Keyword to PostgreSQL",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -896,
-        288
-      ]
+        -832,
+        -1280
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
         "jsCode": "// ================================================================\n// GOOGLE MAPS SCRAPER - WITH WEBSITE SCRAPING\n// Extracts emails from websites\n// ================================================================\n\n/**\n * CONFIGURATION\n * Load settings from incoming workflow data or use defaults\n */\nconst incomingConfig = $input.first()?.json || {};\n\nconst config = {\n    BASE_URL: incomingConfig.scraper?.baseUrl || 'http://localhost:3000',\n    maxResults: incomingConfig.scraper?.maxResultsPerKeyword || 20,\n    delayBetweenRequests: incomingConfig.scraper?.delayBetweenRequests || 1000\n};\n\n// ================================================================\n// EMAIL VALIDATION UTILITIES\n// ================================================================\n\n/**\n * Validates if a string is a legitimate business email address\n * Filters out test accounts, images, and common fake domains\n * \n * @param {string} email - Email address to validate\n * @returns {boolean} - True if email passes all validation checks\n */\nfunction isValidEmail(email) {\n    // Basic type and format checks\n    if (!email || typeof email !== 'string') return false;\n    \n    email = email.trim().toLowerCase();\n    \n    // Check against standard email regex pattern\n    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;\n    if (!emailRegex.test(email)) return false;\n    \n    // Basic structural checks\n    if (!email.includes('@') || !email.includes('.')) return false;\n    \n    const parts = email.split('@');\n    if (parts.length !== 2) return false;\n    \n    const [localPart, domain] = parts;\n    \n    // Minimum length requirements\n    if (localPart.length < 2) return false;\n    if (domain.length < 3 || !domain.includes('.')) return false;\n    \n    // Validate TLD\n    const tld = domain.split('.').pop();\n    if (!tld || tld.length < 2) return false;\n    \n    // Filter out test/placeholder patterns\n    const fakePatterns = [\n        /^test/i, /^example/i, /^sample/i, /^demo/i,\n        /^noreply/i, /^no-?reply/i, /^admin@/i,\n        /^user@/i, /^email@/i, /^your@/i,\n        /^logo-/i, /-color@/, /@2x\\.png/, /\\.png$/, /\\.jpg$/, /\\.jpeg$/, /\\.gif$/,\n        /^[0-9]+@/,\n        /^[a-zA-Z]@/,\n    ];\n    \n    for (const pattern of fakePatterns) {\n        if (pattern.test(email)) return false;\n    }\n    \n    // Block known fake domains\n    const fakeDomains = [\n        'example.com', 'test.com', 'sample.com', 'demo.com',\n        'domain.com', 'yourdomain.com', 'website.com',\n        'yoursite.com', 'email.com', 'mail.com',\n        'localhost', 'local', 'invalid', 'placeholder',\n        'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'\n    ];\n    \n    for (const fakeDomain of fakeDomains) {\n        if (domain === fakeDomain || domain.endsWith('.' + fakeDomain)) {\n            return false;\n        }\n    }\n    \n    // Filter out image file extensions\n    const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico'];\n    for (const ext of imageExtensions) {\n        if (email.includes(ext)) return false;\n    }\n    \n    // Filter out code file extensions\n    const fileExtensions = ['.css', '.js', '.json', '.xml', '.html', '.php', '.asp'];\n    for (const ext of fileExtensions) {\n        if (email.includes(ext)) return false;\n    }\n    \n    // Ensure local part contains at least one letter\n    if (!/[a-zA-Z]/.test(localPart)) return false;\n    \n    return true;\n}\n\n/**\n * Extracts and validates all emails from a text string\n * \n * @param {string} text - Text to search for emails\n * @returns {string[]} - Array of unique valid email addresses\n */\nfunction extractEmails(text) {\n    if (!text) return [];\n    \n    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g;\n    const matches = text.match(emailRegex) || [];\n    \n    const validEmails = [];\n    const seen = new Set();\n    \n    for (const email of matches) {\n        const cleanEmail = email.trim().toLowerCase();\n        \n        if (!seen.has(cleanEmail) && isValidEmail(cleanEmail)) {\n            seen.add(cleanEmail);\n            validEmails.push(cleanEmail);\n        }\n    }\n    \n    return validEmails;\n}\n\n/**\n * Validates if a URL is a legitimate business website\n * Excludes social media platforms and search engines\n * \n * @param {string} url - URL to validate\n * @returns {boolean} - True if URL is valid and not a social platform\n */\nfunction isValidWebsite(url) {\n    if (!url || typeof url !== 'string') return false;\n    \n    url = url.trim().toLowerCase();\n    \n    // Must have proper protocol\n    if (!url.startsWith('http://') && !url.startsWith('https://')) return false;\n    \n    // Exclude social media and search platforms\n    const excludedDomains = [\n        'google.com', 'google.se', 'maps.google', 'gstatic',\n        'facebook.com', 'instagram.com', 'linkedin.com', 'twitter.com'\n    ];\n    \n    for (const domain of excludedDomains) {\n        if (url.includes(domain)) return false;\n    }\n    \n    return true;\n}\n\n// ================================================================\n// WEBSITE SCRAPING\n// ================================================================\n\n/**\n * Scrapes a website for email addresses\n * \n * @param {string} websiteUrl - URL of the website to scrape\n * @returns {Promise<{emails: string[], success: boolean}>} \n *          Object containing extracted emails and success status\n */\nasync function scrapeWebsite(websiteUrl) {\n    try {\n        // Fetch the website HTML\n        const html = await this.helpers.request({\n            method: 'GET',\n            url: websiteUrl,\n            headers: {\n                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'\n            },\n            timeout: 15000,\n        });\n        \n        // Extract emails from the HTML content\n        const emails = extractEmails(html);\n        \n        // Also extract mailto: links\n        const mailtoRegex = /mailto:([^\"'\\s<>]+)/gi;\n        let match;\n        while ((match = mailtoRegex.exec(html)) !== null) {\n            const email = match[1].trim();\n            if (isValidEmail(email) && !emails.includes(email)) {\n                emails.push(email);\n            }\n        }\n        \n        return {\n            emails: [...new Set(emails)],\n            success: true\n        };\n        \n    } catch (error) {\n        return {\n            emails: [],\n            success: false\n        };\n    }\n}\n\n// ================================================================\n// MAIN EXECUTION\n// ================================================================\n\n/**\n * Main workflow execution\n * Searches Google Maps, scrapes websites, and extracts emails\n */\nasync function main() {\n    // Get workflow input data\n    const items = $input.all();\n    const workflowContext = (items && items.length > 0) ? items[0].json : {};\n    \n    // Extract search keywords\n    let keywords = '';\n    if (items && items.length > 0) {\n        const item = items[0].json;\n        keywords = item.keywords || item.query || item.search || item.keyword || '';\n    }\n    \n    // Fallback keyword if none provided\n    if (!keywords || keywords.trim() === '') {\n        throw new Error('No keyword supplied by DeepSeek Keyword Strategy');\n    }\n    \n    console.log(`🔍 Searching: \"${keywords}\"`);\n    \n    // -------- SEARCH GOOGLE MAPS --------\n    \n    let searchResult;\n    try {\n        searchResult = await this.helpers.request({\n            method: 'POST',\n            url: `${config.BASE_URL}/api/scrape/search`,\n            headers: { 'Content-Type': 'application/json' },\n            body: JSON.stringify({\n                query: keywords,\n                maxResults: config.maxResults\n            }),\n            json: true,\n            timeout: 60000\n        });\n    } catch (error) {\n        return [{\n            json: {\n                error: `Search failed: ${error.message}`,\n                success: false,\n                timestamp: new Date().toISOString()\n            }\n        }];\n    }\n    \n    // Handle search errors\n    if (!searchResult.success) {\n        return [{\n            json: {\n                error: `Search error: ${searchResult.error}`,\n                success: false,\n                timestamp: new Date().toISOString()\n            }\n        }];\n    }\n    \n    const places = searchResult.data?.results || [];\n    console.log(`✅ Found ${places.length} total results`);\n    \n    // -------- PROCESS RESULTS --------\n    \n    const validResults = [];\n    let processedCount = 0;\n    \n    for (let i = 0; i < places.length; i++) {\n        const place = places[i];\n        processedCount++;\n        console.log(`📋 ${i+1}/${places.length}: ${place.title}`);\n        \n        // Skip invalid entries\n        if (!place.title || place.title.includes('Logga in') || place.title.includes('Google Maps')) {\n            console.log(`   ⚠️ Skipping invalid entry`);\n            continue;\n        }\n        \n        let primaryEmail = 'N/A';\n        let allEmails = [];\n        \n        // Check if website exists and is valid\n        if (place.website && place.website !== 'N/A' && isValidWebsite(place.website)) {\n            console.log(`   🌐 Scraping website: ${place.website}`);\n            \n            const websiteData = await scrapeWebsite.call(this, place.website);\n            \n            if (websiteData.success && websiteData.emails.length > 0) {\n                allEmails = websiteData.emails;\n                \n                // Prefer business emails over generic providers\n                const businessEmails = allEmails.filter(email => {\n                    const domain = email.split('@')[1];\n                    return domain && !['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'].includes(domain);\n                });\n                \n                primaryEmail = businessEmails.length > 0 ? businessEmails[0] : allEmails[0];\n                console.log(`   📧 Found ${allEmails.length} emails: ${allEmails.join(', ')}`);\n            } else {\n                console.log(`   ⚠️ No emails found on website`);\n            }\n        } else {\n            console.log(`   ⚠️ No valid website to scrape`);\n        }\n        \n        // Only keep results with valid emails\n        if (primaryEmail !== 'N/A') {\n            const result = {\n                name: place.title || 'N/A',\n                phone: place.phone || 'N/A',\n                email: primaryEmail,\n                website: place.website || 'N/A',\n                rating: place.rating || 0,\n                reviews: place.reviews || 0,\n                keyword: keywords,\n                keywordCity: workflowContext.keywordCity || '',\n                keywordIndustry: workflowContext.keywordIndustry || '',\n                keywordIntent: workflowContext.keywordIntent || '',\n                keywordCategory: workflowContext.keywordCategory || '',\n                country: workflowContext.country || '',\n                countryCode: workflowContext.countryCode || '',\n                locale: workflowContext.locale || '',\n                language: workflowContext.language || '',\n                executionId: workflowContext.executionId || '',\n                timestamp: new Date().toISOString()\n            };\n            \n            validResults.push(result);\n            console.log(`   ✅ KEPT - Email: ${primaryEmail}`);\n        } else {\n            console.log(`   ❌ SKIPPED - No valid email found`);\n        }\n        \n        // Delay between requests\n        if (i < places.length - 1) {\n            await new Promise(resolve => setTimeout(resolve, config.delayBetweenRequests));\n        }\n    }\n    \n    // Print summary\n    console.log(`\\n📊 Summary:`);\n    console.log(`   Total processed: ${processedCount}`);\n    console.log(`   Valid results with emails: ${validResults.length}`);\n    console.log(`   Skipped: ${processedCount - validResults.length}`);\n    \n    // -------- RETURN RESULTS --------\n    \n    if (validResults.length > 0) {\n        return validResults.map(result => ({\n            json: result\n        }));\n    }\n    \n    // Fallback response when no results found\n    return [{\n        json: {\n            message: 'No businesses with valid email addresses found',\n            searchKeywords: keywords,\n            keyword: keywords,\n            keywordCity: workflowContext.keywordCity || '',\n            keywordIndustry: workflowContext.keywordIndustry || '',\n            keywordIntent: workflowContext.keywordIntent || '',\n            keywordCategory: workflowContext.keywordCategory || '',\n            country: workflowContext.country || '',\n            countryCode: workflowContext.countryCode || '',\n            locale: workflowContext.locale || '',\n            language: workflowContext.language || '',\n            executionId: workflowContext.executionId || '',\n            totalProcessed: processedCount,\n            success: true,\n            timestamp: new Date().toISOString()\n        }\n    }];\n}\n\n// Execute the workflow\nreturn await main();"
       },
-      "id": "d9b757c5-4441-4c9b-8bbb-d77b0e674b7f",
+      "id": "be311916-5ac1-40f3-ad48-141feaab3b55",
       "name": "Google Maps Scraper",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -672,
-        112
+        -608,
+        -1456
       ]
     },
     {
       "parameters": {
         "jsCode": "function clean(v){return(v??'').toString().trim()}function phone(v){return clean(v).replace(/[\\s().-]/g,'')}function dom(url){try{return new URL(url.startsWith('http')?url:'https://'+url).hostname.replace(/^www\\./,'').toLowerCase()}catch{return''}}return items.map(item=>{const j=item.json;const email=clean(j.email||j.emails?.[0]||'').toLowerCase();const website=clean(j.website||j.url||j.site||'');return{json:{...j,businessName:clean(j.name||j.title||j.businessName||j.placeName),email,phone:phone(j.phone||j.telephone),website,domain:dom(website),city:clean(j.city||j.keywordCity),industry:clean(j.industry||j.keywordIndustry),rating:Number(j.rating||0),reviews:Number(String(j.reviews||j.reviewCount||0).replace(/\\D/g,''))||0,normalizedAt:new Date().toISOString()}}}).filter(i=>i.json.businessName&&i.json.email);"
       },
-      "id": "6ff05145-a869-4b91-94a9-270532018d6a",
+      "id": "32e4166c-c7b5-4a8d-9d0e-5c8865c7c662",
       "name": "Normalize & Require Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -512,
-        288
+        -448,
+        -1280
       ]
     },
     {
       "parameters": {
         "jsCode": "\nconst cfg = $('Runtime Config').first().json;\nconst validation = cfg.emailValidation || {};\nconst data = $getWorkflowStaticData('global');\ndata.invalidEmails ||= {};\ndata.domainMxCache ||= {};\n\nconst disposableDomains = new Set([\n  'mailinator.com','10minutemail.com','guerrillamail.com','tempmail.com','yopmail.com','trashmail.com'\n]);\nconst blockedDomains = new Set([...(validation.blockedDomains || []), ...disposableDomains].map(d => String(d).toLowerCase()));\nconst blockedLocalParts = new Set((validation.blockedLocalParts || []).map(v => String(v).toLowerCase()));\nconst provider = validation.dnsProvider || 'https://dns.google/resolve';\nconst timeout = validation.timeoutMs || 8000;\n\nfunction syntax(email) {\n  if (!email || typeof email !== 'string') return false;\n  if (email.length > 254) return false;\n  const parts = email.split('@');\n  if (parts.length !== 2) return false;\n  const [local, domain] = parts;\n  if (!local || !domain || local.length > 64) return false;\n  if (local.startsWith('.') || local.endsWith('.') || local.includes('..')) return false;\n  if (!/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(local)) return false;\n  if (!/^(?!-)(?:[a-z0-9-]{1,63}\\.)+[a-z]{2,63}$/i.test(domain)) return false;\n  return true;\n}\nfunction getDomain(email) { return String(email).toLowerCase().split('@')[1] || ''; }\nfunction getLocal(email) { return String(email).toLowerCase().split('@')[0] || ''; }\nasync function lookupMx(domain) {\n  const cached = data.domainMxCache[domain];\n  if (cached && Date.now() - new Date(cached.checkedAt).getTime() < 7 * 86400000) return cached;\n  let result = {domain, checkedAt: new Date().toISOString(), hasMx: false, mxRecords: [], reason: 'mx_lookup_failed'};\n  try {\n    const res = await this.helpers.httpRequest({method:'GET',url:provider,qs:{name:domain,type:'MX'},json:true,timeout});\n    const records = (res.Answer || []).filter(a => Number(a.type) === 15).map(a => String(a.data || '').trim()).filter(Boolean);\n    result = {domain, checkedAt: new Date().toISOString(), hasMx: records.length > 0, mxRecords: records, reason: records.length ? 'mx_found' : 'no_mx_records'};\n  } catch (e) {\n    result.reason = `mx_lookup_error: ${e.message}`;\n  }\n  data.domainMxCache[domain] = result;\n  return result;\n}\n\nconst out = [];\nfor (const item of items) {\n  const j = item.json;\n  const email = String(j.email || '').trim().toLowerCase();\n  const domain = getDomain(email);\n  const local = getLocal(email);\n  let status = 'valid';\n  let reason = 'syntax_and_mx_valid';\n  let mx = {hasMx: true, mxRecords: []};\n\n  if (data.invalidEmails[email]) {\n    status = 'invalid'; reason = data.invalidEmails[email].reason || 'previously_bounced_or_invalid';\n  } else if (!syntax(email)) {\n    status = 'invalid'; reason = 'invalid_email_syntax';\n  } else if (blockedDomains.has(domain)) {\n    status = 'invalid'; reason = 'blocked_or_disposable_domain';\n  } else if (blockedLocalParts.has(local)) {\n    status = 'invalid'; reason = 'blocked_role_or_no_reply_local_part';\n  } else if (validation.enabled !== false && validation.requireMx !== false) {\n    mx = await lookupMx.call(this, domain);\n    if (!mx.hasMx) { status = 'invalid'; reason = mx.reason || 'no_mx_records'; }\n  }\n\n  if (status === 'valid') {\n    out.push({json:{...j,emailValidationStatus:status,emailValidationReason:reason,emailMxRecords:(mx.mxRecords || []).join(' | '),emailMxCheckedAt:mx.checkedAt || new Date().toISOString()}});\n  } else {\n    data.invalidEmails[email] = {email, domain, reason, checkedAt: new Date().toISOString(), businessName: j.businessName || ''};\n  }\n}\nreturn out;\n"
       },
-      "id": "5d2d245c-0a6b-4328-b1cf-0d7c6be224d1",
+      "id": "e78c6936-993c-4473-be43-415d4e2cef5e",
       "name": "DNS MX Email Validation",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -352,
-        288
+        -288,
+        -1280
       ]
     },
     {
       "parameters": {
         "jsCode": "async function fetchText(url){try{return await this.helpers.httpRequest({url,method:'GET',timeout:15000,headers:{'User-Agent':'SRLINES lead research bot'},json:false})}catch{return''}}const out=[];for(const item of items){const j=item.json;let html='';if(j.website)html=await fetchText.call(this,j.website);const text=String(html).replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').slice(0,12000);const lower=(text+' '+j.website).toLowerCase();out.push({json:{...j,websiteText:text,signals:{hasWebsite:!!j.website,hasCompanyEmail:!!j.email&&!/@(gmail|yahoo|hotmail|outlook)\\./i.test(j.email),usesFreeEmailProvider:/@(gmail|yahoo|hotmail|outlook)\\./i.test(j.email),shopify:/cdn\\.shopify|myshopify|shopify/i.test(html),whatsapp:/wa\\.me|api\\.whatsapp|whatsapp/i.test(html),facebook:/facebook\\.com|fb\\.com/i.test(html),instagram:/instagram\\.com/i.test(html),ecommerce:/cart|checkout|shopify|woocommerce|add to cart/i.test(lower)}}})}return out;"
       },
-      "id": "d8231772-7e7a-4c1c-8ed6-ff194e14469c",
+      "id": "ade0016a-f340-407f-889e-5c1f637caeea",
       "name": "Website Enrichment",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        80,
-        304
+        160,
+        -1264
       ]
     },
     {
       "parameters": {
         "jsCode": "function h(j){let s=0;if(j.signals.shopify)s+=30;if(j.signals.hasWebsite)s+=20;if(j.signals.hasCompanyEmail)s+=15;if(j.signals.facebook)s+=5;if(j.signals.instagram)s+=5;if(j.reviews>100)s+=10;if(j.signals.usesFreeEmailProvider)s-=5;if(!j.signals.hasWebsite)s-=50;if(!j.email)s=-999;return Math.max(0,Math.min(100,s))}const cfg=$('Runtime Config').first().json;const out=[];for(const item of items){const j=item.json;const base=h(j);let ai={score:base,priority:base>=85?'Hot':base>=70?'Warm':'Low',pain_points:[],crm:'Unknown',shopify:!!j.signals.shopify,industry:j.industry};try{const key=cfg.deepseek.apiKey;if(!key||key==='PASTE_DEEPSEEK_API_KEY_HERE')throw new Error('Configure cfg.deepseek.apiKey in Runtime Config');const prompt=`Evaluate this B2B lead in ${j.country || 'the configured target market'} for SRLINES. Return only JSON with score, priority, industry, employees, crm, shopify, pain_points, personalization_angle. Lead: ${JSON.stringify({businessName:j.businessName,city:j.city,country:j.country,industry:j.industry,email:j.email,website:j.website,rating:j.rating,reviews:j.reviews,signals:j.signals,websiteText:j.websiteText?.slice(0,4000)})}`;const res=await this.helpers.httpRequest({method:'POST',url:cfg.deepseek.apiUrl,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:{model:cfg.deepseek.model,temperature:.35,messages:[{role:'user',content:prompt}],response_format:{type:'json_object'}},json:true,timeout:120000});ai={...ai,...JSON.parse(res.choices?.[0]?.message?.content||'{}')}}catch(e){ai.error=e.message}const finalScore=Math.round(Math.max(base,Number(ai.score)||0));out.push({json:{...j,aiAnalysis:ai,score:finalScore,priority:ai.priority||(finalScore>=85?'Hot':finalScore>=70?'Warm':'Low'),qualified:finalScore>=cfg.limits.minScoreToEmail}})}return out;"
       },
-      "id": "a36a1a4d-babb-4746-911b-4b43aa5d7380",
+      "id": "cc5a3624-7ee6-4bd3-9eee-d970593805a1",
       "name": "DeepSeek Lead Scoring",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        304,
-        304
+        384,
+        -1264
       ]
     },
     {
@@ -120,13 +126,13 @@
           ]
         }
       },
-      "id": "d02d69ad-d2e6-4570-bfc5-5fa092321546",
+      "id": "ef4bad69-3048-433d-a78e-83a5507de1c9",
       "name": "Qualified Only",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        656,
-        288
+        736,
+        -1280
       ]
     },
     {
@@ -137,26 +143,32 @@
           "queryReplacement": "={{ [$json.executionId, $json.normalizedAt, $json.keyword, $json.businessName, $json.email, $json.phone, $json.website, $json.domain, $json.city, $json.country, $json.countryCode, $json.locale, $json.language, $json.industry, $json.keywordCategory, $json.rating, $json.reviews, $json.score, $json.priority, $json.qualified, $json.emailValidationStatus, $json.emailValidationReason, $json.emailMxRecords, $json.emailMxCheckedAt, JSON.stringify($json.aiAnalysis || {}), JSON.stringify($json.signals || {})] }}"
         }
       },
-      "id": "1e93c052-3b66-46d0-9772-e949fb9545d4",
+      "id": "a6c61fff-1dbe-4f9c-bdd0-606223c48123",
       "name": "Store Qualified Lead",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1024,
-        768
-      ]
+        -960,
+        -800
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
         "jsCode": "const cfg = $('Runtime Config').first().json, out=[];\nconst esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\nconst exactContact=`WhatsApp: ${cfg.company.whatsappNumber}\\nEmail: ${cfg.company.contactEmail}`;\nconst placeholderPattern=/{{[^}]+}}|\\[[^\\]]*(?:name|company|email|phone|insert|placeholder)[^\\]]*\\]|<(?:name|company|email|phone|insert)[^>]*>|\\b(?:company name|your company|example\\.com|name here|lorem ipsum|xxx+)\\b/i;\nfunction isGrounded(em){\n  const subject=String(em?.subject||'').trim(), body=String(em?.body||'').trim();\n  if(!subject||!body||placeholderPattern.test(subject)||placeholderPattern.test(body)||/https?:\\/\\//i.test(body)) return false;\n  const emails=body.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi)||[];\n  if(emails.some(email=>email.toLowerCase()!==cfg.company.contactEmail.toLowerCase())) return false;\n  const phones=body.match(/\\+?\\d[\\d\\s().-]{8,}\\d/g)||[];\n  const expected=String(cfg.company.whatsappNumber).replace(/\\D/g,'');\n  if(phones.some(phone=>String(phone).replace(/\\D/g,'')!==expected)) return false;\n  return true;\n}\nfunction withExactContact(body){\n  let clean=String(body||'').trim();\n  clean=clean.replace(/(?:WhatsApp:\\s*\\+92\\s*328\\s*3897926\\s*\\n?\\s*)?(?:Email:\\s*contact@srlines\\.net\\s*)?$/i,'').trim();\n  return `${clean}\\n\\n${exactContact}`;\n}\nfunction html(lead,body){const c=cfg.company,b=c.brand||{},name=esc(lead.businessName||'your business'),city=esc([lead.city,lead.country].filter(Boolean).join(', ')||'your market');const paras=String(body||'').split(/\\n{2,}/).filter(Boolean).map(x=>`<p style=\"margin:0 0 16px;color:#334155;font-size:16px;line-height:1.65\">${esc(x).replace(/\\n/g,'<br>')}</p>`).join('');return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"x-apple-disable-message-reformatting\"><style>body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}table,td{mso-table-lspace:0;mso-table-rspace:0}table{border-collapse:collapse!important}@media only screen and (max-width:620px){.shell{width:100%!important}.pad{padding:24px 18px!important}.button{display:block!important;width:100%!important;box-sizing:border-box!important}.cta-cell{display:block!important;width:100%!important;padding:0 0 12px!important}.headline{font-size:28px!important}}</style></head><body style=\"margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a\"><div style=\"display:none;max-height:0;overflow:hidden;opacity:0\">A practical WhatsApp CRM idea for ${name}</div><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f1f5f9\"><tr><td align=\"center\" style=\"padding:16px 8px\"><table class=\"shell\" role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:100%;max-width:600px;background:#fff;border-radius:18px;overflow:hidden\"><tr><td class=\"pad\" style=\"padding:24px;background:${b.dark||'#0f172a'};color:#fff\"><div style=\"font-size:26px;font-weight:800;letter-spacing:.03em\">${esc(b.logoText||c.name)}</div><div style=\"margin-top:6px;color:#ccfbf1;font-size:14px;line-height:1.5\">${esc(c.tagline||'')}</div></td></tr><tr><td class=\"pad\" style=\"padding:32px\"><div style=\"display:inline-block;padding:7px 11px;border-radius:999px;background:#f0fdfa;color:${b.primary||'#0f766e'};font-size:12px;font-weight:700\">Prepared for ${name} · ${city}</div><h1 class=\"headline\" style=\"margin:18px 0 16px;font-size:32px;line-height:1.2;letter-spacing:-.02em\">Every customer conversation. One place to grow.</h1>${paras}<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:24px 0 12px\"><tr><td class=\"cta-cell\" width=\"50%\" style=\"padding-right:6px\"><a class=\"button\" href=\"${esc(c.whatsappCtaUrl)}\" style=\"display:block;padding:15px 12px;border-radius:10px;background:#16a34a;color:#fff;font-size:15px;font-weight:700;text-align:center;text-decoration:none\">Message on WhatsApp</a></td><td class=\"cta-cell\" width=\"50%\" style=\"padding-left:6px\"><a class=\"button\" href=\"${esc(c.youtubeCtaUrl)}\" style=\"display:block;padding:15px 12px;border-radius:10px;background:#dc2626;color:#fff;font-size:15px;font-weight:700;text-align:center;text-decoration:none\">Watch 60-sec video</a></td></tr></table><a href=\"${esc(c.youtubeCtaUrl)}\" style=\"display:block;margin-top:18px;text-decoration:none\"><img src=\"${esc(c.youtubeThumbnailUrl)}\" width=\"536\" alt=\"Watch the SRLINES product overview on YouTube\" style=\"display:block;width:100%;max-width:536px;height:auto;border:0;border-radius:12px\"><span style=\"display:block;padding-top:8px;color:#475569;font-size:13px;text-align:center\">Tap to watch on YouTube</span></a></td></tr><tr><td class=\"pad\" style=\"padding:22px 32px;background:#f8fafc;border-top:1px solid #e2e8f0\"><p style=\"margin:0 0 10px;font-size:14px;line-height:1.6\"><strong>${esc(c.senderName)}</strong> · ${esc(c.senderTitle)}<br>${esc(c.legalName)}<br><a href=\"${esc(c.website)}\" style=\"color:${b.primary||'#0f766e'}\">${esc(c.website)}</a><br><a href=\"${esc(c.whatsappCtaUrl)}\" style=\"color:${b.primary||'#0f766e'}\">${esc(c.whatsappNumber)}</a> · <a href=\"mailto:${esc(c.contactEmail)}\" style=\"color:${b.primary||'#0f766e'}\">${esc(c.contactEmail)}</a></p><p style=\"margin:0;color:#64748b;font-size:11px;line-height:1.5\">You are receiving this one-to-one business introduction because your public business contact appeared relevant. Reply “unsubscribe” and we will stop future email.</p></td></tr></table></td></tr></table></body></html>`;}\nfunction fallback(j){return{subject:`${j.businessName}: a simpler way to manage customer chats`,body:`Hi ${j.businessName} team,\\n\\nI found your public business listing${j.city?' for '+j.city:''}. Based only on that listing, SRLINES may be relevant if your team handles customer conversations across WhatsApp, Instagram, Facebook Messenger, or other channels.\\n\\nwCRM by SRLINES is a WhatsApp-first CRM SaaS that brings sales, support, campaigns, automation, shared ownership, and a visual deal pipeline into one workspace on Meta’s official Cloud API. Your business keeps ownership of its WhatsApp Business assets.\\n\\nWould you be open to a short, no-obligation overview?`};}\nfor(const item of items){\n  const j=item.json;if(!j.qualified)continue;\n  let em=fallback(j), aiEmailError='';\n  try{\n    const key=cfg.deepseek.apiKey;if(!key||key.startsWith('PASTE_'))throw Error('Configure cfg.deepseek.apiKey');\n    const facts={businessName:j.businessName,city:j.city,country:j.country,industry:j.industry,website:j.website,rating:j.rating,reviews:j.reviews,signals:j.signals};\n    const prompt=`Return only JSON {\"subject\":\"...\",\"body\":\"...\"} for a professional B2B introduction in ${j.language||'English'} (${j.locale||'en-GB'}). FACTUAL-GROUNDING RULES: Use only non-empty facts in LEAD_FACTS. Do not infer the recipient's software, problems, size, performance, needs, customers, revenue, or relationship with SRLINES. Never invent testimonials, results, discounts, deadlines, or prior contact. Never output dummy data, sample values, unresolved tokens, square-bracket placeholders, angle-bracket placeholders, or {{template}} placeholders. Do not use generic substitutions such as \"Company Name\" or \"your company\". If a fact is absent, omit it. Write 90-130 words, with no hype, fake urgency, sensitive data, or URLs. The only permitted contact details are exactly \"WhatsApp: ${cfg.company.whatsappNumber}\" and \"Email: ${cfg.company.contactEmail}\"; include both exactly once at the end. POSITIONING: SRLINES SOFTWARE HOUSE is a software company, not a logistics company. Its product is wCRM, a WhatsApp-first CRM SaaS. Use this product context accurately: ${cfg.company.productContext}. Present relevant capabilities as possibilities, not claims about the lead. Never describe SRLINES as a carrier, freight forwarder, transport provider, or logistics company. LEAD_FACTS=${JSON.stringify(facts)}`;\n    const res=await this.helpers.httpRequest({method:'POST',url:cfg.deepseek.apiUrl,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:{model:cfg.deepseek.model,temperature:.35,messages:[{role:'system',content:'You are a factual, conservative B2B copywriter. Ground every personalized statement in supplied facts. When uncertain, omit the statement. Never invent facts or output placeholders.'},{role:'user',content:prompt}],response_format:{type:'json_object'}},json:true,timeout:120000});\n    const candidate=JSON.parse(res.choices?.[0]?.message?.content||'{}');\n    if(!isGrounded(candidate))throw Error('AI output rejected by factual-grounding/contact validation');\n    em=candidate;\n  }catch(e){aiEmailError=e.message;}\n  const emailBody=withExactContact(em.body);\n  out.push({json:{...j,emailSubject:String(em.subject||'A customer-conversation idea').slice(0,140),emailBody,emailHtml:html(j,emailBody),fromEmail:cfg.company.senderEmail,replyTo:cfg.company.replyTo,whatsappNumber:cfg.company.whatsappNumber,contactEmail:cfg.company.contactEmail,whatsappCtaUrl:cfg.company.whatsappCtaUrl,youtubeCtaUrl:cfg.company.youtubeCtaUrl,aiEmailError}});\n}\nreturn out.slice(0,cfg.limits.maxEmailsPerRun);"
       },
-      "id": "27893517-0513-4a41-9979-01fce555f7d2",
+      "id": "5c0f4c69-f4cb-4f9c-9404-dc77bea748a8",
       "name": "DeepSeek Personalized Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -832,
-        768
+        -768,
+        -800
       ]
     },
     {
@@ -168,36 +180,42 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -832,
-        560
+        -768,
+        -1008
       ],
-      "id": "9df4b1f9-7e0b-4a4e-94c8-81d681182536",
-      "name": "Read Email History for Follow-ups"
+      "id": "b39c02be-c62b-418c-908d-bdb64116daca",
+      "name": "Read Email History for Follow-ups",
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
         "jsCode": "const cfg=$('Runtime Config').first().json;\nconst normalize=value=>String(value||'').trim().toLowerCase(), key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\nconst cutoff=Date.now()-Number(cfg.limits.emailCooldownDays||180)*86400000;\nconst recentlySent=new Set();\nfor(const item of $('Read Recent Email History').all()){\n  const row=item.json,email=normalize(field(row,'email','email address','emailaddress'));\n  const sentAt=new Date(field(row,'lastSent','timestamp')).getTime();\n  const status=normalize(field(row,'status'));\n  if(email && Number.isFinite(sentAt) && sentAt>=cutoff && !/failed|error/.test(status)) recentlySent.add(email);\n}\nconst blacklist=new Set();\nfor(const item of $('Read Blacklist for Initial Suppression').all()){\n  const row=item.json,type=normalize(field(row,'type'));\n  const value=normalize(field(row,'value','email','email address','emailaddress'));\n  const status=normalize(field(row,'status'));\n  const expiresAt=new Date(field(row,'expiresAt')).getTime();\n  const expired=Number.isFinite(expiresAt)&&expiresAt<Date.now();\n  if(value&&(!type||type==='email')&&status!=='inactive'&&status!=='expired'&&!expired) blacklist.add(value);\n}\n// Evaluate only the current loop item. Always return it so a suppressed lead can\n// take the skip path back to Loop Over Items and cannot strand the done output.\nconst lead=$('Loop Over Items2').item.json;\nconst email=normalize(lead.email);\nlet suppressionReason='';\nif(!email) suppressionReason='missing_email';\nelse if(recentlySent.has(email)) suppressionReason='email_cooldown';\nelse if(blacklist.has(email)) suppressionReason='blacklisted';\nif(suppressionReason) return [{json:{...lead,email,shouldSend:false,suppressionReason}}];\nconst now=new Date().toISOString();\nreturn [{json:{...lead,email,id:`${email}-initial-${cfg.executionId}`,timestamp:now,lastSent:now,campaign:cfg.campaign.name,status:'sent_initial',followupStage:0,replied:false,shouldSend:true,notes:`Initial outreach allowed after ${cfg.limits.emailCooldownDays}-day cooldown and Blacklist suppression.`}}];"
       },
-      "id": "ff97057e-9432-40cc-9874-bfa9697b5932",
+      "id": "0842c26b-c42d-4e46-b6c8-a98dc789f9dd",
       "name": "Email Cooldown Deduplication",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        336,
-        768
+        416,
+        -800
       ]
     },
     {
       "parameters": {
         "jsCode": "const cfg=$('Runtime Config').first().json;const ms=(cfg.limits.minDelaySeconds+Math.random()*(cfg.limits.maxDelaySeconds-cfg.limits.minDelaySeconds))*1000;await new Promise(r=>setTimeout(r,ms));return items;"
       },
-      "id": "802dd8cd-e281-416c-8f12-0371570ae423",
+      "id": "fa15636c-e6a1-4a25-9d37-3980f0ef85f9",
       "name": "Random Rate Limit",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        528,
-        768
+        960,
+        -800
       ]
     },
     {
@@ -208,26 +226,32 @@
           "queryReplacement": "={{ [$('Email Cooldown Deduplication').item.json.id, $('Email Cooldown Deduplication').item.json.executionId, $('Email Cooldown Deduplication').item.json.timestamp, $('Email Cooldown Deduplication').item.json.businessName, $('Email Cooldown Deduplication').item.json.email, $('Email Cooldown Deduplication').item.json.phone, $('Email Cooldown Deduplication').item.json.website, $('Email Cooldown Deduplication').item.json.domain, $('Email Cooldown Deduplication').item.json.city, $('Email Cooldown Deduplication').item.json.country, $('Email Cooldown Deduplication').item.json.countryCode, $('Email Cooldown Deduplication').item.json.industry, $('Email Cooldown Deduplication').item.json.score, $('Email Cooldown Deduplication').item.json.priority, $('Email Cooldown Deduplication').item.json.emailSubject, $('Email Cooldown Deduplication').item.json.emailBody, $('Email Cooldown Deduplication').item.json.fromEmail, $('Email Cooldown Deduplication').item.json.replyTo, $('Email Cooldown Deduplication').item.json.lastSent, $('Email Cooldown Deduplication').item.json.campaign, $('Email Cooldown Deduplication').item.json.status, $('Email Cooldown Deduplication').item.json.followupStage, $('Email Cooldown Deduplication').item.json.replied, $('Email Cooldown Deduplication').item.json.whatsappNumber, $('Email Cooldown Deduplication').item.json.contactEmail, $('Email Cooldown Deduplication').item.json.error, $('Email Cooldown Deduplication').item.json.notes] }}"
         }
       },
-      "id": "b56e7bc4-2317-46bc-994d-a19153aa2005",
+      "id": "7a513294-de8d-4713-b93e-23e228e55d49",
       "name": "Store Initial Email History",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        912,
-        768
-      ]
+        1536,
+        -800
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
         "jsCode": "const cfg=$('Runtime Config').first().json;\nconst read=name=>{try{return $(name).all().map(item=>item.json)}catch{return[]}};\nconst processed=read('Normalize & Require Email');\nconst scored=read('DeepSeek Lead Scoring');\nconst prepared=read('Email Cooldown Deduplication');\nconst sent=read('Store Initial Email History');\nconst industries=[...new Set(scored.map(row=>row.industry).filter(Boolean))].slice(0,10);\nreturn [{json:{\n  executionId:cfg.executionId,\n  date:new Date().toISOString(),\n  businessesProcessed:processed.length,\n  qualified:scored.filter(row=>row.qualified).length,\n  emailsPrepared:prepared.filter(row=>row.shouldSend===true).length,\n  emailsSent:sent.length,\n  topIndustries:industries.join(', '),\n  status:'completed'\n}}];"
       },
-      "id": "3423adff-b4b2-4f19-ab27-0480734976db",
+      "id": "8d54f371-16b5-47e0-a454-af262476404d",
       "name": "Build Campaign Report",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        112,
-        560
+        192,
+        -1008
       ]
     },
     {
@@ -238,14 +262,20 @@
           "queryReplacement": "={{ [$json.executionId, $json.date, $json.businessesProcessed, $json.qualified, $json.emailsPrepared, $json.emailsSent, $json.topIndustries, $json.status] }}"
         }
       },
-      "id": "aa934e69-2a45-498c-91de-f1d54cf53aee",
+      "id": "3da10800-34ee-41c0-8562-fbdf3fa6822b",
       "name": "Upsert Campaign Report",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        672,
-        560
-      ]
+        752,
+        -1008
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -254,13 +284,13 @@
         "width": 664,
         "color": 5
       },
-      "id": "9d4908c2-b26c-474b-bff8-31ae5c193923",
+      "id": "02f38d1b-6a6a-4ab8-bf56-76d0866de635",
       "name": "SECTION 1 - Lead Discovery",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1856,
-        160
+        -1792,
+        -1408
       ]
     },
     {
@@ -270,10 +300,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -704,
-        288
+        -640,
+        -1280
       ],
-      "id": "ffc327dd-42d5-4244-88e6-ebf4887ceac5",
+      "id": "a59c350d-9a19-45f4-80e8-04527f66e9ec",
       "name": "Loop Over Items"
     },
     {
@@ -283,10 +313,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -112,
-        144
+        -48,
+        -1424
       ],
-      "id": "3ec2b624-ba85-4333-b57f-17f6eb63a90f",
+      "id": "7993e03a-cca3-4982-a18d-d96401d85732",
       "name": "Loop Over Items1"
     },
     {
@@ -296,49 +326,49 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -288,
-        656
+        -224,
+        -912
       ],
-      "id": "7f67ecf9-6d1e-4241-b88b-a4563197bcf7",
+      "id": "0807684b-c0e8-41f7-80f3-117592341c04",
       "name": "Loop Over Items2"
     },
     {
       "parameters": {
         "jsCode": "const cfg=$('Runtime Config').first().json,rows=$input.all().map(i=>i.json);if(!cfg.followup?.enabled)return[];const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));const render=(t,r)=>String(t||'').replace(/{{businessName}}/g,r.businessName||'there').replace(/{{city}}/g,r.city||'your area').replace(/{{signature}}/g,cfg.company.signature).replace(/{{whatsappCtaUrl}}/g,cfg.company.whatsappCtaUrl).replace(/{{youtubeCtaUrl}}/g,cfg.company.youtubeCtaUrl);function html(r,body){const c=cfg.company,b=c.brand||{},name=esc(r.businessName||'your business');const paras=String(body||'').split(/\\n{2,}/).filter(Boolean).map(p=>`<p style=\"margin:0 0 16px;color:#334155;font-size:16px;line-height:1.65\">${esc(p).replace(/\\n/g,'<br>')}</p>`).join('');return `<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><style>table{border-collapse:collapse!important}@media(max-width:620px){.w{width:100%!important}.p{padding:24px 18px!important}.btn,.cell{display:block!important;width:100%!important;box-sizing:border-box!important}.cell{padding:0 0 12px!important}}</style></head><body style=\"margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif\"><table role=\"presentation\" width=\"100%\"><tr><td align=\"center\" style=\"padding:16px 8px\"><table class=\"w\" role=\"presentation\" width=\"600\" style=\"width:100%;max-width:600px;background:#fff;border-radius:18px;overflow:hidden\"><tr><td class=\"p\" style=\"padding:24px;background:${b.dark||'#0f172a'};color:#fff\"><strong style=\"font-size:26px\">${esc(b.logoText||c.name)}</strong><br><span style=\"color:#ccfbf1;font-size:14px\">${esc(c.tagline||'')}</span></td></tr><tr><td class=\"p\" style=\"padding:30px 32px\"><div style=\"color:${b.primary||'#0f766e'};font-size:13px;font-weight:700\">A quick follow-up for ${name}</div><h1 style=\"margin:12px 0 18px;font-size:27px;line-height:1.25;color:#0f172a\">Keep customer conversations moving.</h1>${paras}<table role=\"presentation\" width=\"100%\" style=\"margin-top:22px\"><tr><td class=\"cell\" width=\"50%\" style=\"padding-right:6px\"><a class=\"btn\" href=\"${esc(c.whatsappCtaUrl)}\" style=\"display:block;padding:15px 10px;border-radius:10px;background:#16a34a;color:#fff;font-weight:700;text-align:center;text-decoration:none\">Message on WhatsApp</a></td><td class=\"cell\" width=\"50%\" style=\"padding-left:6px\"><a class=\"btn\" href=\"${esc(c.youtubeCtaUrl)}\" style=\"display:block;padding:15px 10px;border-radius:10px;background:#dc2626;color:#fff;font-weight:700;text-align:center;text-decoration:none\">Watch 60-sec video</a></td></tr></table><a href=\"${esc(c.youtubeCtaUrl)}\"><img src=\"${esc(c.youtubeThumbnailUrl)}\" width=\"536\" alt=\"Watch SRLINES on YouTube\" style=\"display:block;margin-top:18px;width:100%;height:auto;border:0;border-radius:12px\"></a></td></tr><tr><td class=\"p\" style=\"padding:20px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;color:#475569;font-size:13px;line-height:1.6\"><strong>${esc(c.senderName)}</strong> · ${esc(c.senderTitle)}<br>${esc(c.legalName)} · <a href=\"${esc(c.website)}\" style=\"color:${b.primary||'#0f766e'}\">${esc(c.website)}</a><br><a href=\"${esc(c.whatsappCtaUrl)}\" style=\"color:${b.primary||'#0f766e'}\">${esc(c.whatsappNumber)}</a> · <a href=\"mailto:${esc(c.contactEmail)}\" style=\"color:${b.primary||'#0f766e'}\">${esc(c.contactEmail)}</a><br><span style=\"font-size:11px;color:#64748b\">Reply “unsubscribe” to stop future email.</span></td></tr></table></td></tr></table></body></html>`;}const latest=new Map(),now=Date.now(),stop=new Set((cfg.followup.stopStatuses||[]).map(norm=>String(norm).toLowerCase()));for(const r of rows){const e=String(r.email||'').toLowerCase().trim(),t=new Date(r.lastSent||r.timestamp||0).getTime();if(e&&Number.isFinite(t)&&(!latest.has(e)||t>latest.get(e)._time))latest.set(e,{...r,_time:t});}const out=[];for(const r of latest.values()){const e=String(r.email||'').toLowerCase().trim(),s=String(r.status||'').toLowerCase(),stage=Number(r.followupStage||0),next=(cfg.followup.sequence||[]).find(x=>Number(x.stage)===stage+1);if(!e||r.replied===true||String(r.replied).toLowerCase()==='true'||stop.has(s)||/replied|bounce|undeliver|unsubscribe|complaint/.test(s)||!next||now-r._time<Number(next.delayDays||999)*86400000)continue;const emailBody=render(next.body,r);out.push({json:{...r,_suppressionSource:'candidate',email:e,emailSubject:render(next.subject,r),emailBody,emailHtml:html(r,emailBody),followupStage:next.stage,lastSent:new Date().toISOString(),status:`sent_followup_${next.stage}`,campaign:cfg.campaign.name,replyTo:cfg.company.replyTo,whatsappNumber:cfg.company.whatsappNumber,contactEmail:cfg.company.contactEmail,whatsappCtaUrl:cfg.company.whatsappCtaUrl}});if(out.length>=cfg.followup.maxFollowupsPerRun)break;}return out;"
       },
-      "id": "72a3ab26-a989-4d8e-995a-815a76924b25",
+      "id": "92c26f80-0627-4935-9151-267b0311a46c",
       "name": "Follow-up Sequence Builder (manual/cron branch)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        -224,
-        1088
+        -160,
+        -480
       ]
     },
     {
       "parameters": {
         "jsCode": "const normalize=value=>String(value||'').trim().toLowerCase();\nconst key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\nconst replies=new Set(), blacklist=new Set(), candidates=[];\nfor(const item of $input.all()){const row=item.json, source=row._suppressionSource;\n if(source==='candidate'){candidates.push(row);continue;}\n const email=normalize(field(row,'email','email address','emailaddress'));\n const blockedValue=normalize(field(row,'value','email','email address','emailaddress'));\n if(source==='reply'&&email) replies.add(email);\n if(source==='blacklist'&&blockedValue&&(!field(row,'type')||normalize(field(row,'type'))==='email')&&normalize(field(row,'status'))!=='inactive'&&normalize(field(row,'status'))!=='expired') blacklist.add(blockedValue);\n}\nconst inRun=new Set(), out=[];\nfor(const row of candidates){const email=normalize(row.email),stage=Number(row.followupStage||0),stageKey=`${email}:${stage}`;\n if(!email||!stage||replies.has(email)||blacklist.has(email)||inRun.has(stageKey))continue;\n inRun.add(stageKey);out.push({json:{...row,email,id:`${email}-followup-${stage}`,shouldSend:true}});\n}\nreturn out;"
       },
-      "id": "121c7c4e-c957-41d2-948f-cff119fd3e80",
+      "id": "e4984157-21ec-4b24-a0cc-a3c45bb22ffb",
       "name": "Follow-up Suppression Check",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        48,
-        1088
+        128,
+        -480
       ]
     },
     {
       "parameters": {
         "jsCode": "const cfg=$('Runtime Config').first().json;const ms=(cfg.limits.minDelaySeconds+Math.random()*(cfg.limits.maxDelaySeconds-cfg.limits.minDelaySeconds))*1000;await new Promise(r=>setTimeout(r,ms));return items;"
       },
-      "id": "c98500c2-2148-4c2a-aaab-dfe2cde7fbc1",
+      "id": "bf4256c2-53a0-4ead-a193-ee38cefe6d62",
       "name": "Follow-up Rate Limit",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        800,
-        1088
+        880,
+        -480
       ]
     },
     {
@@ -349,14 +379,20 @@
           "queryReplacement": "={{ [$('Follow-up Suppression Check').item.json.id, $('Runtime Config').first().json.executionId, new Date().toISOString(), $('Follow-up Suppression Check').item.json.businessName, $('Follow-up Suppression Check').item.json.email, $('Follow-up Suppression Check').item.json.phone, $('Follow-up Suppression Check').item.json.website, $('Follow-up Suppression Check').item.json.domain, $('Follow-up Suppression Check').item.json.city, $('Follow-up Suppression Check').item.json.country, $('Follow-up Suppression Check').item.json.countryCode, $('Follow-up Suppression Check').item.json.industry, $('Follow-up Suppression Check').item.json.score, $('Follow-up Suppression Check').item.json.priority, $('Follow-up Suppression Check').item.json.emailSubject, $('Follow-up Suppression Check').item.json.emailBody, $('Runtime Config').first().json.company.senderEmail, $('Follow-up Suppression Check').item.json.replyTo, $('Follow-up Suppression Check').item.json.lastSent, $('Follow-up Suppression Check').item.json.campaign, $('Follow-up Suppression Check').item.json.status, $('Follow-up Suppression Check').item.json.followupStage, $('Follow-up Suppression Check').item.json.replied, $('Runtime Config').first().json.company.whatsappNumber, $('Runtime Config').first().json.company.contactEmail, \"\", \"follow-up drip sent via SES SMTP\"] }}"
         }
       },
-      "id": "d3d30f2d-9aa7-4d76-9d3b-f89624c3a6bc",
+      "id": "256abbca-064b-4f69-a341-46fcf41a0b41",
       "name": "Store Follow-up Email History",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1456,
-        1088
-      ]
+        1536,
+        -480
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -364,14 +400,20 @@
         "query": "SELECT * FROM reply_log;",
         "options": {}
       },
-      "id": "aa4010df-2c7d-42fe-a3b5-227c7d872a56",
+      "id": "fd7bf9bf-5f85-4938-9c8b-d6920f5ff9e5",
       "name": "Read Reply Log for Follow-up Suppression",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -64,
-        1440
-      ]
+        16,
+        -128
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -379,61 +421,67 @@
         "query": "SELECT * FROM blacklist;",
         "options": {}
       },
-      "id": "479e1c77-eef8-4dfd-9901-9465edcfa15a",
+      "id": "caeba671-7d8b-49d6-b6ea-a9a49faa240b",
       "name": "Read Blacklist for Follow-up Suppression",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -48,
-        1664
-      ]
+        32,
+        112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
         "jsCode": "return $input.all().map(item=>({json:{...item.json,_suppressionSource:'reply'}}));"
       },
-      "id": "ab1cfbc9-ca84-4e0b-96c3-87c428cf4d70",
+      "id": "2b1d894f-bea7-455d-9c55-e6b83f1cb4ab",
       "name": "Tag Reply_Log Suppression Rows",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        176,
-        1440
+        256,
+        -128
       ]
     },
     {
       "parameters": {
         "jsCode": "return $input.all().map(item=>({json:{...item.json,_suppressionSource:'blacklist'}}));"
       },
-      "id": "66710d75-fa6d-404b-8263-7dffd53f1d68",
+      "id": "22664355-0a51-4639-92a3-331065df721c",
       "name": "Tag Blacklist Suppression Rows",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        192,
-        1664
+        272,
+        112
       ]
     },
     {
       "parameters": {},
-      "id": "58e681a5-68ac-4247-be57-388a0f74b8d0",
+      "id": "4f461a96-609a-4788-8725-cc3f4f0520dc",
       "name": "Combine Follow-up Suppression Sources",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
       "position": [
-        400,
-        1552
+        480,
+        -16
       ]
     },
     {
       "parameters": {},
-      "id": "d457dcdf-6c29-433b-ad40-2c0923ed715d",
+      "id": "5f48ee3f-dca0-4908-8c04-34bad7e95750",
       "name": "Combine Follow-up Candidates and Suppression",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
       "position": [
-        624,
-        1440
+        704,
+        -128
       ]
     },
     {
@@ -445,12 +493,18 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -32,
-        768
+        48,
+        -800
       ],
-      "id": "e35abb80-b70b-4c27-9e15-e3c5f72aea90",
+      "id": "9aa3ec7e-bd16-4149-92a7-c59f05a2fdec",
       "name": "Read Recent Email History",
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -458,15 +512,21 @@
         "query": "SELECT * FROM blacklist;",
         "options": {}
       },
-      "id": "2484cc43-1518-4652-9f00-6870a76a71ed",
+      "id": "0de1e7e7-d4da-4de1-b456-d6f511dd928d",
       "name": "Read Blacklist for Initial Suppression",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "alwaysOutputData": true,
       "position": [
-        112,
-        768
-      ]
+        192,
+        -800
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -476,14 +536,20 @@
           "queryReplacement": "={{ [$('Runtime Config').first().json.executionId, $json.email, $json.businessName, $json.campaign, $json.followupStage, new Date().toISOString(), $json.emailSubject, $json.emailBody, $('Runtime Config').first().json.company.senderEmail, $json.replyTo, $json.status, $json.lastSent, 'Approved after Reply_Log and Blacklist suppression; queued for SES SMTP send.'] }}"
         }
       },
-      "id": "069ba185-85f4-4f91-a75d-793a7edf6fa2",
+      "id": "114c6cf6-a0f7-4eca-81df-268870048e36",
       "name": "Upsert Follow-up Queue",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        512,
-        1088
-      ]
+        592,
+        -480
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -498,10 +564,10 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        720,
-        768
+        1280,
+        -800
       ],
-      "id": "b10b0dca-83f8-4146-9483-fa40a247df00",
+      "id": "8162681d-c146-4b15-b2a2-2be4f2bab86d",
       "name": "Send Initial Email via SES SMTP",
       "webhookId": "7052a310-2ce1-414c-ad5b-732023d99e3f",
       "credentials": {
@@ -524,10 +590,10 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        1168,
-        1088
+        1248,
+        -480
       ],
-      "id": "45722a5f-f748-4093-bdbe-6b5ce5236f5b",
+      "id": "4b37558e-8904-4fa3-b7ab-edb2642d9d63",
       "name": "Send Follow-up Email via SES SMTP",
       "webhookId": "7052a310-2ce1-414c-ad5b-732023d99e3f",
       "credentials": {
@@ -549,13 +615,13 @@
           ]
         }
       },
-      "id": "3473aea1-35c4-47d5-a773-cb18caa28b4f",
+      "id": "02248949-e9c8-48e0-9ef4-7ca4a57750b8",
       "name": "Cron - Every 30 Minutes (UTC)",
       "type": "n8n-nodes-base.cron",
       "typeVersion": 1,
       "position": [
-        -1600,
-        384
+        -1536,
+        -1184
       ]
     },
     {
@@ -569,13 +635,13 @@
           ]
         }
       },
-      "id": "c146d9d8-c55d-41e2-ac6d-c0dfa89b94c0",
+      "id": "3f8dba58-79dc-4c53-86c4-bd60af930697",
       "name": "Initial Email Allowed",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        464,
-        768
+        704,
+        -768
       ]
     }
   ],
@@ -1016,7 +1082,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "59bb334c-e816-4de9-816e-ab3107c0f070",
+  "versionId": "9c7487ad-7baa-47f5-b71f-8b2ec9bb66df",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "6f4ddd19d6e6b74f777c7351e64ff05ded166492207f0e052776641ed9097a69"
