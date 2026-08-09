@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "jsCode": "const now = new Date();\nconst executionId = `${now.toISOString()}-${Math.random().toString(36).slice(2, 10)}`;\n\n// PRODUCTION CHECKLIST: replace every PASTE_* value, verify the SES identity/domain,\n// connect Google Sheets + SES SMTP credentials, then run one manual low-volume test.\nreturn [{ json: {\n  executionId,\n  now: now.toISOString(),\n  timezone: 'UTC',\n  campaign: {\n    name: 'SRLINES UK-Italy-Spain-UAE B2B',\n    consentNote: 'Relevant one-to-one B2B outreach only. Suppress immediately on reply, bounce, complaint, or unsubscribe.'\n  },\n  markets: [\n    { country: 'United Kingdom', countryCode: 'GB', locale: 'en-GB', language: 'English', cities: ['London','Birmingham','Manchester','Leeds','Glasgow','Liverpool','Bristol','Edinburgh','Sheffield','Leicester'] },\n    { country: 'Italy', countryCode: 'IT', locale: 'it-IT', language: 'Italian', cities: ['Milan','Rome','Naples','Turin','Bologna','Florence','Bari','Palermo','Verona','Padua'] },\n    { country: 'Spain', countryCode: 'ES', locale: 'es-ES', language: 'Spanish', cities: ['Madrid','Barcelona','Valencia','Seville','Zaragoza','Málaga','Murcia','Bilbao','Alicante','Palma'] },\n    { country: 'United Arab Emirates', countryCode: 'AE', locale: 'en-AE', language: 'English', cities: ['Dubai','Abu Dhabi','Sharjah','Ajman','Ras Al Khaimah','Al Ain','Fujairah','Umm Al Quwain'] }\n  ],\n  niches: [\n    { group: 'Real Estate', categories: ['real estate agency','property management company','property developer','commercial real estate agency'] },\n    { group: 'Clinics and Hospitals', categories: ['medical clinic','dental clinic','private hospital','dermatology clinic'] },\n    { group: 'Restaurants and Hotels', categories: ['restaurant','hotel','resort hotel','boutique hotel'] },\n    { group: 'Ecommerce and Retail', categories: ['ecommerce business','fashion retailer','furniture store','electronics retailer'] },\n    { group: 'Recruitment and Visa Manpower', categories: ['recruitment agency','staffing agency','visa consultancy','manpower agency'] },\n    { group: 'Professional Services', categories: ['accounting firm','law firm','business consultancy','digital marketing agency'] }\n  ],\n  company: {\n    name: 'SRLINES', senderName: 'Shahid Rasool', senderTitle: 'CEO',\n    senderEmail: 'noreply@ses.srlines.net', replyTo: 'contact@srlines.net',\n    contactEmail: 'contact@srlines.net', whatsappNumber: '+92 328 3897926',\n    whatsappCtaUrl: 'https://wa.me/923283897926?text=Hi%20SRLINES%2C%20I%20saw%20your%20email%20and%20want%20a%20WhatsApp%20CRM%20demo',\n    youtubeCtaUrl: 'https://youtube.com/shorts/gFChGKdtI0o?si=KQ2ydx96IktM7zmM',\n    youtubeThumbnailUrl: 'https://i.ytimg.com/vi/gFChGKdtI0o/hqdefault.jpg',\n    website: 'https://srlines.net', crmUrl: 'https://crm.srlines.net/', legalName: 'SRLINES SOFTWARE HOUSE (SMC-PRIVATE) LIMITED',\n    companyType: 'Software company and SaaS provider (not a logistics company)',\n    productName: 'wCRM', productCategory: 'WhatsApp-first CRM SaaS',\n    positioning: 'Every customer conversation. One place to grow.',\n    tagline: 'WhatsApp-first CRM for ambitious teams',\n    brand: { logoText: 'wCRM by SRLINES', primary: '#0f766e', dark: '#0f172a', accent: '#14b8a6', trustLine: 'Meta Verified Technology Partner · SECP registered · 750+ businesses served · 99.9% uptime SLA.' },\n    signature: 'Shahid Rasool\\nCEO\\nSRLINES SOFTWARE HOUSE\\nWhatsApp: +92 328 3897926\\nEmail: contact@srlines.net',\n    products: ['Shared WhatsApp team inbox','Visual sales pipeline','Opt-in campaigns','Chat automation','Official WhatsApp Cloud API','Facebook Messenger','Instagram DM','Shopify and WooCommerce integrations','n8n community node'],\n    productContext: 'wCRM is SRLINES SOFTWARE HOUSE’s WhatsApp-first CRM SaaS. It brings sales, support, campaigns and automation into one shared WhatsApp workspace with clear ownership, notes, multilingual routing and follow-up. It runs on Meta’s official Cloud API; customers retain their WABA, phone numbers, templates and data assets. Meta bills messaging directly and SRLINES charges only for the SaaS platform. SRLINES is a Meta Verified Technology Partner and an SECP-registered software company serving 750+ businesses.'\n  },\n  limits: { keywordsPerRun: 4, minScoreToEmail: 60, emailCooldownDays: 180, maxEmailsPerRun: 20, minDelaySeconds: 45, maxDelaySeconds: 120 },\n  emailValidation: { enabled: true, requireMx: true, dnsProvider: 'https://dns.google/resolve', timeoutMs: 8000, blockedDomains: ['example.com','test.com','invalid.com'], blockedLocalParts: ['no-reply','noreply','donotreply','do-not-reply','privacy','abuse'] },\n  followup: {\n    enabled: true, maxFollowupsPerRun: 10,\n    stopStatuses: ['replied','bounced','complained','unsubscribed'],\n    sequence: [\n      { stage: 1, delayDays: 4, subject: 'A WhatsApp CRM idea for {{businessName}}', body: 'Hi {{businessName}} team,\\n\\nI wanted to follow up on the wCRM idea I sent. wCRM by SRLINES brings sales, support, campaigns and automation into one shared WhatsApp workspace, using Meta’s official Cloud API. It helps teams assign owners, keep context and move leads through a visual pipeline.\\n\\nIf this is relevant, I can show a short demo tailored to your operation: {{whatsappCtaUrl}}\\n\\nOr watch the 60-second overview: {{youtubeCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 2, delayDays: 10, subject: 'Should I close the loop?', body: 'Hi {{businessName}} team,\\n\\nOne final note in case improving enquiry response and follow-up is currently a priority. I would be happy to share a short wCRM walkthrough: {{whatsappCtaUrl}}\\n\\nOverview: {{youtubeCtaUrl}}\\n\\nIf it is not relevant, no action is needed and I will close the loop.\\n\\n{{signature}}' }\n    ]\n  },\n  sheets: { documentId: 'PASTE_GOOGLE_SHEET_ID_HERE', keywords: 'Keywords', qualifiedLeads: 'Qualified_Leads', emailHistory: 'Email_History', campaignReport: 'Campaign_Report', replyLog: 'Reply_Log', followupQueue: 'Followup_Queue', blacklist: 'Blacklist' },\n  deepseek: { apiKey: 'PASTE_DEEPSEEK_API_KEY_HERE', apiUrl: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },\n  scraper: { baseUrl: 'http://localhost:3000', maxResultsPerKeyword: 10, delayBetweenRequests: 1500 },\n  instructions: 'Configure placeholders and credentials. Verify applicable direct-marketing law and your lawful basis for each market before activation.'\n}}];"
+        "jsCode": "const now = new Date();\nconst executionId = `${now.toISOString()}-${Math.random().toString(36).slice(2, 10)}`;\n\n// PRODUCTION CHECKLIST: replace every PASTE_* value, verify the SES identity/domain,\n// connect PostgreSQL + SES SMTP credentials, then run one manual low-volume test.\nreturn [{ json: {\n  executionId,\n  now: now.toISOString(),\n  timezone: 'UTC',\n  campaign: {\n    name: 'SRLINES UK-Italy-Spain-UAE B2B',\n    consentNote: 'Relevant one-to-one B2B outreach only. Suppress immediately on reply, bounce, complaint, or unsubscribe.'\n  },\n  markets: [\n    { country: 'United Kingdom', countryCode: 'GB', locale: 'en-GB', language: 'English', cities: ['London','Birmingham','Manchester','Leeds','Glasgow','Liverpool','Bristol','Edinburgh','Sheffield','Leicester'] },\n    { country: 'Italy', countryCode: 'IT', locale: 'it-IT', language: 'Italian', cities: ['Milan','Rome','Naples','Turin','Bologna','Florence','Bari','Palermo','Verona','Padua'] },\n    { country: 'Spain', countryCode: 'ES', locale: 'es-ES', language: 'Spanish', cities: ['Madrid','Barcelona','Valencia','Seville','Zaragoza','Málaga','Murcia','Bilbao','Alicante','Palma'] },\n    { country: 'United Arab Emirates', countryCode: 'AE', locale: 'en-AE', language: 'English', cities: ['Dubai','Abu Dhabi','Sharjah','Ajman','Ras Al Khaimah','Al Ain','Fujairah','Umm Al Quwain'] }\n  ],\n  niches: [\n    { group: 'Real Estate', categories: ['real estate agency','property management company','property developer','commercial real estate agency'] },\n    { group: 'Clinics and Hospitals', categories: ['medical clinic','dental clinic','private hospital','dermatology clinic'] },\n    { group: 'Restaurants and Hotels', categories: ['restaurant','hotel','resort hotel','boutique hotel'] },\n    { group: 'Ecommerce and Retail', categories: ['ecommerce business','fashion retailer','furniture store','electronics retailer'] },\n    { group: 'Recruitment and Visa Manpower', categories: ['recruitment agency','staffing agency','visa consultancy','manpower agency'] },\n    { group: 'Professional Services', categories: ['accounting firm','law firm','business consultancy','digital marketing agency'] }\n  ],\n  company: {\n    name: 'SRLINES', senderName: 'Shahid Rasool', senderTitle: 'CEO',\n    senderEmail: 'noreply@ses.srlines.net', replyTo: 'contact@srlines.net',\n    contactEmail: 'contact@srlines.net', whatsappNumber: '+92 328 3897926',\n    whatsappCtaUrl: 'https://wa.me/923283897926?text=Hi%20SRLINES%2C%20I%20saw%20your%20email%20and%20want%20a%20WhatsApp%20CRM%20demo',\n    youtubeCtaUrl: 'https://youtube.com/shorts/gFChGKdtI0o?si=KQ2ydx96IktM7zmM',\n    youtubeThumbnailUrl: 'https://i.ytimg.com/vi/gFChGKdtI0o/hqdefault.jpg',\n    website: 'https://srlines.net', crmUrl: 'https://crm.srlines.net/', legalName: 'SRLINES SOFTWARE HOUSE (SMC-PRIVATE) LIMITED',\n    companyType: 'Software company and SaaS provider (not a logistics company)',\n    productName: 'wCRM', productCategory: 'WhatsApp-first CRM SaaS',\n    positioning: 'Every customer conversation. One place to grow.',\n    tagline: 'WhatsApp-first CRM for ambitious teams',\n    brand: { logoText: 'wCRM by SRLINES', primary: '#0f766e', dark: '#0f172a', accent: '#14b8a6', trustLine: 'Meta Verified Technology Partner · SECP registered · 750+ businesses served · 99.9% uptime SLA.' },\n    signature: 'Shahid Rasool\\nCEO\\nSRLINES SOFTWARE HOUSE\\nWhatsApp: +92 328 3897926\\nEmail: contact@srlines.net',\n    products: ['Shared WhatsApp team inbox','Visual sales pipeline','Opt-in campaigns','Chat automation','Official WhatsApp Cloud API','Facebook Messenger','Instagram DM','Shopify and WooCommerce integrations','n8n community node'],\n    productContext: 'wCRM is SRLINES SOFTWARE HOUSE’s WhatsApp-first CRM SaaS. It brings sales, support, campaigns and automation into one shared WhatsApp workspace with clear ownership, notes, multilingual routing and follow-up. It runs on Meta’s official Cloud API; customers retain their WABA, phone numbers, templates and data assets. Meta bills messaging directly and SRLINES charges only for the SaaS platform. SRLINES is a Meta Verified Technology Partner and an SECP-registered software company serving 750+ businesses.'\n  },\n  limits: { keywordsPerRun: 4, minScoreToEmail: 60, emailCooldownDays: 180, maxEmailsPerRun: 20, minDelaySeconds: 45, maxDelaySeconds: 120 },\n  emailValidation: { enabled: true, requireMx: true, dnsProvider: 'https://dns.google/resolve', timeoutMs: 8000, blockedDomains: ['example.com','test.com','invalid.com'], blockedLocalParts: ['no-reply','noreply','donotreply','do-not-reply','privacy','abuse'] },\n  followup: {\n    enabled: true, maxFollowupsPerRun: 10,\n    stopStatuses: ['replied','bounced','complained','unsubscribed'],\n    sequence: [\n      { stage: 1, delayDays: 4, subject: 'A WhatsApp CRM idea for {{businessName}}', body: 'Hi {{businessName}} team,\\n\\nI wanted to follow up on the wCRM idea I sent. wCRM by SRLINES brings sales, support, campaigns and automation into one shared WhatsApp workspace, using Meta’s official Cloud API. It helps teams assign owners, keep context and move leads through a visual pipeline.\\n\\nIf this is relevant, I can show a short demo tailored to your operation: {{whatsappCtaUrl}}\\n\\nOr watch the 60-second overview: {{youtubeCtaUrl}}\\n\\n{{signature}}' },\n      { stage: 2, delayDays: 10, subject: 'Should I close the loop?', body: 'Hi {{businessName}} team,\\n\\nOne final note in case improving enquiry response and follow-up is currently a priority. I would be happy to share a short wCRM walkthrough: {{whatsappCtaUrl}}\\n\\nOverview: {{youtubeCtaUrl}}\\n\\nIf it is not relevant, no action is needed and I will close the loop.\\n\\n{{signature}}' }\n    ]\n  },\n  deepseek: { apiKey: 'PASTE_DEEPSEEK_API_KEY_HERE', apiUrl: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat' },\n  scraper: { baseUrl: 'http://localhost:3000', maxResultsPerKeyword: 10, delayBetweenRequests: 1500 },\n  instructions: 'Configure placeholders and credentials. Verify applicable direct-marketing law and your lawful basis for each market before activation.'\n}}];"
       },
       "id": "250f695e-e566-41a2-8125-9cb1dfc60ad4",
       "name": "Runtime Config",
@@ -29,163 +29,20 @@
     },
     {
       "parameters": {
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "={{$json.sheets.documentId}}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{$json.sheets.keywords}}",
-          "mode": "name"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "executionId": "={{ $json.executionId }}",
-            "generatedAt": "={{ $json.now }}",
-            "keyword": "={{ $json.keyword }}",
-            "keywordCity": "={{ $json.keywordCity }}",
-            "keywordIndustry": "={{ $json.keywordIndustry }}",
-            "keywordCategory": "={{ $json.keywordCategory }}",
-            "keywordIntent": "={{ $json.keywordIntent }}",
-            "country": "={{ $json.country }}",
-            "countryCode": "={{ $json.countryCode }}",
-            "locale": "={{ $json.locale }}",
-            "language": "={{ $json.language }}",
-            "keywordStatus": "={{ $json.keywordStatus }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "executionId",
-              "displayName": "executionId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "generatedAt",
-              "displayName": "generatedAt",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "keyword",
-              "displayName": "keyword",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "keywordCity",
-              "displayName": "keywordCity",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "keywordIndustry",
-              "displayName": "keywordIndustry",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "keywordCategory",
-              "displayName": "keywordCategory",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "keywordIntent",
-              "displayName": "keywordIntent",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "country",
-              "displayName": "country",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "countryCode",
-              "displayName": "countryCode",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "locale",
-              "displayName": "locale",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "language",
-              "displayName": "language",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "keywordStatus",
-              "displayName": "keywordStatus",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
+        "operation": "executeQuery",
+        "query": "INSERT INTO keywords (\"executionId\", \"generatedAt\", \"keyword\", \"keywordCity\", \"keywordIndustry\", \"keywordCategory\", \"keywordIntent\", \"country\", \"countryCode\", \"locale\", \"language\", \"keywordStatus\") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *;",
+        "options": {
+          "queryReplacement": "={{ [$json.executionId, $json.now, $json.keyword, $json.keywordCity, $json.keywordIndustry, $json.keywordCategory, $json.keywordIntent, $json.country, $json.countryCode, $json.locale, $json.language, $json.keywordStatus] }}"
+        }
       },
       "id": "5acea77e-a498-450c-a4ff-daffcbe23b68",
-      "name": "Log Keyword to Google Sheets",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4,
+      "name": "Log Keyword to PostgreSQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "position": [
         -896,
         288
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "JOJNkcLhn4iH3jm5",
-          "name": "Google Sheets account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -274,303 +131,20 @@
     },
     {
       "parameters": {
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{$('Runtime Config').first().json.sheets.qualifiedLeads}}",
-          "mode": "name"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "executionId": "={{ $json.executionId }}",
-            "normalizedAt": "={{ $json.normalizedAt }}",
-            "keyword": "={{ $json.keyword }}",
-            "businessName": "={{ $json.businessName }}",
-            "email": "={{ $json.email }}",
-            "phone": "={{ $json.phone }}",
-            "website": "={{ $json.website }}",
-            "domain": "={{ $json.domain }}",
-            "city": "={{ $json.city }}",
-            "country": "={{ $json.country }}",
-            "countryCode": "={{ $json.countryCode }}",
-            "locale": "={{ $json.locale }}",
-            "language": "={{ $json.language }}",
-            "industry": "={{ $json.industry }}",
-            "keywordCategory": "={{ $json.keywordCategory }}",
-            "rating": "={{ $json.rating }}",
-            "reviews": "={{ $json.reviews }}",
-            "score": "={{ $json.score }}",
-            "priority": "={{ $json.priority }}",
-            "qualified": "={{ $json.qualified }}",
-            "emailValidationStatus": "={{ $json.emailValidationStatus }}",
-            "emailValidationReason": "={{ $json.emailValidationReason }}",
-            "emailMxRecords": "={{ $json.emailMxRecords }}",
-            "emailMxCheckedAt": "={{ $json.emailMxCheckedAt }}",
-            "aiAnalysis": "={{ JSON.stringify($json.aiAnalysis || {}) }}",
-            "signals": "={{ JSON.stringify($json.signals || {}) }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "executionId",
-              "displayName": "executionId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "normalizedAt",
-              "displayName": "normalizedAt",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "keyword",
-              "displayName": "keyword",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "businessName",
-              "displayName": "businessName",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "email",
-              "displayName": "email",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "phone",
-              "displayName": "phone",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "website",
-              "displayName": "website",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "domain",
-              "displayName": "domain",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "city",
-              "displayName": "city",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "country",
-              "displayName": "country",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "countryCode",
-              "displayName": "countryCode",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "locale",
-              "displayName": "locale",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "language",
-              "displayName": "language",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "industry",
-              "displayName": "industry",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "keywordCategory",
-              "displayName": "keywordCategory",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "rating",
-              "displayName": "rating",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "reviews",
-              "displayName": "reviews",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "score",
-              "displayName": "score",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "priority",
-              "displayName": "priority",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "qualified",
-              "displayName": "qualified",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailValidationStatus",
-              "displayName": "emailValidationStatus",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailValidationReason",
-              "displayName": "emailValidationReason",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailMxRecords",
-              "displayName": "emailMxRecords",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailMxCheckedAt",
-              "displayName": "emailMxCheckedAt",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "aiAnalysis",
-              "displayName": "aiAnalysis",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "signals",
-              "displayName": "signals",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
+        "operation": "executeQuery",
+        "query": "INSERT INTO qualified_leads (\"executionId\", \"normalizedAt\", \"keyword\", \"businessName\", \"email\", \"phone\", \"website\", \"domain\", \"city\", \"country\", \"countryCode\", \"locale\", \"language\", \"industry\", \"keywordCategory\", \"rating\", \"reviews\", \"score\", \"priority\", \"qualified\", \"emailValidationStatus\", \"emailValidationReason\", \"emailMxRecords\", \"emailMxCheckedAt\", \"aiAnalysis\", \"signals\") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26) RETURNING *;",
+        "options": {
+          "queryReplacement": "={{ [$json.executionId, $json.normalizedAt, $json.keyword, $json.businessName, $json.email, $json.phone, $json.website, $json.domain, $json.city, $json.country, $json.countryCode, $json.locale, $json.language, $json.industry, $json.keywordCategory, $json.rating, $json.reviews, $json.score, $json.priority, $json.qualified, $json.emailValidationStatus, $json.emailValidationReason, $json.emailMxRecords, $json.emailMxCheckedAt, JSON.stringify($json.aiAnalysis || {}), JSON.stringify($json.signals || {})] }}"
+        }
       },
       "id": "1e93c052-3b66-46d0-9772-e949fb9545d4",
-      "name": "Append Qualified Lead",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4,
+      "name": "Store Qualified Lead",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "position": [
         -1024,
         768
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "JOJNkcLhn4iH3jm5",
-          "name": "Google Sheets account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -587,36 +161,22 @@
     },
     {
       "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "={{ $('Runtime Config').first().json.sheets.documentId }}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{ $('Runtime Config').first().json.sheets.emailHistory }}",
-          "mode": "name"
-        },
+        "operation": "executeQuery",
+        "query": "SELECT * FROM email_history WHERE \"lastSent\" IS NULL OR NULLIF(\"lastSent\", '')::timestamptz >= NOW() - INTERVAL '180 days';",
         "options": {}
       },
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "position": [
         -832,
         560
       ],
       "id": "9df4b1f9-7e0b-4a4e-94c8-81d681182536",
-      "name": "Get Emails History",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "JOJNkcLhn4iH3jm5",
-          "name": "Google Sheets account"
-        }
-      }
+      "name": "Read Email History for Follow-ups"
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst normalize=value=>String(value||'').trim().toLowerCase(), key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\nconst cutoff=Date.now()-Number(cfg.limits.emailCooldownDays||180)*86400000;\nconst recentlySent=new Set();\nfor(const item of $('Get Emails History1').all()){\n  const row=item.json,email=normalize(field(row,'email','email address','emailaddress'));\n  const sentAt=new Date(field(row,'lastSent','timestamp')).getTime();\n  const status=normalize(field(row,'status'));\n  if(email && Number.isFinite(sentAt) && sentAt>=cutoff && !/failed|error/.test(status)) recentlySent.add(email);\n}\nconst blacklist=new Set();\nfor(const item of $('Get Blacklist for Initial Suppression').all()){\n  const row=item.json,type=normalize(field(row,'type'));\n  const value=normalize(field(row,'value','email','email address','emailaddress'));\n  const status=normalize(field(row,'status'));\n  const expiresAt=new Date(field(row,'expiresAt')).getTime();\n  const expired=Number.isFinite(expiresAt)&&expiresAt<Date.now();\n  if(value&&(!type||type==='email')&&status!=='inactive'&&status!=='expired'&&!expired) blacklist.add(value);\n}\n// Evaluate only the current loop item. Always return it so a suppressed lead can\n// take the skip path back to Loop Over Items and cannot strand the done output.\nconst lead=$('Loop Over Items2').item.json;\nconst email=normalize(lead.email);\nlet suppressionReason='';\nif(!email) suppressionReason='missing_email';\nelse if(recentlySent.has(email)) suppressionReason='email_cooldown';\nelse if(blacklist.has(email)) suppressionReason='blacklisted';\nif(suppressionReason) return [{json:{...lead,email,shouldSend:false,suppressionReason}}];\nconst now=new Date().toISOString();\nreturn [{json:{...lead,email,id:`${email}-initial-${cfg.executionId}`,timestamp:now,lastSent:now,campaign:cfg.campaign.name,status:'sent_initial',followupStage:0,replied:false,shouldSend:true,notes:`Initial outreach allowed after ${cfg.limits.emailCooldownDays}-day cooldown and Blacklist suppression.`}}];"
+        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst normalize=value=>String(value||'').trim().toLowerCase(), key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\nconst cutoff=Date.now()-Number(cfg.limits.emailCooldownDays||180)*86400000;\nconst recentlySent=new Set();\nfor(const item of $('Read Recent Email History').all()){\n  const row=item.json,email=normalize(field(row,'email','email address','emailaddress'));\n  const sentAt=new Date(field(row,'lastSent','timestamp')).getTime();\n  const status=normalize(field(row,'status'));\n  if(email && Number.isFinite(sentAt) && sentAt>=cutoff && !/failed|error/.test(status)) recentlySent.add(email);\n}\nconst blacklist=new Set();\nfor(const item of $('Read Blacklist for Initial Suppression').all()){\n  const row=item.json,type=normalize(field(row,'type'));\n  const value=normalize(field(row,'value','email','email address','emailaddress'));\n  const status=normalize(field(row,'status'));\n  const expiresAt=new Date(field(row,'expiresAt')).getTime();\n  const expired=Number.isFinite(expiresAt)&&expiresAt<Date.now();\n  if(value&&(!type||type==='email')&&status!=='inactive'&&status!=='expired'&&!expired) blacklist.add(value);\n}\n// Evaluate only the current loop item. Always return it so a suppressed lead can\n// take the skip path back to Loop Over Items and cannot strand the done output.\nconst lead=$('Loop Over Items2').item.json;\nconst email=normalize(lead.email);\nlet suppressionReason='';\nif(!email) suppressionReason='missing_email';\nelse if(recentlySent.has(email)) suppressionReason='email_cooldown';\nelse if(blacklist.has(email)) suppressionReason='blacklisted';\nif(suppressionReason) return [{json:{...lead,email,shouldSend:false,suppressionReason}}];\nconst now=new Date().toISOString();\nreturn [{json:{...lead,email,id:`${email}-initial-${cfg.executionId}`,timestamp:now,lastSent:now,campaign:cfg.campaign.name,status:'sent_initial',followupStage:0,replied:false,shouldSend:true,notes:`Initial outreach allowed after ${cfg.limits.emailCooldownDays}-day cooldown and Blacklist suppression.`}}];"
       },
       "id": "ff97057e-9432-40cc-9874-bfa9697b5932",
       "name": "Email Cooldown Deduplication",
@@ -642,317 +202,24 @@
     },
     {
       "parameters": {
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{$('Runtime Config').first().json.sheets.emailHistory}}",
-          "mode": "name"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "id": "={{ $('Email Cooldown Deduplication').item.json.id }}",
-            "executionId": "={{ $('Email Cooldown Deduplication').item.json.executionId }}",
-            "timestamp": "={{ $('Email Cooldown Deduplication').item.json.timestamp }}",
-            "businessName": "={{ $('Email Cooldown Deduplication').item.json.businessName }}",
-            "email": "={{ $('Email Cooldown Deduplication').item.json.email }}",
-            "phone": "={{ $('Email Cooldown Deduplication').item.json.phone }}",
-            "website": "={{ $('Email Cooldown Deduplication').item.json.website }}",
-            "domain": "={{ $('Email Cooldown Deduplication').item.json.domain }}",
-            "city": "={{ $('Email Cooldown Deduplication').item.json.city }}",
-            "country": "={{ $('Email Cooldown Deduplication').item.json.country }}",
-            "countryCode": "={{ $('Email Cooldown Deduplication').item.json.countryCode }}",
-            "industry": "={{ $('Email Cooldown Deduplication').item.json.industry }}",
-            "score": "={{ $('Email Cooldown Deduplication').item.json.score }}",
-            "priority": "={{ $('Email Cooldown Deduplication').item.json.priority }}",
-            "emailSubject": "={{ $('Email Cooldown Deduplication').item.json.emailSubject }}",
-            "emailBody": "={{ $('Email Cooldown Deduplication').item.json.emailBody }}",
-            "fromEmail": "={{ $('Email Cooldown Deduplication').item.json.fromEmail }}",
-            "replyTo": "={{ $('Email Cooldown Deduplication').item.json.replyTo }}",
-            "lastSent": "={{ $('Email Cooldown Deduplication').item.json.lastSent }}",
-            "campaign": "={{ $('Email Cooldown Deduplication').item.json.campaign }}",
-            "status": "={{ $('Email Cooldown Deduplication').item.json.status }}",
-            "followupStage": "={{ $('Email Cooldown Deduplication').item.json.followupStage }}",
-            "replied": "={{ $('Email Cooldown Deduplication').item.json.replied }}",
-            "whatsappNumber": "={{ $('Email Cooldown Deduplication').item.json.whatsappNumber }}",
-            "contactEmail": "={{ $('Email Cooldown Deduplication').item.json.contactEmail }}",
-            "error": "={{ $('Email Cooldown Deduplication').item.json.error }}",
-            "notes": "={{ $('Email Cooldown Deduplication').item.json.notes }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "executionId",
-              "displayName": "executionId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "timestamp",
-              "displayName": "timestamp",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "businessName",
-              "displayName": "businessName",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "email",
-              "displayName": "email",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "phone",
-              "displayName": "phone",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "website",
-              "displayName": "website",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "domain",
-              "displayName": "domain",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "city",
-              "displayName": "city",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "country",
-              "displayName": "country",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "countryCode",
-              "displayName": "countryCode",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "industry",
-              "displayName": "industry",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "score",
-              "displayName": "score",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "priority",
-              "displayName": "priority",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailSubject",
-              "displayName": "emailSubject",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailBody",
-              "displayName": "emailBody",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "fromEmail",
-              "displayName": "fromEmail",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "replyTo",
-              "displayName": "replyTo",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "lastSent",
-              "displayName": "lastSent",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "campaign",
-              "displayName": "campaign",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "status",
-              "displayName": "status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "followupStage",
-              "displayName": "followupStage",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "replied",
-              "displayName": "replied",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "whatsappNumber",
-              "displayName": "whatsappNumber",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "contactEmail",
-              "displayName": "contactEmail",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "error",
-              "displayName": "error",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "notes",
-              "displayName": "notes",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
+        "operation": "executeQuery",
+        "query": "INSERT INTO email_history (\"id\", \"executionId\", \"timestamp\", \"businessName\", \"email\", \"phone\", \"website\", \"domain\", \"city\", \"country\", \"countryCode\", \"industry\", \"score\", \"priority\", \"emailSubject\", \"emailBody\", \"fromEmail\", \"replyTo\", \"lastSent\", \"campaign\", \"status\", \"followupStage\", \"replied\", \"whatsappNumber\", \"contactEmail\", \"error\", \"notes\") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27) ON CONFLICT (id) DO NOTHING RETURNING *;",
+        "options": {
+          "queryReplacement": "={{ [$('Email Cooldown Deduplication').item.json.id, $('Email Cooldown Deduplication').item.json.executionId, $('Email Cooldown Deduplication').item.json.timestamp, $('Email Cooldown Deduplication').item.json.businessName, $('Email Cooldown Deduplication').item.json.email, $('Email Cooldown Deduplication').item.json.phone, $('Email Cooldown Deduplication').item.json.website, $('Email Cooldown Deduplication').item.json.domain, $('Email Cooldown Deduplication').item.json.city, $('Email Cooldown Deduplication').item.json.country, $('Email Cooldown Deduplication').item.json.countryCode, $('Email Cooldown Deduplication').item.json.industry, $('Email Cooldown Deduplication').item.json.score, $('Email Cooldown Deduplication').item.json.priority, $('Email Cooldown Deduplication').item.json.emailSubject, $('Email Cooldown Deduplication').item.json.emailBody, $('Email Cooldown Deduplication').item.json.fromEmail, $('Email Cooldown Deduplication').item.json.replyTo, $('Email Cooldown Deduplication').item.json.lastSent, $('Email Cooldown Deduplication').item.json.campaign, $('Email Cooldown Deduplication').item.json.status, $('Email Cooldown Deduplication').item.json.followupStage, $('Email Cooldown Deduplication').item.json.replied, $('Email Cooldown Deduplication').item.json.whatsappNumber, $('Email Cooldown Deduplication').item.json.contactEmail, $('Email Cooldown Deduplication').item.json.error, $('Email Cooldown Deduplication').item.json.notes] }}"
+        }
       },
       "id": "b56e7bc4-2317-46bc-994d-a19153aa2005",
-      "name": "Append Email History",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4,
+      "name": "Store Initial Email History",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "position": [
         912,
         768
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "JOJNkcLhn4iH3jm5",
-          "name": "Google Sheets account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst read=name=>{try{return $(name).all().map(item=>item.json)}catch{return[]}};\nconst processed=read('Normalize & Require Email');\nconst scored=read('DeepSeek Lead Scoring');\nconst prepared=read('Email Cooldown Deduplication');\nconst sent=read('Append Email History');\nconst industries=[...new Set(scored.map(row=>row.industry).filter(Boolean))].slice(0,10);\nreturn [{json:{\n  executionId:cfg.executionId,\n  date:new Date().toISOString(),\n  businessesProcessed:processed.length,\n  qualified:scored.filter(row=>row.qualified).length,\n  emailsPrepared:prepared.filter(row=>row.shouldSend===true).length,\n  emailsSent:sent.length,\n  topIndustries:industries.join(', '),\n  status:'completed'\n}}];"
+        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst read=name=>{try{return $(name).all().map(item=>item.json)}catch{return[]}};\nconst processed=read('Normalize & Require Email');\nconst scored=read('DeepSeek Lead Scoring');\nconst prepared=read('Email Cooldown Deduplication');\nconst sent=read('Store Initial Email History');\nconst industries=[...new Set(scored.map(row=>row.industry).filter(Boolean))].slice(0,10);\nreturn [{json:{\n  executionId:cfg.executionId,\n  date:new Date().toISOString(),\n  businessesProcessed:processed.length,\n  qualified:scored.filter(row=>row.qualified).length,\n  emailsPrepared:prepared.filter(row=>row.shouldSend===true).length,\n  emailsSent:sent.length,\n  topIndustries:industries.join(', '),\n  status:'completed'\n}}];"
       },
       "id": "3423adff-b4b2-4f19-ab27-0480734976db",
       "name": "Build Campaign Report",
@@ -965,125 +232,20 @@
     },
     {
       "parameters": {
-        "operation": "appendOrUpdate",
-        "documentId": {
-          "__rl": true,
-          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{$('Runtime Config').first().json.sheets.campaignReport}}",
-          "mode": "name"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "executionId": "={{ $json.executionId }}",
-            "date": "={{ $json.date }}",
-            "businessesProcessed": "={{ $json.businessesProcessed }}",
-            "qualified": "={{ $json.qualified }}",
-            "emailsPrepared": "={{ $json.emailsPrepared }}",
-            "emailsSent": "={{ $json.emailsSent }}",
-            "topIndustries": "={{ $json.topIndustries }}",
-            "status": "={{ $json.status }}"
-          },
-          "matchingColumns": [
-            "executionId"
-          ],
-          "schema": [
-            {
-              "id": "executionId",
-              "displayName": "executionId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "date",
-              "displayName": "date",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "businessesProcessed",
-              "displayName": "businessesProcessed",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "qualified",
-              "displayName": "qualified",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailsPrepared",
-              "displayName": "emailsPrepared",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailsSent",
-              "displayName": "emailsSent",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "topIndustries",
-              "displayName": "topIndustries",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "status",
-              "displayName": "status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
+        "operation": "executeQuery",
+        "query": "INSERT INTO campaign_report (\"executionId\", \"date\", \"businessesProcessed\", \"qualified\", \"emailsPrepared\", \"emailsSent\", \"topIndustries\", \"status\") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (\"executionId\") DO UPDATE SET \"date\" = EXCLUDED.\"date\", \"businessesProcessed\" = EXCLUDED.\"businessesProcessed\", \"qualified\" = EXCLUDED.\"qualified\", \"emailsPrepared\" = EXCLUDED.\"emailsPrepared\", \"emailsSent\" = EXCLUDED.\"emailsSent\", \"topIndustries\" = EXCLUDED.\"topIndustries\", \"status\" = EXCLUDED.\"status\" RETURNING *;",
+        "options": {
+          "queryReplacement": "={{ [$json.executionId, $json.date, $json.businessesProcessed, $json.qualified, $json.emailsPrepared, $json.emailsSent, $json.topIndustries, $json.status] }}"
+        }
       },
       "id": "aa934e69-2a45-498c-91de-f1d54cf53aee",
-      "name": "Append Campaign Report",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4,
+      "name": "Upsert Campaign Report",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "position": [
         672,
         560
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "JOJNkcLhn4iH3jm5",
-          "name": "Google Sheets account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -1181,371 +343,50 @@
     },
     {
       "parameters": {
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{$('Runtime Config').first().json.sheets.emailHistory}}",
-          "mode": "name"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "id": "={{ $('Follow-up Suppression Check').item.json.id }}",
-            "executionId": "={{$('Runtime Config').first().json.executionId}}",
-            "timestamp": "={{new Date().toISOString()}}",
-            "businessName": "={{ $('Follow-up Suppression Check').item.json.businessName }}",
-            "email": "={{ $('Follow-up Suppression Check').item.json.email }}",
-            "phone": "={{ $('Follow-up Suppression Check').item.json.phone }}",
-            "website": "={{ $('Follow-up Suppression Check').item.json.website }}",
-            "domain": "={{ $('Follow-up Suppression Check').item.json.domain }}",
-            "city": "={{ $('Follow-up Suppression Check').item.json.city }}",
-            "country": "={{ $('Follow-up Suppression Check').item.json.country }}",
-            "countryCode": "={{ $('Follow-up Suppression Check').item.json.countryCode }}",
-            "industry": "={{ $('Follow-up Suppression Check').item.json.industry }}",
-            "score": "={{ $('Follow-up Suppression Check').item.json.score }}",
-            "priority": "={{ $('Follow-up Suppression Check').item.json.priority }}",
-            "emailSubject": "={{ $('Follow-up Suppression Check').item.json.emailSubject }}",
-            "emailBody": "={{ $('Follow-up Suppression Check').item.json.emailBody }}",
-            "fromEmail": "={{$('Runtime Config').first().json.company.senderEmail}}",
-            "replyTo": "={{ $('Follow-up Suppression Check').item.json.replyTo }}",
-            "lastSent": "={{ $('Follow-up Suppression Check').item.json.lastSent }}",
-            "campaign": "={{ $('Follow-up Suppression Check').item.json.campaign }}",
-            "status": "={{ $('Follow-up Suppression Check').item.json.status }}",
-            "followupStage": "={{ $('Follow-up Suppression Check').item.json.followupStage }}",
-            "replied": "={{ $('Follow-up Suppression Check').item.json.replied }}",
-            "whatsappNumber": "={{ $('Runtime Config').first().json.company.whatsappNumber }}",
-            "contactEmail": "={{ $('Runtime Config').first().json.company.contactEmail }}",
-            "error": "",
-            "notes": "follow-up drip sent via SES SMTP"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "executionId",
-              "displayName": "executionId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "timestamp",
-              "displayName": "timestamp",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "businessName",
-              "displayName": "businessName",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "email",
-              "displayName": "email",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "phone",
-              "displayName": "phone",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "website",
-              "displayName": "website",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "domain",
-              "displayName": "domain",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "city",
-              "displayName": "city",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "country",
-              "displayName": "country",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "countryCode",
-              "displayName": "countryCode",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "industry",
-              "displayName": "industry",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "score",
-              "displayName": "score",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "priority",
-              "displayName": "priority",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailSubject",
-              "displayName": "emailSubject",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailBody",
-              "displayName": "emailBody",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "fromEmail",
-              "displayName": "fromEmail",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "replyTo",
-              "displayName": "replyTo",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "lastSent",
-              "displayName": "lastSent",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "campaign",
-              "displayName": "campaign",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "status",
-              "displayName": "status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "followupStage",
-              "displayName": "followupStage",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "replied",
-              "displayName": "replied",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "whatsappNumber",
-              "displayName": "whatsappNumber",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "contactEmail",
-              "displayName": "contactEmail",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "error",
-              "displayName": "error",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "notes",
-              "displayName": "notes",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
+        "operation": "executeQuery",
+        "query": "INSERT INTO email_history (\"id\", \"executionId\", \"timestamp\", \"businessName\", \"email\", \"phone\", \"website\", \"domain\", \"city\", \"country\", \"countryCode\", \"industry\", \"score\", \"priority\", \"emailSubject\", \"emailBody\", \"fromEmail\", \"replyTo\", \"lastSent\", \"campaign\", \"status\", \"followupStage\", \"replied\", \"whatsappNumber\", \"contactEmail\", \"error\", \"notes\") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27) ON CONFLICT (id) DO NOTHING RETURNING *;",
+        "options": {
+          "queryReplacement": "={{ [$('Follow-up Suppression Check').item.json.id, $('Runtime Config').first().json.executionId, new Date().toISOString(), $('Follow-up Suppression Check').item.json.businessName, $('Follow-up Suppression Check').item.json.email, $('Follow-up Suppression Check').item.json.phone, $('Follow-up Suppression Check').item.json.website, $('Follow-up Suppression Check').item.json.domain, $('Follow-up Suppression Check').item.json.city, $('Follow-up Suppression Check').item.json.country, $('Follow-up Suppression Check').item.json.countryCode, $('Follow-up Suppression Check').item.json.industry, $('Follow-up Suppression Check').item.json.score, $('Follow-up Suppression Check').item.json.priority, $('Follow-up Suppression Check').item.json.emailSubject, $('Follow-up Suppression Check').item.json.emailBody, $('Runtime Config').first().json.company.senderEmail, $('Follow-up Suppression Check').item.json.replyTo, $('Follow-up Suppression Check').item.json.lastSent, $('Follow-up Suppression Check').item.json.campaign, $('Follow-up Suppression Check').item.json.status, $('Follow-up Suppression Check').item.json.followupStage, $('Follow-up Suppression Check').item.json.replied, $('Runtime Config').first().json.company.whatsappNumber, $('Runtime Config').first().json.company.contactEmail, \"\", \"follow-up drip sent via SES SMTP\"] }}"
+        }
       },
       "id": "d3d30f2d-9aa7-4d76-9d3b-f89624c3a6bc",
-      "name": "Append Follow-up Email History",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4,
+      "name": "Store Follow-up Email History",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "position": [
         1456,
         1088
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "JOJNkcLhn4iH3jm5",
-          "name": "Google Sheets account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "={{ $('Runtime Config').first().json.sheets.documentId }}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{ $('Runtime Config').first().json.sheets.replyLog }}",
-          "mode": "name"
-        },
+        "operation": "executeQuery",
+        "query": "SELECT * FROM reply_log;",
         "options": {}
       },
       "id": "aa4010df-2c7d-42fe-a3b5-227c7d872a56",
-      "name": "Get Reply_Log for Follow-up Suppression",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4,
+      "name": "Read Reply Log for Follow-up Suppression",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "position": [
         -64,
         1440
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "JOJNkcLhn4iH3jm5",
-          "name": "Google Sheets account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "={{ $('Runtime Config').first().json.sheets.documentId }}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{ $('Runtime Config').first().json.sheets.blacklist }}",
-          "mode": "name"
-        },
+        "operation": "executeQuery",
+        "query": "SELECT * FROM blacklist;",
         "options": {}
       },
       "id": "479e1c77-eef8-4dfd-9901-9465edcfa15a",
-      "name": "Get Blacklist for Follow-up Suppression",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4,
+      "name": "Read Blacklist for Follow-up Suppression",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "position": [
         -48,
         1664
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "JOJNkcLhn4iH3jm5",
-          "name": "Google Sheets account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -1597,235 +438,52 @@
     },
     {
       "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "={{ $('Runtime Config').first().json.sheets.documentId }}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{ $('Runtime Config').first().json.sheets.emailHistory }}",
-          "mode": "name"
-        },
+        "operation": "executeQuery",
+        "query": "SELECT * FROM email_history WHERE \"lastSent\" IS NULL OR NULLIF(\"lastSent\", '')::timestamptz >= NOW() - INTERVAL '180 days';",
         "options": {}
       },
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.7,
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "position": [
         -32,
         768
       ],
       "id": "e35abb80-b70b-4c27-9e15-e3c5f72aea90",
-      "name": "Get Emails History1",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "JOJNkcLhn4iH3jm5",
-          "name": "Google Sheets account"
-        }
-      },
+      "name": "Read Recent Email History",
       "alwaysOutputData": true
     },
     {
       "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "={{ $('Runtime Config').first().json.sheets.documentId }}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{ $('Runtime Config').first().json.sheets.blacklist }}",
-          "mode": "name"
-        },
+        "operation": "executeQuery",
+        "query": "SELECT * FROM blacklist;",
         "options": {}
       },
       "id": "2484cc43-1518-4652-9f00-6870a76a71ed",
-      "name": "Get Blacklist for Initial Suppression",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "name": "Read Blacklist for Initial Suppression",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "alwaysOutputData": true,
       "position": [
         112,
         768
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "JOJNkcLhn4iH3jm5",
-          "name": "Google Sheets account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
-        "operation": "appendOrUpdate",
-        "documentId": {
-          "__rl": true,
-          "value": "={{$('Runtime Config').first().json.sheets.documentId}}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "={{$('Runtime Config').first().json.sheets.followupQueue}}",
-          "mode": "name"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "executionId": "={{$('Runtime Config').first().json.executionId}}",
-            "email": "={{$json.email}}",
-            "businessName": "={{$json.businessName}}",
-            "campaign": "={{$json.campaign}}",
-            "followupStage": "={{$json.followupStage}}",
-            "dueAt": "={{new Date().toISOString()}}",
-            "emailSubject": "={{$json.emailSubject}}",
-            "emailBody": "={{$json.emailBody}}",
-            "fromEmail": "={{$('Runtime Config').first().json.company.senderEmail}}",
-            "replyTo": "={{$json.replyTo}}",
-            "status": "={{$json.status}}",
-            "lastSent": "={{$json.lastSent}}",
-            "notes": "={{'Approved after Reply_Log and Blacklist suppression; queued for SES SMTP send.'}}"
-          },
-          "matchingColumns": [
-            "email"
-          ],
-          "schema": [
-            {
-              "id": "executionId",
-              "displayName": "executionId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "email",
-              "displayName": "email",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "businessName",
-              "displayName": "businessName",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "campaign",
-              "displayName": "campaign",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "followupStage",
-              "displayName": "followupStage",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "dueAt",
-              "displayName": "dueAt",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailSubject",
-              "displayName": "emailSubject",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "emailBody",
-              "displayName": "emailBody",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "fromEmail",
-              "displayName": "fromEmail",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "replyTo",
-              "displayName": "replyTo",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "status",
-              "displayName": "status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "lastSent",
-              "displayName": "lastSent",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "notes",
-              "displayName": "notes",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
+        "operation": "executeQuery",
+        "query": "INSERT INTO followup_queue (\"executionId\", \"email\", \"businessName\", \"campaign\", \"followupStage\", \"dueAt\", \"emailSubject\", \"emailBody\", \"fromEmail\", \"replyTo\", \"status\", \"lastSent\", \"notes\") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) ON CONFLICT (email) DO UPDATE SET \"executionId\" = EXCLUDED.\"executionId\", \"email\" = EXCLUDED.\"email\", \"businessName\" = EXCLUDED.\"businessName\", \"campaign\" = EXCLUDED.\"campaign\", \"followupStage\" = EXCLUDED.\"followupStage\", \"dueAt\" = EXCLUDED.\"dueAt\", \"emailSubject\" = EXCLUDED.\"emailSubject\", \"emailBody\" = EXCLUDED.\"emailBody\", \"fromEmail\" = EXCLUDED.\"fromEmail\", \"replyTo\" = EXCLUDED.\"replyTo\", \"status\" = EXCLUDED.\"status\", \"lastSent\" = EXCLUDED.\"lastSent\", \"notes\" = EXCLUDED.\"notes\" RETURNING *;",
+        "options": {
+          "queryReplacement": "={{ [$('Runtime Config').first().json.executionId, $json.email, $json.businessName, $json.campaign, $json.followupStage, new Date().toISOString(), $json.emailSubject, $json.emailBody, $('Runtime Config').first().json.company.senderEmail, $json.replyTo, $json.status, $json.lastSent, 'Approved after Reply_Log and Blacklist suppression; queued for SES SMTP send.'] }}"
+        }
       },
       "id": "069ba185-85f4-4f91-a75d-793a7edf6fa2",
-      "name": "Upsert Followup_Queue",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "name": "Upsert Follow-up Queue",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "position": [
         512,
         1088
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "JOJNkcLhn4iH3jm5",
-          "name": "Google Sheets account"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -1932,17 +590,17 @@
             "index": 0
           },
           {
-            "node": "Get Emails History",
+            "node": "Read Email History for Follow-ups",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Get Reply_Log for Follow-up Suppression",
+            "node": "Read Reply Log for Follow-up Suppression",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Get Blacklist for Follow-up Suppression",
+            "node": "Read Blacklist for Follow-up Suppression",
             "type": "main",
             "index": 0
           }
@@ -1953,14 +611,14 @@
       "main": [
         [
           {
-            "node": "Log Keyword to Google Sheets",
+            "node": "Log Keyword to PostgreSQL",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Log Keyword to Google Sheets": {
+    "Log Keyword to PostgreSQL": {
       "main": [
         [
           {
@@ -2030,14 +688,14 @@
       "main": [
         [
           {
-            "node": "Append Qualified Lead",
+            "node": "Store Qualified Lead",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Append Qualified Lead": {
+    "Store Qualified Lead": {
       "main": [
         [
           {
@@ -2059,7 +717,7 @@
         ]
       ]
     },
-    "Get Emails History": {
+    "Read Email History for Follow-ups": {
       "main": [
         [
           {
@@ -2092,7 +750,7 @@
         ]
       ]
     },
-    "Append Email History": {
+    "Store Initial Email History": {
       "main": [
         [
           {
@@ -2107,7 +765,7 @@
       "main": [
         [
           {
-            "node": "Append Campaign Report",
+            "node": "Upsert Campaign Report",
             "type": "main",
             "index": 0
           }
@@ -2161,7 +819,7 @@
         ],
         [
           {
-            "node": "Get Emails History1",
+            "node": "Read Recent Email History",
             "type": "main",
             "index": 0
           }
@@ -2183,7 +841,7 @@
       "main": [
         [
           {
-            "node": "Upsert Followup_Queue",
+            "node": "Upsert Follow-up Queue",
             "type": "main",
             "index": 0
           }
@@ -2201,7 +859,7 @@
         ]
       ]
     },
-    "Get Reply_Log for Follow-up Suppression": {
+    "Read Reply Log for Follow-up Suppression": {
       "main": [
         [
           {
@@ -2212,7 +870,7 @@
         ]
       ]
     },
-    "Get Blacklist for Follow-up Suppression": {
+    "Read Blacklist for Follow-up Suppression": {
       "main": [
         [
           {
@@ -2267,18 +925,18 @@
         ]
       ]
     },
-    "Get Emails History1": {
+    "Read Recent Email History": {
       "main": [
         [
           {
-            "node": "Get Blacklist for Initial Suppression",
+            "node": "Read Blacklist for Initial Suppression",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get Blacklist for Initial Suppression": {
+    "Read Blacklist for Initial Suppression": {
       "main": [
         [
           {
@@ -2289,7 +947,7 @@
         ]
       ]
     },
-    "Upsert Followup_Queue": {
+    "Upsert Follow-up Queue": {
       "main": [
         [
           {
@@ -2304,7 +962,7 @@
       "main": [
         [
           {
-            "node": "Append Email History",
+            "node": "Store Initial Email History",
             "type": "main",
             "index": 0
           }
@@ -2315,7 +973,7 @@
       "main": [
         [
           {
-            "node": "Append Follow-up Email History",
+            "node": "Store Follow-up Email History",
             "type": "main",
             "index": 0
           }
