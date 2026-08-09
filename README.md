@@ -65,10 +65,10 @@ pm2 startup
 Run the command printed by `pm2 startup` if PM2 asks you to do so. Restrict network access to the scraper so only n8n or trusted hosts can reach it; the service does not define API authentication. Verify the deployment from the same network context as n8n:
 
 ```bash
-curl http://SCRAPER_HOST:3000/api/health
+curl http://localhost:3000/api/health
 ```
 
-Set `scraper.baseUrl` in the workflow's **Runtime Config** to the reachable URL, for example `http://127.0.0.1:3000` when both services share a host or `http://googlemaps-scraper:3000` when that is the scraper's container/DNS name. Do not use `localhost` when n8n runs in a separate container or machine, because it would refer to n8n itself. Keep a single scraper process—the supplied PM2 configuration intentionally uses one instance to preserve its in-memory queue.
+Set `scraper.baseUrl` in the workflow's **Runtime Config** to the reachable URL, for example `http://localhost:3000` when both services share a host or `http://localhost:3000` when that is the scraper's container/DNS name. Do not use `localhost` when n8n runs in a separate container or machine, because it would refer to n8n itself. Keep a single scraper process—the supplied PM2 configuration intentionally uses one instance to preserve its in-memory queue.
 
 ## Excel-to-Google-Sheets contract (case-sensitive)
 
