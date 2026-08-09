@@ -11,27 +11,68 @@ This repository contains an n8n workflow configured for the **United Kingdom, It
 - Initial messages are suppressed against `Email_History` and `Blacklist`; follow-ups are additionally suppressed by `Reply_Log`.
 - A two-step follow-up sequence and conservative rate limits reduce operational and reputation risk.
 - Personalized email generation is fact-grounded: invented claims, dummy values, unresolved placeholders, unapproved URLs, phone numbers, and email addresses are rejected; the workflow falls back to conservative copy and deterministically inserts `+92 328 3897926` and `contact@srlines.net`.
-- No API secret is stored in the committed workflow. The supplied CSV import set contains one header-only CSV for each of the seven tabs the active workflow uses.
+- No API secret is stored in the committed workflow. The ready-to-upload Excel workbook contains the seven tabs and exact headers used by the active workflow.
+
+## Repository contents
+
+- `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.json` — the n8n workflow to import.
+- `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.xlsx` — the ready-to-upload Google Sheets workbook with all seven required tabs.
+- `googlemaps-scraper/` — the scraper service required by the workflow. This folder contains the four deployment files `.env`, `ecosystem.config.js`, `package.json`, and `server.js`.
+
+The scraper is not embedded in n8n. **Install and deploy `googlemaps-scraper/` on your VPS or instance before testing, using, or activating the n8n workflow.**
 
 ## Required configuration before activation
 
-1. Import `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.json` into n8n.
-2. Create one Google Spreadsheet, then import each CSV from `SRLINES Google Sheets CSV Import/` as a separate sheet using **File → Import → Upload → Insert new sheet(s)**. Rename each imported sheet exactly to the CSV filename without `.csv`; do not alter row 1.
-3. In **Runtime Config**, replace:
+1. Deploy the required Google Maps scraper by following [Deploy the Google Maps scraper](#deploy-the-google-maps-scraper). Do not test or activate the workflow until its health check succeeds from the n8n host or container.
+2. Upload `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.xlsx` to Google Drive and open it with Google Sheets. Confirm that all seven tabs listed in [Excel-to-Google-Sheets contract](#excel-to-google-sheets-contract-case-sensitive) are present and keep their names and row-1 headers unchanged.
+3. Import `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.json` into n8n.
+4. In **Runtime Config**, replace:
    - `PASTE_GOOGLE_SHEET_ID_HERE` with the ID from the Google Sheet URL.
    - `PASTE_DEEPSEEK_API_KEY_HERE` with a newly issued DeepSeek API key.
    - Company identity and product claims if any are not exact. Keep `whatsappNumber` as `+92 328 3897926` and `contactEmail`/`replyTo` as `contact@srlines.net`.
-4. Attach Google Sheets OAuth credentials to every Google Sheets node.
-5. Attach the n8n SMTP credential named **SES SMTP account** to both SES email nodes. Use the SES SMTP endpoint for the verified identity's AWS Region, port 465 with SSL/TLS or port 587 with STARTTLS, and SES SMTP credentials (not AWS access keys).
-6. Verify `noreply@ses.srlines.net` (or its domain) in SES, ensure `contact@srlines.net` receives replies, configure SPF, DKIM, DMARC, and move the SES account out of sandbox where applicable.
-7. Run `googlemaps-scraper`, confirm `http://localhost:3000/api/health`, and adjust `scraper.baseUrl` if n8n runs in another container/host.
+5. Attach Google Sheets OAuth credentials to every Google Sheets node.
+6. Attach the n8n SMTP credential named **SES SMTP account** to both SES email nodes. Use the SES SMTP endpoint for the verified identity's AWS Region, port 465 with SSL/TLS or port 587 with STARTTLS, and SES SMTP credentials (not AWS access keys).
+7. Verify `noreply@ses.srlines.net` (or its domain) in SES, ensure `contact@srlines.net` receives replies, configure SPF, DKIM, DMARC, and move the SES account out of sandbox where applicable.
 8. Keep the workflow inactive until the preflight below passes.
 
 > The previously committed DeepSeek key must be revoked and replaced. Treat it as compromised even if repository access was limited.
 
-## CSV-to-Google-Sheets contract (case-sensitive)
+## Deploy the Google Maps scraper
 
-The repository contains these UTF-8, header-only CSV files. Import every file as its own tab in the same Google Spreadsheet:
+The VPS or instance needs Node.js and npm. Playwright also needs its Chromium browser and system dependencies. From the repository root, run:
+
+```bash
+cd googlemaps-scraper
+npm install
+npx playwright install --with-deps chromium
+```
+
+Review `.env` before starting the service, especially `PORT`, `HEADLESS`, timeouts, rate limits, and `DATA_DIR`. Ensure that the configured data and log directories exist and are writable by the service account. For a quick foreground start, run:
+
+```bash
+npm start
+```
+
+For a persistent production process, install PM2 and use the included configuration:
+
+```bash
+npm install --global pm2
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup
+```
+
+Run the command printed by `pm2 startup` if PM2 asks you to do so. Restrict network access to the scraper so only n8n or trusted hosts can reach it; the service does not define API authentication. Verify the deployment from the same network context as n8n:
+
+```bash
+curl http://SCRAPER_HOST:3000/api/health
+```
+
+Set `scraper.baseUrl` in the workflow's **Runtime Config** to the reachable URL, for example `http://127.0.0.1:3000` when both services share a host or `http://googlemaps-scraper:3000` when that is the scraper's container/DNS name. Do not use `localhost` when n8n runs in a separate container or machine, because it would refer to n8n itself. Keep a single scraper process—the supplied PM2 configuration intentionally uses one instance to preserve its in-memory queue.
+
+## Excel-to-Google-Sheets contract (case-sensitive)
+
+The repository-root Excel workbook already contains these header-only tabs. Upload the workbook once, open it as a Google Spreadsheet, and do not rename tabs or alter row 1:
 
 | Tab | Exact headers |
 |---|---|
@@ -43,7 +84,7 @@ The repository contains these UTF-8, header-only CSV files. Import every file as
 | `Followup_Queue` | `executionId, email, businessName, campaign, followupStage, dueAt, emailSubject, emailBody, fromEmail, replyTo, status, lastSent, notes` |
 | `Blacklist` | `type, value, reason, addedAt, addedBy, expiresAt, status, notes` |
 
-`Raw_Leads` and `Industry_Stats` were removed because no active workflow node reads or writes them. Gmail-only search fields and thread/label columns were also removed because SMTP does not provide Gmail search metadata.
+`Raw_Leads` and `Industry_Stats` are omitted because no active workflow node reads or writes them. Gmail-only search fields and thread/label columns are also omitted because SMTP does not provide Gmail search metadata.
 
 ## Reply, bounce, complaint, and unsubscribe operations
 
@@ -66,8 +107,9 @@ Start with SES sandbox/test recipients, then a reviewed pilot of no more than fi
 - [ ] The old exposed DeepSeek key is revoked.
 - [ ] Google Sheets and SES SMTP credentials are attached and tested.
 - [ ] SES identity, SPF, DKIM, DMARC, and reply mailbox are verified.
-- [ ] All seven CSV files are imported into one Google Spreadsheet; tab names equal filenames without `.csv`, and row-1 headers are unchanged.
-- [ ] Scraper health and one keyword from each market are verified manually.
+- [ ] The root `.xlsx` workbook is uploaded to Google Sheets; all seven tab names and row-1 headers are unchanged.
+- [ ] The four-file `googlemaps-scraper/` service is installed and running on the VPS/instance before any workflow test.
+- [ ] Scraper health is reachable from n8n, `scraper.baseUrl` is correct, and one keyword from each market is verified manually.
 - [ ] Reply/SES event ingestion updates `Reply_Log` and `Blacklist` before follow-ups.
 - [ ] A legal/compliance owner approves each market and niche.
 - [ ] A five-recipient seed-list execution has correct language, links, sender, reply-to, and suppression behavior.
