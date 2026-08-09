@@ -44,7 +44,7 @@ The VPS or instance needs Node.js and npm. Playwright also needs its Chromium br
 ```bash
 cd googlemaps-scraper
 npm install
-npx playwright install --with-deps chromium
+npx playwright install chromium
 ```
 
 Review `.env` before starting the service, especially `PORT`, `HEADLESS`, timeouts, rate limits, and `DATA_DIR`. Ensure that the configured data and log directories exist and are writable by the service account. For a quick foreground start, run:
