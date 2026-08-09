@@ -8,7 +8,6 @@ PostgreSQL is used rather than an n8n SQLite community node: PostgreSQL has a ma
 
 - `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.json` — importable n8n workflow with 11 PostgreSQL nodes and no Google Sheets nodes.
 - `database/init.sql` — idempotent tables, constraints, grants, and query indexes.
-- `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.xlsx` — legacy data template; it is no longer used by the workflow.
 - `googlemaps-scraper/` — scraper service required by the workflow.
 
 ## 1. Install PostgreSQL on the n8n VPS
@@ -37,8 +36,13 @@ SQL
 Initialize the schema from this repository. `init.sql` is safe to run again after pulling an update:
 
 ```bash
-sudo -u postgres psql --set ON_ERROR_STOP=1 --dbname=n8n_leads --file=/workspace/n8n-workflows/database/init.sql
-sudo -u postgres psql --dbname=n8n_leads --command='\dt'
+sudo cp /home/admin/init.sql /tmp/init.sql
+sudo chmod 644 /tmp/init.sql
+
+sudo -u postgres psql \
+  --set ON_ERROR_STOP=1 \
+  --dbname=n8n_leads \
+  --file=/tmp/init.sql
 ```
 
 Test the application login (the prompt asks for the password):
@@ -47,44 +51,12 @@ Test the application login (the prompt asks for the password):
 psql 'host=127.0.0.1 port=5432 dbname=n8n_leads user=n8n_leads sslmode=prefer' -c 'SELECT current_database(), current_user;'
 ```
 
-### If n8n itself runs in Docker
-
-`127.0.0.1` inside the n8n container is the container, not the VPS. The cleanest same-instance setup is to run a PostgreSQL container on the same private Docker network and address it as `postgres`. Do not publish `5432:5432`:
-
-```yaml
-services:
-  postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: n8n_leads
-      POSTGRES_USER: n8n_leads
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/10-leads.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U n8n_leads -d n8n_leads"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  n8n:
-    image: docker.n8n.io/n8nio/n8n:2.8.4 # or keep your currently tested pin
-    # keep the existing n8n volumes, ports, and environment
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-volumes:
-  postgres_data:
-```
-
 The included health check prevents n8n from starting before PostgreSQL accepts connections. Docker initialization scripts only run when the data volume is empty; on an existing volume apply upgrades with `docker compose exec -T postgres psql -U n8n_leads -d n8n_leads < database/init.sql`.
 
 ## 2. Create the n8n PostgreSQL credential
 
 1. Open **Credentials → Add credential → Postgres** in n8n.
-2. Use host `127.0.0.1` when n8n is installed directly on the VPS, or `postgres` when both services share the Docker Compose network.
+2. Use host `localhost` when n8n is installed directly on the VPS, or `postgres` when both services share the Docker Compose network.
 3. Enter database `n8n_leads`, user `n8n_leads`, the generated password, and port `5432`.
 4. Set SSL to **Disable** only for loopback/private Docker-network traffic. If the database is ever remote, require TLS and validate its CA instead.
 5. Save it as **Lead Pipeline PostgreSQL** and run **Test connection**.
@@ -99,36 +71,6 @@ The included health check prevents n8n from starting before PostgreSQL accepts c
 6. Run a manual seed-list execution. Inspect each Postgres node and confirm rows with the verification queries below before activation.
 
 The history readers only retrieve the last 180 days, matching the configured cooldown and bounding n8n memory use. Database indexes make email suppression lookups independent of Google API quotas. The write nodes use positional parameters rather than interpolating lead content into SQL.
-
-## 4. Verification, operations, and backups
-
-```bash
-sudo -u postgres psql -d n8n_leads -c 'SELECT count(*) FROM keywords;'
-sudo -u postgres psql -d n8n_leads -c 'SELECT status, count(*) FROM email_history GROUP BY status;'
-sudo -u postgres psql -d n8n_leads -c 'SELECT * FROM campaign_report ORDER BY date DESC LIMIT 5;'
-```
-
-Create an off-VPS encrypted backup job before production. A basic logical backup is:
-
-```bash
-sudo install -d -m 0700 /var/backups/n8n-leads
-sudo -u postgres pg_dump --format=custom n8n_leads > /var/backups/n8n-leads/n8n_leads_$(date -u +%F).dump
-```
-
-Test restores periodically on a separate database. Monitor disk space, PostgreSQL logs, failed n8n executions, bounces, complaints, and suppressions. PostgreSQL fixes the Sheets 429 error, but it does not make outbound email compliance or delivery-event ingestion optional.
-
-## 5. Optional one-time migration from Google Sheets
-
-Do not run the old Sheets workflow while migrating. Export each populated tab as CSV, copy it to a directory readable by PostgreSQL, and import into its corresponding table with `\copy`. The table mappings are `Keywords → keywords`, `Qualified_Leads → qualified_leads`, `Email_History → email_history`, `Campaign_Report → campaign_report`, `Reply_Log → reply_log`, `Followup_Queue → followup_queue`, and `Blacklist → blacklist`.
-
-Example from a shell whose current user can read the CSV:
-
-```bash
-psql 'host=127.0.0.1 dbname=n8n_leads user=n8n_leads' \
-  -c "\copy email_history FROM '/absolute/path/Email_History.csv' WITH (FORMAT csv, HEADER true)"
-```
-
-Import parent/history data before activating the new workflow. Deduplicate `id` in `Email_History` and `email` in `Followup_Queue` first because those columns are database keys. Keep the CSV header order identical to `database/init.sql`, or provide an explicit quoted column list to `\copy`.
 
 ## Deploy the Google Maps scraper
 
@@ -192,8 +134,4 @@ Start with SES sandbox/test recipients, then a reviewed pilot of no more than fi
 - [ ] A five-recipient seed-list execution has correct language, links, sender, reply-to, and suppression behavior.
 - [ ] Only then activate the hourly UTC schedule and raise volume gradually.
 
-### Initial-send branch does not continue past suppression checks
 
-An empty `email_history` or `blacklist` table is a valid first-run state. The two PostgreSQL readers in the initial-send branch are configured to **Always Output Data**, so they still trigger `Email Cooldown Deduplication` when a table has no rows. Keep this node setting enabled after importing or editing the workflow. Without it, n8n returns zero items from an empty query and stops that execution path before the deduplication node can evaluate the personalized-email candidates.
-
-The deduplication node also emits a result for suppressed candidates. `Initial Email Allowed` sends allowed candidates onward and returns suppressed candidates directly to `Loop Over Items2`. This return path is required: if a loop iteration produces zero output, n8n never reaches the loop's done output and `Build Campaign Report` cannot run. The report's `emailsPrepared` count includes only candidates where `shouldSend` is true.
