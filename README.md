@@ -114,3 +114,7 @@ Start with SES sandbox/test recipients, then a reviewed pilot of no more than fi
 - [ ] A legal/compliance owner approves each market and niche.
 - [ ] A five-recipient seed-list execution has correct language, links, sender, reply-to, and suppression behavior.
 - [ ] Only then activate the hourly UTC schedule and raise volume gradually.
+
+### Initial-send branch does not continue past suppression checks
+
+An empty `Email_History` or `Blacklist` tab is a valid first-run state. The two Google Sheets readers in the initial-send branch are configured to **Always Output Data**, so they still trigger `Email Cooldown Deduplication` when a tab has no data rows. Keep this node setting enabled after importing or editing the workflow. Without it, n8n returns zero items from an empty tab and stops that execution path before the deduplication node can evaluate the personalized-email candidates.

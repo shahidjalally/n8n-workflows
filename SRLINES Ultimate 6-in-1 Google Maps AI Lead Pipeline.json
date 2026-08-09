@@ -1622,7 +1622,8 @@
           "id": "JOJNkcLhn4iH3jm5",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -1642,6 +1643,7 @@
       "name": "Get Blacklist for Initial Suppression",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
+      "alwaysOutputData": true,
       "position": [
         112,
         768
