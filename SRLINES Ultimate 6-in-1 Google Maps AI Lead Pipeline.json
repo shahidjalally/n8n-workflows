@@ -616,7 +616,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst normalize=value=>String(value||'').trim().toLowerCase(), key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\nconst cutoff=Date.now()-Number(cfg.limits.emailCooldownDays||180)*86400000;\nconst recentlySent=new Set();\nfor(const item of $('Get Emails History1').all()){\n  const row=item.json,email=normalize(field(row,'email','email address','emailaddress'));\n  const sentAt=new Date(field(row,'lastSent','timestamp')).getTime();\n  const status=normalize(field(row,'status'));\n  if(email && Number.isFinite(sentAt) && sentAt>=cutoff && !/failed|error/.test(status)) recentlySent.add(email);\n}\nconst blacklist=new Set();\nfor(const item of $('Get Blacklist for Initial Suppression').all()){\n  const row=item.json,type=normalize(field(row,'type'));\n  const value=normalize(field(row,'value','email','email address','emailaddress'));\n  const status=normalize(field(row,'status'));\n  const expiresAt=new Date(field(row,'expiresAt')).getTime();\n  const expired=Number.isFinite(expiresAt)&&expiresAt<Date.now();\n  if(value&&(!type||type==='email')&&status!=='inactive'&&status!=='expired'&&!expired) blacklist.add(value);\n}\nconst inRun=new Set(),out=[];\nfor(const item of $('DeepSeek Personalized Email').all()){\n  const lead=item.json,email=normalize(lead.email);\n  if(!email||recentlySent.has(email)||blacklist.has(email)||inRun.has(email)) continue;\n  inRun.add(email);const now=new Date().toISOString();\n  out.push({json:{...lead,email,id:`${email}-initial-${cfg.executionId}`,timestamp:now,lastSent:now,campaign:cfg.campaign.name,status:'sent_initial',followupStage:0,replied:false,shouldSend:true,notes:`Initial outreach allowed after ${cfg.limits.emailCooldownDays}-day cooldown and Blacklist suppression.`}});\n}\nreturn out;"
+        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst normalize=value=>String(value||'').trim().toLowerCase(), key=value=>normalize(value).replace(/[^a-z0-9]/g,'');\nconst field=(row,...names)=>{const wanted=new Set(names.map(key));const found=Object.keys(row||{}).find(column=>wanted.has(key(column)));return found===undefined?'':row[found];};\nconst cutoff=Date.now()-Number(cfg.limits.emailCooldownDays||180)*86400000;\nconst recentlySent=new Set();\nfor(const item of $('Get Emails History1').all()){\n  const row=item.json,email=normalize(field(row,'email','email address','emailaddress'));\n  const sentAt=new Date(field(row,'lastSent','timestamp')).getTime();\n  const status=normalize(field(row,'status'));\n  if(email && Number.isFinite(sentAt) && sentAt>=cutoff && !/failed|error/.test(status)) recentlySent.add(email);\n}\nconst blacklist=new Set();\nfor(const item of $('Get Blacklist for Initial Suppression').all()){\n  const row=item.json,type=normalize(field(row,'type'));\n  const value=normalize(field(row,'value','email','email address','emailaddress'));\n  const status=normalize(field(row,'status'));\n  const expiresAt=new Date(field(row,'expiresAt')).getTime();\n  const expired=Number.isFinite(expiresAt)&&expiresAt<Date.now();\n  if(value&&(!type||type==='email')&&status!=='inactive'&&status!=='expired'&&!expired) blacklist.add(value);\n}\n// Evaluate only the current loop item. Always return it so a suppressed lead can\n// take the skip path back to Loop Over Items and cannot strand the done output.\nconst lead=$('Loop Over Items2').item.json;\nconst email=normalize(lead.email);\nlet suppressionReason='';\nif(!email) suppressionReason='missing_email';\nelse if(recentlySent.has(email)) suppressionReason='email_cooldown';\nelse if(blacklist.has(email)) suppressionReason='blacklisted';\nif(suppressionReason) return [{json:{...lead,email,shouldSend:false,suppressionReason}}];\nconst now=new Date().toISOString();\nreturn [{json:{...lead,email,id:`${email}-initial-${cfg.executionId}`,timestamp:now,lastSent:now,campaign:cfg.campaign.name,status:'sent_initial',followupStage:0,replied:false,shouldSend:true,notes:`Initial outreach allowed after ${cfg.limits.emailCooldownDays}-day cooldown and Blacklist suppression.`}}];"
       },
       "id": "ff97057e-9432-40cc-9874-bfa9697b5932",
       "name": "Email Cooldown Deduplication",
@@ -952,7 +952,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst read=name=>{try{return $(name).all().map(item=>item.json)}catch{return[]}};\nconst processed=read('Normalize & Require Email');\nconst scored=read('DeepSeek Lead Scoring');\nconst prepared=read('Email Cooldown Deduplication');\nconst sent=read('Append Email History');\nconst industries=[...new Set(scored.map(row=>row.industry).filter(Boolean))].slice(0,10);\nreturn [{json:{\n  executionId:cfg.executionId,\n  date:new Date().toISOString(),\n  businessesProcessed:processed.length,\n  qualified:scored.filter(row=>row.qualified).length,\n  emailsPrepared:prepared.length,\n  emailsSent:sent.length,\n  topIndustries:industries.join(', '),\n  status:'completed'\n}}];"
+        "jsCode": "const cfg=$('Runtime Config').first().json;\nconst read=name=>{try{return $(name).all().map(item=>item.json)}catch{return[]}};\nconst processed=read('Normalize & Require Email');\nconst scored=read('DeepSeek Lead Scoring');\nconst prepared=read('Email Cooldown Deduplication');\nconst sent=read('Append Email History');\nconst industries=[...new Set(scored.map(row=>row.industry).filter(Boolean))].slice(0,10);\nreturn [{json:{\n  executionId:cfg.executionId,\n  date:new Date().toISOString(),\n  businessesProcessed:processed.length,\n  qualified:scored.filter(row=>row.qualified).length,\n  emailsPrepared:prepared.filter(row=>row.shouldSend===true).length,\n  emailsSent:sent.length,\n  topIndustries:industries.join(', '),\n  status:'completed'\n}}];"
       },
       "id": "3423adff-b4b2-4f19-ab27-0480734976db",
       "name": "Build Campaign Report",
@@ -1622,7 +1622,8 @@
           "id": "JOJNkcLhn4iH3jm5",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -1642,6 +1643,7 @@
       "name": "Get Blacklist for Initial Suppression",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
+      "alwaysOutputData": true,
       "position": [
         112,
         768
@@ -1897,6 +1899,26 @@
         -1600,
         384
       ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.shouldSend}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "c146d9d8-c55d-41e2-ac6d-c0dfa89b94c0",
+      "name": "Initial Email Allowed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        464,
+        768
+      ]
     }
   ],
   "pinData": {},
@@ -2052,7 +2074,7 @@
       "main": [
         [
           {
-            "node": "Random Rate Limit",
+            "node": "Initial Email Allowed",
             "type": "main",
             "index": 0
           }
@@ -2305,6 +2327,24 @@
         [
           {
             "node": "Runtime Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initial Email Allowed": {
+      "main": [
+        [
+          {
+            "node": "Random Rate Limit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items2",
             "type": "main",
             "index": 0
           }
