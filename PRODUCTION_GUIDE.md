@@ -1,182 +1,74 @@
-# SRLINES Google Maps AI Lead Pipeline — Production Guide
+# SRLINES Multi-Market Google Maps Lead Pipeline — Production Guide
 
-This guide explains how to configure and operate the `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.json` n8n workflow for Google Maps lead discovery, email validation, DeepSeek personalization, Gmail outreach, reply/bounce suppression, and drip follow-ups.
+This repository contains an n8n workflow configured for the **United Kingdom, Italy, Spain, and the United Arab Emirates**, using **Amazon SES SMTP** for initial messages and follow-ups. Its six target niche groups are Real Estate; Clinics and Hospitals; Restaurants and Hotels; Ecommerce and Retail; Recruitment and Visa Manpower; and Professional Services.
 
-> Important: your n8n plan does not support environment variables, so all API keys and IDs are configured in the **Runtime Config** node. Keep exported workflow files private and never publish real keys.
+## What is production-ready in the template
 
-## What the workflow does
+- A deterministic, rotating keyword strategy covers all four markets without making lead discovery depend on an AI response.
+- Every lead carries `country`, `countryCode`, `locale`, and `language` through scoring, personalization, and Sheets.
+- Website email extraction requires valid HTTPS/TLS, syntax validation, non-disposable domains, and DNS MX records.
+- Initial and follow-up sends use the same SES SMTP credential reference and sender configuration.
+- Initial messages are suppressed against `Email_History` and `Blacklist`; follow-ups are additionally suppressed by `Reply_Log`.
+- A two-step follow-up sequence and conservative rate limits reduce operational and reputation risk.
+- Personalized email generation is fact-grounded: invented claims, dummy values, unresolved placeholders, unapproved URLs, phone numbers, and email addresses are rejected; the workflow falls back to conservative copy and deterministically inserts `+92 328 3897926` and `contact@srlines.net`.
+- No API secret is stored in the committed workflow. The supplied CSV import set contains one header-only CSV for each of the seven tabs the active workflow uses.
 
-1. Runs on a schedule from **Cron - 1 x Hour PKT**.
-2. Builds randomized city/industry keywords.
-3. Sends each keyword to your local Google Maps scraper.
-4. Normalizes leads and requires a valid email.
-5. Checks email syntax, blocked local parts, disposable domains, and DNS MX records.
-6. Enriches each lead from the business website.
-7. Scores leads with DeepSeek and rule-based signals.
-8. Appends qualified leads to Google Sheets.
-9. Generates a custom cold email with a strong WhatsApp CTA.
-10. Suppresses addresses already sent, replied, bounced, blacklisted, or inside cooldown.
-11. Sends Gmail messages with randomized throttling.
-12. Appends send history and campaign reporting.
-13. Syncs replied emails into `Reply_Log` and bounced recipients into `Blacklist`.
-14. Runs a wired follow-up branch from `Email_History` through suppression, rate limiting, Gmail send, and history append.
+## Required configuration before activation
 
-## Required services
+1. Import `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.json` into n8n.
+2. Create one Google Spreadsheet, then import each CSV from `SRLINES Google Sheets CSV Import/` as a separate sheet using **File → Import → Upload → Insert new sheet(s)**. Rename each imported sheet exactly to the CSV filename without `.csv`; do not alter row 1.
+3. In **Runtime Config**, replace:
+   - `PASTE_GOOGLE_SHEET_ID_HERE` with the ID from the Google Sheet URL.
+   - `PASTE_DEEPSEEK_API_KEY_HERE` with a newly issued DeepSeek API key.
+   - Company identity and product claims if any are not exact. Keep `whatsappNumber` as `+92 328 3897926` and `contactEmail`/`replyTo` as `contact@srlines.net`.
+4. Attach Google Sheets OAuth credentials to every Google Sheets node.
+5. Attach the n8n SMTP credential named **SES SMTP account** to both SES email nodes. Use the SES SMTP endpoint for the verified identity's AWS Region, port 465 with SSL/TLS or port 587 with STARTTLS, and SES SMTP credentials (not AWS access keys).
+6. Verify `noreply@ses.srlines.net` (or its domain) in SES, ensure `contact@srlines.net` receives replies, configure SPF, DKIM, DMARC, and move the SES account out of sandbox where applicable.
+7. Run `googlemaps-scraper`, confirm `http://localhost:3000/api/health`, and adjust `scraper.baseUrl` if n8n runs in another container/host.
+8. Keep the workflow inactive until the preflight below passes.
 
-- n8n on your Debian VPS.
-- Local Google Maps scraper reachable from n8n, default: `http://localhost:3000`.
-- Google account with Gmail and Google Sheets OAuth credentials connected in n8n.
-- DeepSeek API key.
-- A Google Sheet with the tabs listed below.
-- A verified sender mailbox with correct SPF, DKIM, and DMARC records.
+> The previously committed DeepSeek key must be revoked and replaced. Treat it as compromised even if repository access was limited.
 
-## Google Sheet tabs and recommended headers
+## CSV-to-Google-Sheets contract (case-sensitive)
 
-Create one spreadsheet and add these exact tab names:
+The repository contains these UTF-8, header-only CSV files. Import every file as its own tab in the same Google Spreadsheet:
 
-### `Keywords`
+| Tab | Exact headers |
+|---|---|
+| `Keywords` | `executionId, generatedAt, keyword, keywordCity, keywordIndustry, keywordCategory, keywordIntent, country, countryCode, locale, language, keywordStatus` |
+| `Qualified_Leads` | `executionId, normalizedAt, keyword, businessName, email, phone, website, domain, city, country, countryCode, locale, language, industry, keywordCategory, rating, reviews, score, priority, qualified, emailValidationStatus, emailValidationReason, emailMxRecords, emailMxCheckedAt, aiAnalysis, signals` |
+| `Email_History` | `id, executionId, timestamp, businessName, email, phone, website, domain, city, country, countryCode, industry, score, priority, emailSubject, emailBody, fromEmail, replyTo, lastSent, campaign, status, followupStage, replied, whatsappNumber, contactEmail, error, notes` |
+| `Campaign_Report` | `executionId, date, businessesProcessed, qualified, emailsPrepared, emailsSent, topIndustries, status` |
+| `Reply_Log` | `executionId, email, businessName, repliedAt, status, messageId, snippet, action, notes` |
+| `Followup_Queue` | `executionId, email, businessName, campaign, followupStage, dueAt, emailSubject, emailBody, fromEmail, replyTo, status, lastSent, notes` |
+| `Blacklist` | `type, value, reason, addedAt, addedBy, expiresAt, status, notes` |
 
-`executionId, now, keyword, keywordCity, keywordIndustry, keywordIntent, keywordStatus, firstSeen`
+`Raw_Leads` and `Industry_Stats` were removed because no active workflow node reads or writes them. Gmail-only search fields and thread/label columns were also removed because SMTP does not provide Gmail search metadata.
 
-### `Raw_Leads`
+## Reply, bounce, complaint, and unsubscribe operations
 
-Optional archive tab if you wire raw scraper output later.
+SMTP sending cannot search the reply mailbox. Before every scheduled follow-up run, synchronize replies into `Reply_Log` and delivery failures/complaints/unsubscribes into `Blacklist` using an external inbound-mail or SES event workflow.
 
-`executionId, keyword, businessName, email, phone, website, city, industry, rating, reviews, scrapedAt`
+- `Reply_Log.email` must contain the normalized recipient address.
+- In `Blacklist`, use `type=email`, the normalized address in `value`, an active `status`, and a clear `reason` such as `bounce`, `complaint`, or `unsubscribe`.
+- For domain-wide suppression, the current workflow requires individual email rows; do not assume `type=domain` is enforced.
+- Treat synchronization failure as a stop condition for follow-up sending.
 
-### `Qualified_Leads`
+## Compliance and deliverability gate
 
-`executionId, normalizedAt, keyword, businessName, email, phone, website, domain, city, industry, rating, reviews, score, priority, qualified, aiAnalysis`
+This automation is a technical template, not a determination that contacting any lead is lawful. Before each market launch, document the applicable lawful basis and direct-marketing rules, use only relevant business contact data, honor objection/unsubscribe immediately, publish an appropriate privacy notice, apply retention limits, and maintain evidence of suppression. Obtain qualified legal advice for the UK, EU member states (Italy and Spain), and UAE.
 
-### `Email_History`
+Start with SES sandbox/test recipients, then a reviewed pilot of no more than five messages. Monitor hard bounces, complaints, replies, and unsubscribes daily. Pause automatically or manually if suppression ingestion is stale, SPF/DKIM/DMARC fails, or complaint/bounce metrics deteriorate.
 
-`id, executionId, timestamp, businessName, email, phone, website, domain, city, industry, score, priority, emailSubject, emailBody, fromEmail, replyTo, lastSent, campaign, status, error, notes, followupStage, replied, whatsappCtaUrl`
+## Preflight and rollout
 
-### `Reply_Log`
-
-`timestamp, email, businessName, threadId, subject, snippet, status, notes`
-
-Use this tab to record any prospect that replied. Once an email is present here, the workflow suppresses future outreach to that address.
-
-### `Blacklist`
-
-`timestamp, type, value, source, reason, notes`
-
-Use `type=email` and `value=person@example.com` for bounced, complained, unsubscribed, or invalid addresses. Add domains with `type=domain` if you want to manually block an entire domain in your own filtering logic.
-
-### `Followup_Queue`
-
-`timestamp, email, businessName, followupStage, nextDueAt, status, notes`
-
-This is optional because follow-up timing can be calculated from `Email_History`, but it is useful for manual review.
-
-### `Campaign_Report`
-
-`executionId, date, keywordCount, businessesProcessed, emailsFound, duplicatesSkipped, qualified, emailsPrepared, emailsSent, topIndustries, status`
-
-### `Industry_Stats`
-
-Optional analytics tab.
-
-`date, city, industry, leads, qualified, sent, replies, bounces`
-
-## Configure the Runtime Config node
-
-Open **Runtime Config** and replace all placeholders:
-
-- `company.senderEmail`: your Gmail sender address.
-- `company.replyTo`: the mailbox where replies should arrive.
-- `company.whatsappCtaUrl`: your WhatsApp click-to-chat URL. Use E.164 format without `+`, for example `https://wa.me/923001234567?...`.
-- `sheets.documentId`: the Google Sheet ID from the sheet URL.
-- `deepseek.apiKey`: your DeepSeek API key.
-- `scraper.baseUrl`: your local scraper API URL.
-- `gmailSearch.replyQuery`: Gmail query for replies.
-- `gmailSearch.bounceQuery`: Gmail query for bounces.
-
-Recommended starting limits:
-
-- `maxEmailsPerRun`: 20–50 while warming up.
-- `minDelaySeconds`: 25 or higher.
-- `maxDelaySeconds`: 90 or higher.
-- `emailCooldownDays`: 180.
-- `minScoreToEmail`: 60 initially; increase to 70 if quality is low.
-
-## Local scraper expectation
-
-The **Google Maps Scraper** code node expects your scraper to accept a keyword and return business results that include as many of these fields as possible:
-
-- `name` or `businessName`
-- `email` or `emails[0]`
-- `phone`
-- `website` or `url`
-- `rating`
-- `reviews` or `reviewCount`
-- `city`
-- `industry`
-
-If your scraper endpoint path or payload differs, update the **Google Maps Scraper** node only. Keep the output field names above for downstream compatibility.
-
-## Reply, bounce, and reputation process
-
-For production safety, the workflow now includes two wired Gmail search branches:
-
-1. **Gmail Search Replied Emails** uses `gmailSearch.replyQuery`, extracts sender addresses, and appends them to `Reply_Log`.
-2. **Gmail Search Bounced Emails** uses `gmailSearch.bounceQuery`, extracts failed recipient addresses, and appends them to `Blacklist` with `type=email`.
-3. Add manual unsubscribes or complaints to `Blacklist` immediately.
-4. Never remove hard bounces from `Blacklist`.
-
-The initial sending branch and the follow-up branch both check suppression data before sending. If a lead appears in any suppression source, it is skipped.
-
-## Drip follow-up sequence
-
-Follow-up templates are defined in `Runtime Config > followup.sequence`:
-
-- Stage 1: after 3 days.
-- Stage 2: after 7 days.
-- Stage 3: after 14 days.
-
-Each follow-up includes the WhatsApp CTA and is automatically personalized with:
-
-- `{{businessName}}`
-- `{{city}}`
-- `{{signature}}`
-- `{{whatsappCtaUrl}}`
-
-The follow-up branch is fully wired: **Get Emails History → Follow-up Sequence Builder → Follow-up Suppression Check → Follow-up Rate Limit → Send Follow-up Gmail → Append Follow-up Email History**. It sends only the latest due stage per email and skips replied, bounced, complained, unsubscribed, duplicate, and blacklisted contacts.
-
-## Production activation checklist
-
-- [ ] Replace all placeholders in **Runtime Config**.
-- [ ] Create every Google Sheet tab with the exact names above.
-- [ ] Connect Google Sheets OAuth credentials to all Google Sheets nodes.
-- [ ] Connect Gmail OAuth credentials to Gmail send/search nodes.
-- [ ] Confirm the local scraper works from inside the n8n runtime.
-- [ ] Run the workflow manually with `maxEmailsPerRun: 1`.
-- [ ] Verify `Email_History` receives one correct row.
-- [ ] Send test replies and bounce samples, then add them to `Reply_Log` and `Blacklist`.
-- [ ] Confirm repeated runs skip replied/bounced/history emails.
-- [ ] Increase volume slowly only after SPF, DKIM, DMARC, bounce rate, and reply handling are stable.
-
-## Compliance and deliverability notes
-
-- Only contact relevant business addresses.
-- Do not email role addresses such as `noreply`, `abuse`, `privacy`, or unrelated support inboxes.
-- Stop immediately on reply, unsubscribe, complaint, or bounce.
-- Keep daily volume low during warm-up.
-- Make emails truthful: the prompt forbids fake claims and uses only provided lead data.
-- Monitor bounce rate; pause the workflow if hard bounces exceed safe thresholds.
-
-## Google Maps scraper timeout troubleshooting
-
-The **Google Maps Scraper** node is intentionally kept byte-for-byte aligned with the originally provided working scraper code. If you see `Search failed: timeout of 60000ms exceeded`, the timeout is coming from the local scraper request to `/api/scrape/search`, not from the reply/bounce/follow-up additions. Check that the scraper service is running, reachable from the n8n container/VPS network namespace, and able to finish one keyword within 60 seconds.
-
-Quick checks on the VPS:
-
-```bash
-curl -sS http://localhost:3000/health || true
-curl -sS -X POST http://localhost:3000/api/scrape/search \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"real estate agent in karachi","maxResults":5}'
-```
-
-If the second command takes more than 60 seconds, reduce `scraper.maxResultsPerKeyword` in **Runtime Config**, increase scraper server capacity, or test the scraper directly outside n8n before activating the full campaign.
+- [ ] All `PASTE_*` placeholders are replaced in the imported n8n copy.
+- [ ] The old exposed DeepSeek key is revoked.
+- [ ] Google Sheets and SES SMTP credentials are attached and tested.
+- [ ] SES identity, SPF, DKIM, DMARC, and reply mailbox are verified.
+- [ ] All seven CSV files are imported into one Google Spreadsheet; tab names equal filenames without `.csv`, and row-1 headers are unchanged.
+- [ ] Scraper health and one keyword from each market are verified manually.
+- [ ] Reply/SES event ingestion updates `Reply_Log` and `Blacklist` before follow-ups.
+- [ ] A legal/compliance owner approves each market and niche.
+- [ ] A five-recipient seed-list execution has correct language, links, sender, reply-to, and suppression behavior.
+- [ ] Only then activate the hourly UTC schedule and raise volume gradually.
