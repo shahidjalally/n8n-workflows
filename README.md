@@ -1,6 +1,6 @@
 # SRLINES Multi-Market Google Maps Lead Pipeline — PostgreSQL Edition
 
-This repository contains two n8n lead-generation workflows for the **United Kingdom, Italy, Spain, and the United Arab Emirates**. Both target the same six business-niche groups and store operational data in a PostgreSQL database on the same VPS as n8n instead of Google Sheets. This removes the Google Sheets 60-read-requests-per-minute-per-user bottleneck, gives writes transaction semantics, and adds indexes for suppression and email-history lookups.
+This repository contains two n8n lead-generation workflows for the **United Kingdom, Italy, Spain, and the United Arab Emirates**. Both target the same six business-niche groups and store operational data in a PostgreSQL database on the same VPS as n8n instead of Google Sheets. This gives writes transaction semantics, and adds indexes for suppression and email-history lookups.
 
 PostgreSQL is used rather than an n8n SQLite community node: PostgreSQL has a maintained core n8n node, supports concurrent workflow executions, and remains modest on a small single-VPS deployment.
 
