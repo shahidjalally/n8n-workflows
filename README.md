@@ -1,12 +1,13 @@
 # SRLINES Multi-Market Google Maps Lead Pipeline — PostgreSQL Edition
 
-This repository contains an n8n workflow for the **United Kingdom, Italy, Spain, and the United Arab Emirates**. The workflow now stores operational data in a PostgreSQL database on the same VPS as n8n instead of Google Sheets. This removes the Google Sheets 60-read-requests-per-minute-per-user bottleneck, gives writes transaction semantics, and adds indexes for suppression and email-history lookups.
+This repository contains two n8n lead-generation workflows for the **United Kingdom, Italy, Spain, and the United Arab Emirates**. Both target the same six business-niche groups and store operational data in a PostgreSQL database on the same VPS as n8n instead of Google Sheets. This removes the Google Sheets 60-read-requests-per-minute-per-user bottleneck, gives writes transaction semantics, and adds indexes for suppression and email-history lookups.
 
 PostgreSQL is used rather than an n8n SQLite community node: PostgreSQL has a maintained core n8n node, supports concurrent workflow executions, and remains modest on a small single-VPS deployment.
 
 ## Repository contents
 
-- `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.json` — importable n8n workflow with 11 PostgreSQL nodes and no Google Sheets nodes.
+- `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.json` — the original importable workflow for wCRM/WhatsApp CRM outreach, with 11 PostgreSQL nodes and no Google Sheets nodes.
+- `SRLINES 2nd Workflow - Website and Web Application Client Hunt.json` — the duplicated client-hunting workflow for website, ecommerce, portal, dashboard, integration, and custom web application development. It keeps the original countries and niche groups, uses a distinct set of search phrases and web-development scoring/personalization, and contains no YouTube video, thumbnail, or call to action.
 - `database/init.sql` — idempotent tables, constraints, grants, and query indexes.
 - `googlemaps-scraper/` — scraper service required by the workflow.
 
@@ -83,14 +84,37 @@ The included health check prevents n8n from starting before PostgreSQL accepts c
 4. Set SSL to **Disable** only for loopback/private Docker-network traffic. If the database is ever remote, require TLS and validate its CA instead.
 5. Save it as **Lead Pipeline PostgreSQL** and run **Test connection**.
 
-## 3. Import and connect the workflow
+## 3. Choose a workflow
+
+Use the workflow whose offer matches the campaign you intend to send:
+
+| Workflow | Use it for | Important behavior |
+| --- | --- | --- |
+| **Original — Google Maps AI Lead Pipeline** | Introducing the SRLINES wCRM/WhatsApp CRM product | Generates Google Maps searches across the four configured countries and six niche groups, scores product fit, then creates localized initial and follow-up email. |
+| **2nd Workflow — Website and Web Application Client Hunt** | Finding clients for websites, redesigns, ecommerce, portals, dashboards, booking/enquiry systems, integrations, and custom web applications | Uses the same countries and niche groups with changed search phrases, evidence-grounded web-development scoring, and dynamic localized emails. It deliberately has no YouTube content. |
+
+The workflows share the PostgreSQL tables. Their campaign names differ, but the email cooldown and blacklist apply across the shared history, which helps prevent contacting the same address twice. If you want completely isolated data, create a separate database/schema and update every Postgres credential accordingly.
+
+## 4. Configure Runtime Config before publishing
+
+**Do this separately in every imported workflow.** Open the **Runtime Config** node and replace or review all operator-specific values before testing or publishing:
+
+1. Replace `PASTE_DEEPSEEK_API_KEY_HERE`; preferably move the secret to an n8n credential or protected environment variable if your deployment supports it.
+2. Change the company name, legal name, sender name/title, sender email, reply-to address, contact email, phone/WhatsApp number, WhatsApp CTA URL, website, branding, signature, product/service description, and trust statements to your own accurate details.
+3. Review countries, cities, niches, keyword categories, languages/locales, campaign name, sending limits, cooldown, delays, follow-up timing, scraper URL, result limits, validation rules, and timezone.
+4. Verify that the selected SES identity belongs to you and that every link and contact value in a seed email is correct.
+5. Do not publish or activate the schedule until the Runtime Config has been updated, credentials are connected, suppression ingestion works, and a manual low-volume test passes.
+
+The JSON files contain template operator details for illustration; importing a file does **not** make those details appropriate for your deployment.
+
+## 5. Import and connect a workflow
 
 1. Back up/export the currently active workflow, then deactivate it so the old and new workflows cannot send duplicate messages.
-2. Import `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.json` as a new workflow.
+2. Import either workflow JSON listed above as a new workflow. To run both offers, import both files and configure/test each one independently.
 3. Open each of its 11 Postgres nodes, select **Lead Pipeline PostgreSQL**, and save. n8n intentionally does not receive a committed credential ID or password.
-4. Attach the existing **SES SMTP account** credential to both email nodes and verify the scraper configuration in **Runtime Config**.
+4. Attach your **SES SMTP account** credential to both email nodes and verify all operator details and the scraper configuration in **Runtime Config**. Repeat this for the second workflow if both are imported.
 5. There is no Google Sheet ID and no Google OAuth credential to configure. `Reply_Log` and `Blacklist` are now the `reply_log` and `blacklist` tables.
-6. Run a manual seed-list execution. Inspect each Postgres node and confirm rows with the verification queries below before activation.
+6. Run a manual seed-list execution for the chosen workflow. Inspect each Postgres node, generated subject, plain-text body, rendered HTML, links, localization, and suppression result before activation. When using both workflows, test them one at a time while both schedules remain inactive.
 
 The history readers only retrieve the last 180 days, matching the configured cooldown and bounding n8n memory use. Database indexes make email suppression lookups independent of Google API quotas. The write nodes use positional parameters rather than interpolating lead content into SQL.
 
@@ -155,4 +179,3 @@ Start with SES sandbox/test recipients, then a reviewed pilot of no more than fi
 - [ ] A legal/compliance owner approves each market and niche.
 - [ ] A five-recipient seed-list execution has correct language, links, sender, reply-to, and suppression behavior.
 - [ ] Only then activate the hourly UTC schedule and raise volume gradually.
-
