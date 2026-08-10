@@ -10,6 +10,28 @@ PostgreSQL is used rather than an n8n SQLite community node: PostgreSQL has a ma
 - `database/init.sql` — idempotent tables, constraints, grants, and query indexes.
 - `googlemaps-scraper/` — scraper service required by the workflow.
 
+## Recommended VPS prerequisites and technology stack
+
+We currently run and recommend the following single-VPS configuration for this workflow:
+
+| Resource | Recommended configuration |
+| --- | --- |
+| vCPU | 2 vCPUs |
+| Memory | 2 GB RAM |
+| Swap | 3 GB |
+| Disk | 30 GB HDD or better |
+| Operating system | Debian 12 or Debian 13 |
+
+The technology stack used on the VPS is:
+
+- **n8n** for workflow automation.
+- **PM2** for keeping the Google Maps scraper process running.
+- **Node.js** for n8n and the scraper runtime.
+- **PostgreSQL** for workflow data storage.
+- **Nginx** as the reverse proxy.
+
+This is our tested and recommended baseline, not a universal sizing guarantee. Monitor CPU, memory, swap, and disk usage, and increase the VPS resources when workflow concurrency, database size, or scraping volume grows.
+
 ## 1. Install PostgreSQL on the n8n VPS
 
 The following commands are for Ubuntu/Debian. Run them as a sudo-capable VPS user:
@@ -133,5 +155,4 @@ Start with SES sandbox/test recipients, then a reviewed pilot of no more than fi
 - [ ] A legal/compliance owner approves each market and niche.
 - [ ] A five-recipient seed-list execution has correct language, links, sender, reply-to, and suppression behavior.
 - [ ] Only then activate the hourly UTC schedule and raise volume gradually.
-
 
