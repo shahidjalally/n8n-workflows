@@ -8,7 +8,9 @@ PostgreSQL is used rather than an n8n SQLite community node: PostgreSQL has a ma
 
 - `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.json` — the original importable workflow for wCRM/WhatsApp CRM outreach, with 11 PostgreSQL nodes and no Google Sheets nodes.
 - `SRLINES 2nd Workflow - Website and Web Application Client Hunt.json` — the duplicated client-hunting workflow for website, ecommerce, portal, dashboard, integration, and custom web application development. It keeps the original countries and niche groups, uses a distinct set of search phrases and web-development scoring/personalization, and contains no YouTube video, thumbnail, or call to action.
+- `SRLINES Pakistan Real Estate AI Lead Intelligence and CSV Export.json` — a collection-only Pakistan workflow for real-estate companies. It rotates city/category searches, enriches public decision-maker evidence, applies AI scoring and nurture guidance, stores PostgreSQL records, and exposes a CSV download. It contains no Gmail, SMTP, or outreach nodes.
 - `database/init.sql` — idempotent tables, constraints, grants, and query indexes.
+- `database/pakistan_real_estate_leads.sql` — dedicated Pakistan lead/contact tables, constraints, grants, and indexes.
 - `googlemaps-scraper/` — scraper service required by the workflow.
 
 ## Recommended VPS prerequisites and technology stack
@@ -150,6 +152,44 @@ curl http://localhost:3000/api/health
 ```
 
 Set `scraper.baseUrl` in the workflow's **Runtime Config** to the reachable URL, for example `http://localhost:3000` when both services share a host or `http://localhost:3000` when that is the scraper's container/DNS name. Do not use `localhost` when n8n runs in a separate container or machine, because it would refer to n8n itself. Keep a single scraper process—the supplied PM2 configuration intentionally uses one instance to preserve its in-memory queue.
+
+## Pakistan real-estate intelligence workflow
+
+This workflow is deliberately **data collection only**: it neither drafts nor sends email. It retains low- and high-scoring leads, while DeepSeek assigns a 0–100 score, A–D grade, qualification summary, nurture recommendation, and evidence-backed decision-maker records. Its prompt forbids invented people or contact details. Review Pakistani privacy requirements, website terms, and your retention policy before activation.
+
+### Create the dedicated PostgreSQL tables
+
+Apply the idempotent schema as the database owner:
+
+```bash
+sudo -u postgres psql --set ON_ERROR_STOP=1 --dbname=n8n_leads \
+  --file=/path/to/n8n-workflows/database/pakistan_real_estate_leads.sql
+```
+
+Verify the tables and application login:
+
+```bash
+psql 'host=127.0.0.1 dbname=n8n_leads user=n8n_leads' -c \
+  "SELECT to_regclass('public.pakistan_real_estate_leads'), to_regclass('public.pakistan_real_estate_contacts');"
+```
+
+### Import and configure
+
+1. Import `SRLINES Pakistan Real Estate AI Lead Intelligence and CSV Export.json` as a **new** workflow; do not overwrite the existing workflow.
+2. In **Pakistan Runtime Config**, replace `PASTE_DEEPSEEK_API_KEY_HERE` (prefer a protected environment variable), confirm the scraper URL, and review the cities, real-estate keywords, crawl/result limits, delays, and six-hour schedule.
+3. Select **Lead Pipeline PostgreSQL** on both Postgres nodes. No Gmail, SES, Google Sheets, or SMTP credential is required.
+4. Start the repository's scraper, run the workflow manually, and inspect its output before enabling the schedule. Maps results are retained even without email; public home/about/team/leadership/contact pages provide enrichment evidence.
+5. Check coverage with `SELECT city, count(*), round(avg(ai_score), 1) FROM pakistan_real_estate_leads GROUP BY city ORDER BY count(*) DESC;`.
+
+### Download a presentable CSV
+
+Activate the workflow, then open the production URL shown by **Download Leads Webhook**, whose path ends in:
+
+```text
+/webhook/pakistan-real-estate-leads.csv
+```
+
+It returns a UTF-8 CSV attachment ordered by score, with one company per row and decision makers in a readable field. Protect the endpoint using n8n/reverse-proxy authentication or an allowlist before exposing it; the template commits no secret. Limit access and define deletion/retention rules because the export can contain business-contact personal data.
 
 ## Reply, bounce, complaint, and unsubscribe operations
 
