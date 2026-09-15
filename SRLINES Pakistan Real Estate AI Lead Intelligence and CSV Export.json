@@ -1,163 +1,141 @@
 {
-  "name": "SRLINES Pakistan Real Estate AI Lead Intelligence and CSV Export",
   "nodes": [
     {
       "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "hours",
-              "hoursInterval": 6
-            }
-          ]
-        }
+        "jsCode": "const now = new Date();\nreturn [{json:{\n  executionId:`pk-real-estate-${now.toISOString()}-${Math.random().toString(36).slice(2,8)}`,\n  country:'Pakistan',\n  countryCode:'PK',\n  locale:'en-PK',\n  language:'English',\n  cities:[\n    {city:'Karachi',province:'Sindh'},\n    {city:'Lahore',province:'Punjab'},\n    {city:'Islamabad',province:'Islamabad Capital Territory'},\n    {city:'Rawalpindi',province:'Punjab'},\n    {city:'Faisalabad',province:'Punjab'},\n    {city:'Multan',province:'Punjab'},\n    {city:'Peshawar',province:'Khyber Pakhtunkhwa'},\n    {city:'Quetta',province:'Balochistan'},\n    {city:'Gujranwala',province:'Punjab'},\n    {city:'Sialkot',province:'Punjab'},\n    {city:'Hyderabad',province:'Sindh'},\n    {city:'Bahawalpur',province:'Punjab'},\n    {city:'Abbottabad',province:'Khyber Pakhtunkhwa'}\n  ],\n  niche:'Real Estate',\n  keywords:[\n    'real estate agency',\n    'property dealer',\n    'property developer',\n    'real estate developer',\n    'commercial real estate',\n    'property management company',\n    'housing society',\n    'real estate investment company',\n    'estate agent',\n    'property consultant'\n  ],\n  limits:{\n    keywordsPerRun:4,\n    maxResultsPerKeyword:12,\n    crawlPagesPerSite:3,\n    websiteConcurrency:3,\n    aiConcurrency:3,\n    mxConcurrency:6,\n    requestDelayMs:700\n  },\n  scraper:{baseUrl:'http://localhost:3000'},\n  deepseek:{\n    apiKey:'REPLACE_DEEPSEEK_KEY',\n    apiUrl:'https://api.deepseek.com/chat/completions',\n    model:'deepseek-chat'\n  }\n}}];"
       },
-      "id": "246e0f9b-239e-4559-86ae-c8fd4386686d",
-      "name": "Schedule - Every 6 Hours",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        0,
-        0
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const now = new Date();\nreturn [{json:{\n executionId:`pk-real-estate-${now.toISOString()}-${Math.random().toString(36).slice(2,8)}`,\n country:'Pakistan', countryCode:'PK', locale:'en-PK', language:'English',\n cities:[\n  {city:'Karachi',province:'Sindh'},{city:'Lahore',province:'Punjab'},{city:'Islamabad',province:'Islamabad Capital Territory'},\n  {city:'Rawalpindi',province:'Punjab'},{city:'Faisalabad',province:'Punjab'},{city:'Multan',province:'Punjab'},\n  {city:'Peshawar',province:'Khyber Pakhtunkhwa'},{city:'Quetta',province:'Balochistan'},\n  {city:'Gujranwala',province:'Punjab'},{city:'Sialkot',province:'Punjab'},{city:'Hyderabad',province:'Sindh'},\n  {city:'Bahawalpur',province:'Punjab'},{city:'Abbottabad',province:'Khyber Pakhtunkhwa'}\n ],\n niche:'Real Estate',\n keywords:['real estate agency','property dealer','property developer','real estate developer','commercial real estate','property management company','housing society','real estate investment company','estate agent','property consultant'],\n limits:{keywordsPerRun:12,maxResultsPerKeyword:50,crawlPagesPerSite:6,requestDelayMs:900},\n scraper:{baseUrl:'http://localhost:3000'},\n deepseek:{apiKey:'PASTE_DEEPSEEK_API_KEY_HERE',apiUrl:'https://api.deepseek.com/chat/completions',model:'deepseek-chat'}\n}}];"
-      },
-      "id": "34b4f52d-a709-467c-81cc-eb075259a45f",
+      "id": "920df39b-dd97-45ba-82cf-d002e49a1c67",
       "name": "Pakistan Runtime Config",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        220,
-        0
+        -48,
+        736
       ]
     },
     {
       "parameters": {
-        "jsCode": "const cfg=$input.first().json; const state=$getWorkflowStaticData('global'); state.cursor=Number(state.cursor||0);\nconst candidates=cfg.cities.flatMap(m=>cfg.keywords.map(k=>({...m,keyword:`${k} in ${m.city}, Pakistan`,category:k})));\nconst count=Math.min(Number(cfg.limits.keywordsPerRun||12),candidates.length); const out=[];\nfor(let i=0;i<count;i++){const c=candidates[(state.cursor+i)%candidates.length];out.push({json:{...cfg,...c,industry:cfg.niche}})}\nstate.cursor=(state.cursor+count)%candidates.length; return out;"
+        "jsCode": "const cfg = $input.first().json;\nconst state = $getWorkflowStaticData('global');\n\nconst cities = Array.isArray(cfg.cities) ? cfg.cities.filter(c => c?.city) : [];\nconst keywords = Array.isArray(cfg.keywords)\n  ? cfg.keywords.map(k => String(k || '').trim()).filter(Boolean)\n  : [];\n\nif (!cities.length) throw new Error('No cities configured');\nif (!keywords.length) throw new Error('No keywords configured');\n\nconst candidates = [];\nfor (const cityConfig of cities) {\n  for (const category of keywords) {\n    candidates.push({\n      ...cityConfig,\n      category,\n      keyword: `${category} in ${cityConfig.city}, Pakistan`,\n    });\n  }\n}\n\nlet cursor = Number(state.searchRotationCursor ?? 0);\nif (!Number.isInteger(cursor) || cursor < 0 || cursor >= candidates.length) cursor = 0;\n\nconst requested = Math.max(1, Math.floor(Number(cfg?.limits?.keywordsPerRun || 1)));\nconst count = Math.min(requested, candidates.length);\nconst nextCursor = (cursor + count) % candidates.length;\nconst run = Number(state.searchRotationRuns ?? 0) + 1;\n\nconst out = [];\nfor (let i = 0; i < count; i++) {\n  const index = (cursor + i) % candidates.length;\n  out.push({\n    json:{\n      ...cfg,\n      ...candidates[index],\n      industry:cfg.niche,\n      rotation:{\n        index,\n        position:index + 1,\n        total:candidates.length,\n        cursor_before:cursor,\n        cursor_after:nextCursor,\n        batch_position:i + 1,\n        batch_size:count,\n        run\n      }\n    }\n  });\n}\n\nstate.searchRotationCursor = nextCursor;\nstate.searchRotationRuns = run;\nreturn out;"
       },
-      "id": "862062c8-a9bf-45af-9d07-395a00d28dbf",
+      "id": "7b9d4e33-d779-4530-9bab-653b977d82b7",
       "name": "Rotate City and Keywords",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        440,
-        0
+        176,
+        736
       ]
     },
     {
       "parameters": {
-        "options": {}
+        "jsCode": "const out = [];\n\nfunction clean(value) {\n  const s = String(value ?? '').replace(/\\s+/g, ' ').trim();\n  if (!s || /^(?:n\\/?a|na|none|null|unknown|-|—)$/i.test(s)) return '';\n  return s;\n}\n\nfunction phone(value) {\n  const s = clean(value);\n  if (!s) return '';\n  const p = s.replace(/[^0-9+]/g, '');\n  return p.length >= 7 ? p : '';\n}\n\nfunction website(value) {\n  let s = clean(value);\n  if (!s) return '';\n  if (!/^https?:\\/\\//i.test(s)) s = `https://${s}`;\n  try {\n    const u = new URL(s);\n    if (!/^https?:$/.test(u.protocol)) return '';\n    return u.href;\n  } catch {\n    return '';\n  }\n}\n\nfunction mapsUrl(value) {\n  const s = clean(value);\n  if (!s) return '';\n  try {\n    const u = new URL(s);\n    u.search = '';\n    u.hash = '';\n    return u.toString();\n  } catch {\n    return s;\n  }\n}\n\nfor (const item of $input.all()) {\n  const j = item.json;\n  const query = clean(j.keyword);\n\n  if (!query) {\n    out.push({json:{...j,_skipUpsert:true,skipReason:'empty_search_keyword'}});\n    continue;\n  }\n\n  let response;\n  try {\n    response = await this.helpers.httpRequest({\n      method:'POST',\n      url:`${String(j.scraper?.baseUrl || '').replace(/\\/$/, '')}/api/scrape/search`,\n      headers:{'Content-Type':'application/json'},\n      body:{\n        query,\n        maxResults:Math.max(1, Math.min(12, Number(j.limits?.maxResultsPerKeyword || 12)))\n      },\n      json:true,\n      timeout:240000\n    });\n  } catch (e) {\n    out.push({json:{\n      ...j,\n      _skipUpsert:true,\n      skipReason:'google_maps_scrape_failed',\n      scrapeError:String(e.message || e)\n    }});\n    continue;\n  }\n\n  const results = Array.isArray(response?.data?.results) ? response.data.results : [];\n\n  if (!results.length) {\n    out.push({json:{\n      ...j,\n      _skipUpsert:true,\n      skipReason:'google_maps_no_results'\n    }});\n    continue;\n  }\n\n  for (const p of results) {\n    const businessName = clean(p?.title);\n    const googleMapsUrl = mapsUrl(p?.googleMapsUrl || p?.url);\n    const businessWebsite = website(p?.website);\n    const businessPhone = phone(p?.phone);\n\n    if (!businessName || (!googleMapsUrl && !businessWebsite && !businessPhone)) continue;\n\n    let domain = '';\n    if (businessWebsite) {\n      try { domain = new URL(businessWebsite).hostname.replace(/^www\\./i, '').toLowerCase(); } catch {}\n    }\n\n    const mapEmail = clean(p?.email).toLowerCase();\n\n    out.push({json:{\n      ...j,\n      businessName,\n      address:clean(p?.address),\n      phone:businessPhone,\n      website:businessWebsite,\n      domain,\n      googleMapsUrl,\n      latitude:Number.isFinite(Number(p?.latitude)) ? Number(p.latitude) : null,\n      longitude:Number.isFinite(Number(p?.longitude)) ? Number(p.longitude) : null,\n      rating:Number.isFinite(Number(p?.rating)) ? Number(p.rating) : null,\n      reviews:Math.max(0, Number(String(p?.reviews || '').replace(/[^0-9]/g, '')) || 0),\n      rawCategory:clean(p?.category || j.category),\n      sourceRetrievedAt:new Date().toISOString(),\n      mapEmails:mapEmail ? [mapEmail] : []\n    }});\n  }\n\n  if (!out.some(x => x.json.keyword === j.keyword && !x.json._skipUpsert)) {\n    out.push({json:{...j,_skipUpsert:true,skipReason:'google_maps_results_unusable'}});\n  }\n}\n\nreturn out;"
       },
-      "id": "02142e1a-ebc9-4864-a936-af0959c7e403",
-      "name": "Loop Searches",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        660,
-        0
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const out=[]; for(const item of $input.all()){const j=item.json;let response;\ntry{response=await this.helpers.httpRequest({method:'POST',url:`${j.scraper.baseUrl}/api/scrape/search`,headers:{'Content-Type':'application/json'},body:{query:j.keyword,maxResults:j.limits.maxResultsPerKeyword},json:true,timeout:120000})}catch(e){console.log(`Scrape failed for ${j.keyword}: ${e.message}`);continue}\nfor(const p of response?.data?.results||[]){if(!p.title)continue;let domain='';try{domain=new URL(p.website).hostname.replace(/^www\\./,'').toLowerCase()}catch{}\nout.push({json:{...j,businessName:p.title,address:p.address||'',phone:p.phone||'',website:p.website||'',domain,googleMapsUrl:p.url||p.googleMapsUrl||'',latitude:p.latitude??null,longitude:p.longitude??null,rating:Number(p.rating)||null,reviews:Number(String(p.reviews||'').replace(/[^0-9]/g,''))||0,rawCategory:p.category||j.category,sourceRetrievedAt:new Date().toISOString()}})}} return out;"
-      },
-      "id": "c772cade-6ea8-4329-b1bc-a1a03b213085",
+      "id": "4d8a2c76-8f69-45a9-bc05-15a6c3d7ac99",
       "name": "Google Maps Pakistan Scraper",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        100
+        608,
+        848
       ]
     },
     {
       "parameters": {
-        "jsCode": "function text(html){return String(html||'').replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&[a-z]+;/gi,' ').replace(/\\s+/g,' ').trim()}\nfunction uniq(a){return [...new Set(a.filter(Boolean))]}; const out=[];\nfor(const item of $input.all()){const j=item.json;const pages=[];if(j.website){const base=j.website.replace(/\\/$/,'');for(const path of ['','/about','/about-us','/team','/leadership','/contact']){if(pages.length>=j.limits.crawlPagesPerSite)break;const url=base+path;try{const html=await this.helpers.httpRequest({url,method:'GET',timeout:15000,headers:{'User-Agent':'SRLINES Pakistan real-estate research bot'},json:false});pages.push({url,html:String(html)})}catch{}}}\nconst combined=pages.map(p=>p.html).join(' ');const emails=uniq((combined.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi)||[]).map(e=>e.toLowerCase()));\nconst linkedin=uniq((combined.match(/https?:\\/\\/(?:[a-z]+\\.)?linkedin\\.com\\/(?:in|company)\\/[A-Za-z0-9_%?&=./-]+/gi)||[]));\nconst socials={linkedin,facebook:uniq(combined.match(/https?:\\/\\/(?:www\\.)?facebook\\.com\\/[A-Za-z0-9_.?&=/-]+/gi)||[]),instagram:uniq(combined.match(/https?:\\/\\/(?:www\\.)?instagram\\.com\\/[A-Za-z0-9_.?&=/-]+/gi)||[])};\nconst snippets=text(combined).slice(0,18000);out.push({json:{...j,emails,socialProfiles:socials,websiteText:snippets,websiteSignals:{hasWebsite:!!j.website,emailCount:emails.length,linkedinCount:linkedin.length,pagesCrawled:pages.map(p=>p.url)},contacts:[]}})} return out;"
+        "jsCode": "const inputs = $input.all();\n\nfunction uniq(a) { return [...new Set(a.filter(Boolean))]; }\nfunction clean(v) {\n  const s = String(v ?? '').replace(/\\s+/g, ' ').trim();\n  if (!s || /^(?:n\\/?a|na|none|null|unknown|-|—)$/i.test(s)) return '';\n  return s;\n}\nfunction htmlToText(html) {\n  return String(html || '')\n    .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')\n    .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n    .replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n    .replace(/<[^>]+>/g, ' ')\n    .replace(/&(?:nbsp|amp|quot|apos|lt|gt);/gi, ' ')\n    .replace(/&#\\d+;/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n}\nfunction normalizeEmail(v) {\n  return String(v || '').trim().toLowerCase().replace(/^mailto:/i, '').replace(/^[<(\\\"'\\s]+/, '').replace(/[>)\\\"'\\],.;:\\s]+$/, '');\n}\nfunction validEmailSyntax(email) {\n  if (!email || email.length > 254) return false;\n  const at = email.lastIndexOf('@');\n  if (at <= 0) return false;\n  const local = email.slice(0, at), domain = email.slice(at + 1);\n  if (!local || !domain || local.length > 64 || domain.length > 253) return false;\n  if (local.startsWith('.') || local.endsWith('.') || local.includes('..')) return false;\n  if (!/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(local)) return false;\n  const labels = domain.split('.');\n  if (labels.length < 2) return false;\n  for (const label of labels) {\n    if (!label || label.length > 63 || !/^[a-z0-9-]+$/i.test(label) || label.startsWith('-') || label.endsWith('-')) return false;\n  }\n  return /^[a-z]{2,63}$/i.test(labels.at(-1));\n}\nfunction assetGarbage(email) {\n  const lower = email.toLowerCase();\n  const [local='', domain=''] = lower.split('@');\n  return /\\.(?:png|jpe?g|gif|webp|svg|ico|css|js|woff2?|ttf|eot|pdf|zip)$/i.test(domain) ||\n    /^(?:logo|icon|sprite|favicon|image|img|avatar|banner|thumbnail|thumb)(?:[-_.]|$)/i.test(local) ||\n    /@(?:2x|3x)\\.(?:png|jpe?g|gif|webp)$/i.test(lower);\n}\nfunction sanitizeEmails(values) {\n  return uniq(values.map(normalizeEmail).filter(e => validEmailSyntax(e) && !assetGarbage(e)));\n}\nfunction pageUrls(site, limit) {\n  if (!site) return [];\n  try {\n    const origin = new URL(site).origin;\n    const paths = ['', '/about', '/contact', '/about-us', '/team', '/leadership'];\n    return uniq(paths.slice(0, Math.max(1, Math.min(6, limit))).map(p => new URL(p, origin).href));\n  } catch { return []; }\n}\nasync function mapLimit(items, limit, worker) {\n  const results = new Array(items.length);\n  let cursor = 0;\n  async function run() {\n    while (true) {\n      const i = cursor++;\n      if (i >= items.length) return;\n      results[i] = await worker(items[i], i);\n    }\n  }\n  await Promise.all(Array.from({length:Math.min(limit, items.length)}, run));\n  return results;\n}\n\nconst concurrency = Math.max(1, Math.min(5, Number(inputs[0]?.json?.limits?.websiteConcurrency || 3)));\nconst results = await mapLimit(inputs, concurrency, async item => {\n  const j = item.json;\n  if (j._skipUpsert) return {json:{...j,emails:[],socialProfiles:{linkedin:[],facebook:[],instagram:[]},websiteText:'',websiteSignals:{hasWebsite:false,emailCandidateCount:0,emailCount:0,linkedinCount:0,pagesCrawled:[]},contacts:[]}};\n\n  const urls = pageUrls(j.website, Number(j.limits?.crawlPagesPerSite || 3));\n  const pages = await Promise.all(urls.map(async url => {\n    try {\n      const html = await this.helpers.httpRequest({\n        method:'GET',\n        url,\n        timeout:8000,\n        followRedirect:true,\n        maxRedirects:5,\n        headers:{\n          'User-Agent':'Mozilla/5.0 (compatible; SRLINES-LeadResearch/1.0)',\n          'Accept':'text/html,application/xhtml+xml'\n        },\n        json:false\n      });\n      return {url,html:String(html || '')};\n    } catch { return null; }\n  }));\n\n  const goodPages = pages.filter(Boolean);\n  const combined = goodPages.map(p => p.html).join('\\n');\n  const candidates = [\n    ...(Array.isArray(j.mapEmails) ? j.mapEmails : []),\n    ...(combined.match(/[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Z0-9.-]+\\.[A-Z]{2,63}/gi) || [])\n  ];\n  const emails = sanitizeEmails(candidates);\n  const linkedin = uniq(combined.match(/https?:\\/\\/(?:[a-z]+\\.)?linkedin\\.com\\/(?:in|company)\\/[A-Za-z0-9_%?&=./-]+/gi) || []);\n  const facebook = uniq(combined.match(/https?:\\/\\/(?:www\\.)?facebook\\.com\\/[A-Za-z0-9_.?&=/-]+/gi) || []);\n  const instagram = uniq(combined.match(/https?:\\/\\/(?:www\\.)?instagram\\.com\\/[A-Za-z0-9_.?&=/-]+/gi) || []);\n\n  return {json:{\n    ...j,\n    emails,\n    socialProfiles:{linkedin,facebook,instagram},\n    websiteText:htmlToText(combined).slice(0,18000),\n    websiteSignals:{\n      hasWebsite:!!j.website,\n      emailCandidateCount:candidates.length,\n      emailCount:emails.length,\n      linkedinCount:linkedin.length,\n      pagesAttempted:urls,\n      pagesCrawled:goodPages.map(p => p.url)\n    },\n    contacts:[]\n  }};\n});\n\nreturn results;"
       },
-      "id": "173bfa7b-df2a-4cf8-8283-8f053815226a",
+      "id": "a6fcf846-ac74-4a39-99cf-5499927ed111",
       "name": "Public Website Contact Enrichment",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1100,
-        100
+        832,
+        848
       ]
     },
     {
       "parameters": {
-        "jsCode": "function fallback(j){let s=20;if(j.website)s+=15;if(j.emails.length)s+=15;if(j.socialProfiles.linkedin.length)s+=10;if(j.reviews>=50)s+=10;if(j.reviews>=200)s+=10;if(j.rating>=4)s+=10;return Math.min(100,s)}\nconst cfg=$('Pakistan Runtime Config').first().json;const out=[];for(const item of $input.all()){const j=item.json;const base=fallback(j);let ai={score:base,grade:base>=80?'A':base>=65?'B':base>=45?'C':'D',qualification:'Heuristic score; AI was unavailable.',nurture_strategy:'Research and verify a senior decision-maker before outreach.',contacts:[]};\ntry{if(!cfg.deepseek.apiKey||cfg.deepseek.apiKey.startsWith('PASTE_'))throw new Error('DeepSeek key is not configured');const prompt=`Research/qualification task only; do not write or send outreach. Using the supplied public website evidence for a Pakistan real-estate business, return JSON: score (0-100), grade (A/B/C/D), qualification, nurture_strategy, and contacts array. Each contact must contain full_name, job_title, authority_level (owner/c-suite/director/manager/unknown), email, phone, linkedin_url, source_url, confidence (0-100), is_decision_maker. Never invent a person or contact detail; omit unsupported fields. Prioritize CEO, founder, owner, managing director, director, partner and head of sales. Lead: ${JSON.stringify({business:j.businessName,city:j.city,category:j.rawCategory,rating:j.rating,reviews:j.reviews,emails:j.emails,socialProfiles:j.socialProfiles,website:j.website,websiteText:j.websiteText.slice(0,12000)})}`;\nconst r=await this.helpers.httpRequest({method:'POST',url:cfg.deepseek.apiUrl,headers:{Authorization:`Bearer ${cfg.deepseek.apiKey}`,'Content-Type':'application/json'},body:{model:cfg.deepseek.model,temperature:0.1,messages:[{role:'user',content:prompt}],response_format:{type:'json_object'}},json:true,timeout:120000});ai={...ai,...JSON.parse(r.choices?.[0]?.message?.content||'{}')}}catch(e){ai.error=e.message}\nconst score=Math.max(0,Math.min(100,Math.round(Number(ai.score)||base)));out.push({json:{...j,score,grade:ai.grade||'D',qualification:ai.qualification||'',nurtureStrategy:ai.nurture_strategy||'',contacts:Array.isArray(ai.contacts)?ai.contacts:[],aiAnalysis:ai}})}return out;"
+        "jsCode": "const inputs = $input.all();\nconst cfg = $('Pakistan Runtime Config').first().json;\nlet apiDisabledReason = '';\n\nfunction fallback(j) {\n  let s = 20;\n  if (j.website) s += 15;\n  if (Array.isArray(j.emails) && j.emails.length) s += 15;\n  if (j.socialProfiles?.linkedin?.length) s += 10;\n  if ((j.reviews || 0) >= 50) s += 10;\n  if ((j.reviews || 0) >= 200) s += 10;\n  if ((j.rating || 0) >= 4) s += 10;\n  return Math.min(100, s);\n}\nfunction gradeFor(score) {\n  return score >= 80 ? 'A' : score >= 65 ? 'B' : score >= 45 ? 'C' : 'D';\n}\nasync function mapLimit(items, limit, worker) {\n  const results = new Array(items.length);\n  let cursor = 0;\n  async function run() {\n    while (true) {\n      const i = cursor++;\n      if (i >= items.length) return;\n      results[i] = await worker(items[i], i);\n    }\n  }\n  await Promise.all(Array.from({length:Math.min(limit, items.length)}, run));\n  return results;\n}\n\nconst concurrency = Math.max(1, Math.min(4, Number(cfg?.limits?.aiConcurrency || 3)));\nconst results = await mapLimit(inputs, concurrency, async item => {\n  const j = item.json;\n  if (j._skipUpsert) return {json:{...j,score:0,grade:'D',qualification:'Skipped: no usable Google Maps lead.',nurtureStrategy:'',contacts:[],aiAnalysis:{skipped:true,reason:j.skipReason || 'invalid_lead'}}};\n\n  const base = fallback(j);\n  const fallbackAi = {\n    score:base,\n    grade:gradeFor(base),\n    qualification:'Heuristic score; AI was unavailable or there was insufficient public evidence.',\n    nurture_strategy:'Research and verify a senior decision-maker before outreach.',\n    contacts:[]\n  };\n\n  const hasEvidence = !!String(j.websiteText || '').trim() || (j.emails?.length || 0) > 0 || (j.socialProfiles?.linkedin?.length || 0) > 0;\n  if (!hasEvidence) {\n    return {json:{...j,score:base,grade:gradeFor(base),qualification:fallbackAi.qualification,nurtureStrategy:fallbackAi.nurture_strategy,contacts:[],aiAnalysis:{...fallbackAi,skipped:true,reason:'insufficient_public_website_evidence'}}};\n  }\n\n  if (apiDisabledReason) {\n    return {json:{...j,score:base,grade:gradeFor(base),qualification:fallbackAi.qualification,nurtureStrategy:fallbackAi.nurture_strategy,contacts:[],aiAnalysis:{...fallbackAi,error:apiDisabledReason}}};\n  }\n\n  let ai = {...fallbackAi};\n  try {\n    if (!cfg.deepseek?.apiKey || cfg.deepseek.apiKey.startsWith('PASTE_')) throw new Error('DeepSeek key is not configured');\n\n    const prompt = `Research/qualification task only; do not write or send outreach. Use ONLY the supplied public evidence. Return one JSON object with: score (0-100), grade (A/B/C/D), qualification, nurture_strategy, contacts. Each contacts item may contain full_name, job_title, authority_level (owner/c-suite/director/manager/unknown), email, phone, linkedin_url, source_url, confidence (0-100), is_decision_maker. Never invent a person or contact detail. If a person is not explicitly supported by the evidence, do not include them. Lead evidence: ${JSON.stringify({business:j.businessName,city:j.city,category:j.rawCategory,rating:j.rating,reviews:j.reviews,emails:j.emails,socialProfiles:j.socialProfiles,website:j.website,websiteText:String(j.websiteText || '').slice(0,12000)})}`;\n\n    const r = await this.helpers.httpRequest({\n      method:'POST',\n      url:cfg.deepseek.apiUrl,\n      headers:{Authorization:`Bearer ${cfg.deepseek.apiKey}`,'Content-Type':'application/json'},\n      body:{\n        model:cfg.deepseek.model,\n        temperature:0.1,\n        messages:[{role:'user',content:prompt}],\n        response_format:{type:'json_object'}\n      },\n      json:true,\n      timeout:45000\n    });\n\n    const parsed = JSON.parse(r?.choices?.[0]?.message?.content || '{}');\n    ai = {...ai,...parsed};\n  } catch (e) {\n    const message = String(e.message || e);\n    ai.error = message;\n    if (/status code 402|\\b402\\b|payment|required|balance/i.test(message)) apiDisabledReason = message;\n  }\n\n  const score = Math.max(0, Math.min(100, Math.round(Number(ai.score) || base)));\n  const contacts = Array.isArray(ai.contacts) ? ai.contacts.filter(c => c && typeof c === 'object') : [];\n\n  return {json:{\n    ...j,\n    score,\n    grade:/^[ABCD]$/i.test(String(ai.grade || '')) ? String(ai.grade).toUpperCase() : gradeFor(score),\n    qualification:String(ai.qualification || fallbackAi.qualification),\n    nurtureStrategy:String(ai.nurture_strategy || fallbackAi.nurture_strategy),\n    contacts,\n    aiAnalysis:ai\n  }};\n});\n\nreturn results;"
       },
-      "id": "e870938e-6e7d-4092-944d-e0435ae018ee",
+      "id": "7a48452e-41ff-4eee-b462-d3c0d822a6af",
       "name": "AI Qualify, Score and Nurture",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1320,
-        100
+        1056,
+        848
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH lead AS (INSERT INTO pakistan_real_estate_leads (business_name,city,province,address,phone,website,domain,google_maps_url,latitude,longitude,rating,review_count,category,search_keyword,emails,social_profiles,website_signals,ai_score,ai_grade,ai_qualification,ai_nurture_strategy,ai_analysis,source_retrieved_at,last_seen_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::text[],$16::jsonb,$17::jsonb,$18,$19,$20,$21,$22::jsonb,$23::timestamptz,now()) ON CONFLICT (business_key) DO UPDATE SET address=EXCLUDED.address,phone=EXCLUDED.phone,website=EXCLUDED.website,google_maps_url=EXCLUDED.google_maps_url,rating=EXCLUDED.rating,review_count=EXCLUDED.review_count,emails=EXCLUDED.emails,social_profiles=EXCLUDED.social_profiles,website_signals=EXCLUDED.website_signals,ai_score=EXCLUDED.ai_score,ai_grade=EXCLUDED.ai_grade,ai_qualification=EXCLUDED.ai_qualification,ai_nurture_strategy=EXCLUDED.ai_nurture_strategy,ai_analysis=EXCLUDED.ai_analysis,source_retrieved_at=EXCLUDED.source_retrieved_at,last_seen_at=now() RETURNING id), contacts AS (INSERT INTO pakistan_real_estate_contacts (lead_id,full_name,job_title,authority_level,email,phone,linkedin_url,source_url,confidence,is_decision_maker) SELECT lead.id,c->>'full_name',c->>'job_title',coalesce(nullif(c->>'authority_level',''),'unknown'),c->>'email',c->>'phone',c->>'linkedin_url',c->>'source_url',least(100,greatest(0,coalesce((c->>'confidence')::int,0))),coalesce((c->>'is_decision_maker')::boolean,false) FROM lead CROSS JOIN jsonb_array_elements($24::jsonb) c ON CONFLICT (lead_id,full_name,email,linkedin_url) DO UPDATE SET job_title=EXCLUDED.job_title,authority_level=EXCLUDED.authority_level,phone=EXCLUDED.phone,source_url=EXCLUDED.source_url,confidence=EXCLUDED.confidence,is_decision_maker=EXCLUDED.is_decision_maker) SELECT id AS lead_id FROM lead;",
+        "query": "WITH\ninput_data AS (\n  SELECT\n    NULLIF(btrim($1::text), '') AS business_name,\n    NULLIF(btrim($2::text), '') AS city,\n    NULLIF(btrim($3::text), '') AS province,\n    NULLIF(btrim($4::text), '') AS address,\n    CASE WHEN lower(btrim(coalesce($5::text,''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE btrim($5::text) END AS phone,\n    CASE WHEN lower(btrim(coalesce($6::text,''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE btrim($6::text) END AS website,\n    CASE WHEN lower(btrim(coalesce($7::text,''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE lower(btrim($7::text)) END AS domain,\n    CASE WHEN lower(btrim(coalesce($8::text,''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE btrim($8::text) END AS google_maps_url,\n    CASE WHEN NULLIF(btrim($9::text),'') IS NULL THEN NULL ELSE $9::numeric END AS latitude,\n    CASE WHEN NULLIF(btrim($10::text),'') IS NULL THEN NULL ELSE $10::numeric END AS longitude,\n    CASE WHEN NULLIF(btrim($11::text),'') IS NULL THEN NULL ELSE $11::numeric END AS rating,\n    CASE WHEN NULLIF(btrim($12::text),'') IS NULL THEN 0 ELSE greatest(0,$12::integer) END AS review_count,\n    NULLIF(btrim($13::text),'') AS category,\n    COALESCE(NULLIF(btrim($14::text),''),'unknown') AS search_keyword,\n    CASE WHEN $16 IS NULL OR btrim($16::text)='' THEN '{}'::jsonb ELSE $16::jsonb END AS social_profiles,\n    CASE WHEN $17 IS NULL OR btrim($17::text)='' THEN '{}'::jsonb ELSE $17::jsonb END AS website_signals,\n    least(100,greatest(0,COALESCE(NULLIF(btrim($18::text),'')::integer,0))) AS ai_score,\n    COALESCE(NULLIF(btrim($19::text),''),'unrated') AS ai_grade,\n    NULLIF(btrim($20::text),'') AS ai_qualification,\n    NULLIF(btrim($21::text),'') AS ai_nurture_strategy,\n    CASE WHEN $22 IS NULL OR btrim($22::text)='' THEN '{}'::jsonb ELSE $22::jsonb END AS ai_analysis,\n    COALESCE(NULLIF(btrim($23::text),'')::timestamptz,now()) AS source_retrieved_at\n),\nraw_business_emails AS (\n  SELECT lower(btrim(value)) AS email\n  FROM jsonb_array_elements_text(\n    CASE WHEN $15 IS NULL OR btrim($15::text)='' OR jsonb_typeof($15::jsonb) <> 'array' THEN '[]'::jsonb ELSE $15::jsonb END\n  ) AS x(value)\n),\nvalid_business_emails AS (\n  SELECT DISTINCT email\n  FROM raw_business_emails\n  WHERE email IS NOT NULL\n    AND email <> ''\n    AND length(email) <= 254\n    AND email ~ '^[a-z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-z0-9][a-z0-9.-]*\\.[a-z]{2,63}$'\n    AND email !~ '\\.\\.'\n    AND email !~* '@[^@]+\\.(png|jpe?g|gif|webp|svg|ico|css|js|woff2?|ttf|eot|pdf|zip)$'\n),\nbusiness_email_array AS (\n  SELECT COALESCE(array_agg(email ORDER BY email),ARRAY[]::text[]) AS emails\n  FROM valid_business_emails\n),\nlead AS (\n  INSERT INTO pakistan_real_estate_leads (\n    business_name,city,province,address,phone,website,domain,google_maps_url,\n    latitude,longitude,rating,review_count,category,search_keyword,emails,\n    social_profiles,website_signals,ai_score,ai_grade,ai_qualification,\n    ai_nurture_strategy,ai_analysis,source_retrieved_at,last_seen_at\n  )\n  SELECT\n    i.business_name,i.city,i.province,i.address,i.phone,i.website,i.domain,i.google_maps_url,\n    i.latitude,i.longitude,i.rating,i.review_count,i.category,i.search_keyword,e.emails,\n    i.social_profiles,i.website_signals,i.ai_score,i.ai_grade,i.ai_qualification,\n    i.ai_nurture_strategy,i.ai_analysis,i.source_retrieved_at,now()\n  FROM input_data i CROSS JOIN business_email_array e\n  WHERE i.business_name IS NOT NULL\n    AND i.city IS NOT NULL\n    AND (i.google_maps_url IS NOT NULL OR i.domain IS NOT NULL OR i.phone IS NOT NULL OR i.website IS NOT NULL)\n  ON CONFLICT (business_key) DO UPDATE SET\n    province=COALESCE(EXCLUDED.province,pakistan_real_estate_leads.province),\n    address=COALESCE(EXCLUDED.address,pakistan_real_estate_leads.address),\n    phone=COALESCE(EXCLUDED.phone,pakistan_real_estate_leads.phone),\n    website=COALESCE(EXCLUDED.website,pakistan_real_estate_leads.website),\n    domain=COALESCE(EXCLUDED.domain,pakistan_real_estate_leads.domain),\n    google_maps_url=COALESCE(EXCLUDED.google_maps_url,pakistan_real_estate_leads.google_maps_url),\n    latitude=COALESCE(EXCLUDED.latitude,pakistan_real_estate_leads.latitude),\n    longitude=COALESCE(EXCLUDED.longitude,pakistan_real_estate_leads.longitude),\n    rating=COALESCE(EXCLUDED.rating,pakistan_real_estate_leads.rating),\n    review_count=greatest(EXCLUDED.review_count,pakistan_real_estate_leads.review_count),\n    category=COALESCE(EXCLUDED.category,pakistan_real_estate_leads.category),\n    search_keyword=EXCLUDED.search_keyword,\n    emails=(\n      SELECT COALESCE(array_agg(DISTINCT e ORDER BY e),ARRAY[]::text[])\n      FROM unnest(pakistan_real_estate_leads.emails || EXCLUDED.emails) AS u(e)\n      WHERE e IS NOT NULL AND e <> ''\n    ),\n    social_profiles=CASE WHEN EXCLUDED.social_profiles='{}'::jsonb THEN pakistan_real_estate_leads.social_profiles ELSE EXCLUDED.social_profiles END,\n    website_signals=CASE WHEN EXCLUDED.website_signals='{}'::jsonb THEN pakistan_real_estate_leads.website_signals ELSE EXCLUDED.website_signals END,\n    ai_score=EXCLUDED.ai_score,\n    ai_grade=EXCLUDED.ai_grade,\n    ai_qualification=EXCLUDED.ai_qualification,\n    ai_nurture_strategy=EXCLUDED.ai_nurture_strategy,\n    ai_analysis=CASE WHEN EXCLUDED.ai_analysis='{}'::jsonb THEN pakistan_real_estate_leads.ai_analysis ELSE EXCLUDED.ai_analysis END,\n    source_retrieved_at=EXCLUDED.source_retrieved_at,\n    last_seen_at=now()\n  RETURNING id,business_name\n),\nraw_contacts AS (\n  SELECT c\n  FROM jsonb_array_elements(\n    CASE WHEN $24 IS NULL OR btrim($24::text)='' OR jsonb_typeof($24::jsonb) <> 'array' THEN '[]'::jsonb ELSE $24::jsonb END\n  ) AS x(c)\n  WHERE jsonb_typeof(c)='object'\n),\nclean_contacts AS (\n  SELECT DISTINCT ON (contact_identity)\n    full_name,job_title,authority_level,email,phone,linkedin_url,source_url,confidence,is_decision_maker\n  FROM (\n    SELECT\n      NULLIF(btrim(c->>'full_name'),'') AS full_name,\n      NULLIF(btrim(c->>'job_title'),'') AS job_title,\n      COALESCE(NULLIF(lower(btrim(c->>'authority_level')),''),'unknown') AS authority_level,\n      CASE\n        WHEN lower(btrim(coalesce(c->>'email',''))) ~ '^[a-z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-z0-9][a-z0-9.-]*\\.[a-z]{2,63}$'\n         AND lower(btrim(c->>'email')) !~ '\\.\\.'\n         AND lower(btrim(c->>'email')) !~* '@[^@]+\\.(png|jpe?g|gif|webp|svg|ico|css|js|woff2?|ttf|eot|pdf|zip)$'\n        THEN lower(btrim(c->>'email')) ELSE NULL END AS email,\n      CASE WHEN lower(btrim(coalesce(c->>'phone',''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE btrim(c->>'phone') END AS phone,\n      NULLIF(btrim(c->>'linkedin_url'),'') AS linkedin_url,\n      NULLIF(btrim(c->>'source_url'),'') AS source_url,\n      least(100,greatest(0,CASE WHEN coalesce(c->>'confidence','') ~ '^[0-9]+$' THEN (c->>'confidence')::integer ELSE 0 END)) AS confidence,\n      lower(coalesce(c->>'is_decision_maker','false')) IN ('true','1','yes','y') AS is_decision_maker,\n      lower(coalesce(\n        NULLIF(btrim(c->>'email'),''),\n        NULLIF(btrim(c->>'linkedin_url'),''),\n        CASE WHEN lower(btrim(coalesce(c->>'phone',''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE btrim(c->>'phone') END,\n        NULLIF(coalesce(NULLIF(btrim(c->>'full_name'),''),'') || '|' || coalesce(NULLIF(btrim(c->>'job_title'),''),''),'|')\n      )) AS contact_identity\n    FROM raw_contacts\n  ) s\n  WHERE contact_identity IS NOT NULL AND contact_identity <> ''\n  ORDER BY contact_identity, confidence DESC\n),\ncontacts AS (\n  INSERT INTO pakistan_real_estate_contacts (\n    lead_id,full_name,job_title,authority_level,email,phone,linkedin_url,source_url,confidence,is_decision_maker\n  )\n  SELECT\n    l.id,c.full_name,c.job_title,c.authority_level,c.email,c.phone,c.linkedin_url,c.source_url,c.confidence,c.is_decision_maker\n  FROM lead l CROSS JOIN clean_contacts c\n  ON CONFLICT (lead_id,contact_key) DO UPDATE SET\n    full_name=COALESCE(EXCLUDED.full_name,pakistan_real_estate_contacts.full_name),\n    job_title=COALESCE(EXCLUDED.job_title,pakistan_real_estate_contacts.job_title),\n    authority_level=CASE WHEN EXCLUDED.authority_level='unknown' THEN pakistan_real_estate_contacts.authority_level ELSE EXCLUDED.authority_level END,\n    email=COALESCE(EXCLUDED.email,pakistan_real_estate_contacts.email),\n    phone=COALESCE(EXCLUDED.phone,pakistan_real_estate_contacts.phone),\n    linkedin_url=COALESCE(EXCLUDED.linkedin_url,pakistan_real_estate_contacts.linkedin_url),\n    source_url=COALESCE(EXCLUDED.source_url,pakistan_real_estate_contacts.source_url),\n    confidence=greatest(pakistan_real_estate_contacts.confidence,EXCLUDED.confidence),\n    is_decision_maker=pakistan_real_estate_contacts.is_decision_maker OR EXCLUDED.is_decision_maker\n  RETURNING id\n)\nSELECT\n  (SELECT id FROM lead LIMIT 1) AS lead_id,\n  CASE WHEN EXISTS(SELECT 1 FROM lead) THEN 'upserted' ELSE 'skipped' END AS status,\n  COALESCE((SELECT business_name FROM lead LIMIT 1),(SELECT business_name FROM input_data)) AS business_name,\n  (SELECT count(*) FROM valid_business_emails) AS valid_email_count,\n  (SELECT count(*) FROM contacts) AS contacts_upserted;",
         "options": {
-          "queryReplacement": "={{ [$json.businessName,$json.city,$json.province,$json.address,$json.phone,$json.website,$json.domain,$json.googleMapsUrl,$json.latitude,$json.longitude,$json.rating,$json.reviews,$json.rawCategory,$json.keyword,$json.emails,$json.socialProfiles,$json.websiteSignals,$json.score,$json.grade,$json.qualification,$json.nurtureStrategy,$json.aiAnalysis,$json.sourceRetrievedAt,$json.contacts].map((v,i)=>[14,15,16,21,23].includes(i)?JSON.stringify(v):v) }}"
+          "queryReplacement": "={{ [$json.businessName,$json.city,$json.province,$json.address,$json.phone,$json.website,$json.domain,$json.googleMapsUrl,$json.latitude,$json.longitude,$json.rating,$json.reviews,$json.rawCategory,$json.keyword,$json.emails,$json.socialProfiles,$json.websiteSignals,$json.score,$json.grade,$json.qualification,$json.nurtureStrategy,$json.aiAnalysis,$json.sourceRetrievedAt,$json.contacts].map((v,i)=>[14,15,16,21,23].includes(i)?JSON.stringify(v ?? ([14,23].includes(i)?[]:{})):v) }}"
         }
       },
-      "id": "32e9b6c7-9882-415b-be13-ad4829b17d66",
+      "id": "f49b09d9-3d70-4c35-a843-902d730a03c6",
       "name": "Upsert Lead and Decision Makers",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1540,
-        100
-      ]
+        1408,
+        848
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
-        "httpMethod": "GET",
         "path": "pakistan-real-estate-leads.csv",
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "ae781083-c2d9-474e-a47c-10da72a98bbe",
+      "id": "4002bbe1-d691-48eb-a282-5abc896e404c",
       "name": "Download Leads Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        0,
-        500
-      ]
+        -288,
+        1136
+      ],
+      "webhookId": "0f23f1b5-9e66-45c7-b093-fb51f32b4aeb"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT l.id,l.business_name,l.city,l.province,l.address,l.phone,l.website,l.domain,l.google_maps_url,l.rating,l.review_count,l.category,l.search_keyword,array_to_string(l.emails, '; ') AS emails,l.ai_score,l.ai_grade,l.ai_qualification,l.ai_nurture_strategy,l.first_seen_at,l.last_seen_at,coalesce(string_agg(concat_ws(' | ',c.full_name,c.job_title,c.authority_level,c.email,c.phone,c.linkedin_url), ' ;; ' ORDER BY c.is_decision_maker DESC,c.confidence DESC),'') AS decision_makers FROM pakistan_real_estate_leads l LEFT JOIN pakistan_real_estate_contacts c ON c.lead_id=l.id GROUP BY l.id ORDER BY l.ai_score DESC,l.city,l.business_name;",
+        "query": "SELECT\n  l.id,\n  l.business_name,\n  l.city,\n  l.province,\n  l.address,\n  l.phone,\n  l.website,\n  l.domain,\n  l.google_maps_url,\n  l.rating,\n  l.review_count,\n  l.category,\n  l.search_keyword,\n  array_to_string(l.emails, '; ') AS emails,\n  l.ai_score,\n  l.ai_grade,\n  l.ai_qualification,\n  l.ai_nurture_strategy,\n  l.first_seen_at,\n  l.last_seen_at,\n  coalesce(\n    string_agg(\n      concat_ws(' | ',c.full_name,c.job_title,c.authority_level,c.email,c.phone,c.linkedin_url),\n      ' ;; ' ORDER BY c.is_decision_maker DESC,c.confidence DESC\n    ) FILTER (WHERE c.id IS NOT NULL),\n    ''\n  ) AS decision_makers\nFROM pakistan_real_estate_leads l\nLEFT JOIN pakistan_real_estate_contacts c ON c.lead_id=l.id\nGROUP BY l.id\nORDER BY l.ai_score DESC,l.city,l.business_name;",
         "options": {}
       },
-      "id": "a70e958a-bdf6-4738-8aa4-754d23d2bdba",
+      "id": "9f1d9580-7687-4d7d-b908-79b3fc3fca08",
       "name": "Read Presentable Lead Dataset",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        250,
-        500
-      ]
+        -32,
+        1136
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
         "jsCode": "const rows=$input.all().map(i=>i.json);const cols=rows.length?Object.keys(rows[0]):[];const esc=v=>'\"'+String(v??'').replace(/\"/g,'\"\"')+'\"';const csv='\\uFEFF'+cols.map(esc).join(',')+'\\r\\n'+rows.map(r=>cols.map(c=>esc(r[c])).join(',')).join('\\r\\n');return [{json:{csv,count:rows.length,generatedAt:new Date().toISOString()}}];"
       },
-      "id": "79564812-3322-4828-a85d-b46d0a3b12b3",
+      "id": "507caa19-9405-445a-b48a-9399a5daa2ed",
       "name": "Build Downloadable CSV",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        500,
-        500
+        224,
+        1136
       ]
     },
     {
@@ -183,29 +161,76 @@
           }
         }
       },
-      "id": "001c6595-e222-4bc3-b5ac-c9ad6619e336",
+      "id": "9d5eba4c-77f6-4d2b-91da-bec95c530125",
       "name": "Return CSV Download",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        750,
-        500
+        464,
+        1136
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputs = $input.all();\nconst mxCache = new Map();\n\nfunction clean(v) {\n  const s = String(v ?? '').replace(/\\s+/g, ' ').trim();\n  if (!s || /^(?:n\\/?a|na|none|null|unknown|-|—)$/i.test(s)) return '';\n  return s;\n}\nfunction cleanPhone(v) {\n  const s = clean(v);\n  if (!s) return '';\n  const p = s.replace(/[^0-9+]/g, '');\n  return p.length >= 7 ? p : '';\n}\nfunction normalizeEmail(v) {\n  return String(v || '').trim().toLowerCase().replace(/^mailto:/i, '').replace(/^[<(\\\"'\\s]+/, '').replace(/[>)\\\"'\\],.;:\\s]+$/, '');\n}\nfunction validSyntax(email) {\n  if (!email || email.length > 254) return false;\n  const at = email.lastIndexOf('@');\n  if (at <= 0) return false;\n  const local = email.slice(0, at), domain = email.slice(at + 1);\n  if (!local || !domain || local.length > 64 || domain.length > 253) return false;\n  if (local.startsWith('.') || local.endsWith('.') || local.includes('..')) return false;\n  if (!/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(local)) return false;\n  const labels = domain.split('.');\n  if (labels.length < 2) return false;\n  for (const label of labels) {\n    if (!label || label.length > 63 || !/^[a-z0-9-]+$/i.test(label) || label.startsWith('-') || label.endsWith('-')) return false;\n  }\n  return /^[a-z]{2,63}$/i.test(labels.at(-1));\n}\nfunction assetGarbage(email) {\n  const lower = email.toLowerCase();\n  const [local='', domain=''] = lower.split('@');\n  return /\\.(?:png|jpe?g|gif|webp|svg|ico|css|js|woff2?|ttf|eot|pdf|zip)$/i.test(domain) ||\n    /^(?:logo|icon|sprite|favicon|image|img|avatar|banner|thumbnail|thumb)(?:[-_.]|$)/i.test(local) ||\n    /@(?:2x|3x)\\.(?:png|jpe?g|gif|webp)$/i.test(lower);\n}\nasync function mxFor(domain) {\n  if (mxCache.has(domain)) return mxCache.get(domain);\n  let result;\n  try {\n    const r = await this.helpers.httpRequest({\n      method:'GET',\n      url:'https://dns.google/resolve',\n      qs:{name:domain,type:'MX'},\n      headers:{Accept:'application/dns-json'},\n      json:true,\n      timeout:8000\n    });\n    const answers = Array.isArray(r?.Answer) ? r.Answer : [];\n    const records = answers.filter(x => Number(x.type) === 15).map(x => String(x.data || '').trim()).filter(Boolean);\n    const nullMx = records.some(x => /^0\\s+\\.$/.test(x));\n    result = {valid:records.length > 0 && !nullMx,records,reason:nullMx?'null_mx':records.length?'mx_found':'no_mx'};\n  } catch (e) {\n    result = {valid:false,records:[],reason:`dns_error:${String(e.message || e)}`};\n  }\n  mxCache.set(domain, result);\n  return result;\n}\nasync function validateEmail(raw) {\n  const email = normalizeEmail(raw);\n  if (!validSyntax(email)) return {email,valid:false,syntax_valid:false,mx_valid:false,mx_records:[],reason:'invalid_syntax'};\n  if (assetGarbage(email)) return {email,valid:false,syntax_valid:true,mx_valid:false,mx_records:[],reason:'asset_or_scraper_junk'};\n  const mx = await mxFor(email.split('@')[1]);\n  return {email,valid:mx.valid,syntax_valid:true,mx_valid:mx.valid,mx_records:mx.records,reason:mx.reason};\n}\nasync function mapLimit(items, limit, worker) {\n  const results = new Array(items.length);\n  let cursor = 0;\n  async function run() {\n    while (true) {\n      const i = cursor++;\n      if (i >= items.length) return;\n      results[i] = await worker(items[i], i);\n    }\n  }\n  await Promise.all(Array.from({length:Math.min(limit, items.length)}, run));\n  return results;\n}\n\nconst concurrency = Math.max(1, Math.min(10, Number(inputs[0]?.json?.limits?.mxConcurrency || 6)));\nconst results = await mapLimit(inputs, concurrency, async item => {\n  const data = {...item.json};\n\n  data.businessName = clean(data.businessName);\n  data.city = clean(data.city);\n  data.province = clean(data.province);\n  data.address = clean(data.address);\n  data.phone = cleanPhone(data.phone);\n  data.website = clean(data.website);\n  data.domain = clean(data.domain).toLowerCase();\n  data.googleMapsUrl = clean(data.googleMapsUrl);\n\n  if (data._skipUpsert) {\n    data.emails = [];\n    data.contacts = [];\n    data.decision_makers = [];\n    data.emailValidation = [];\n    data.emailValidationSummary = {candidates:0,valid:0,rejected:0,rejectedEmails:[]};\n    return {json:data};\n  }\n\n  const rawEmails = [...new Set((Array.isArray(data.emails) ? data.emails : []).map(normalizeEmail).filter(Boolean))];\n  const emailValidation = await Promise.all(rawEmails.map(validateEmail));\n  data.emails = emailValidation.filter(x => x.valid).map(x => x.email);\n\n  const sourceContacts = Array.isArray(data.contacts) ? data.contacts : [];\n  const cleanedContacts = [];\n\n  for (const raw of sourceContacts) {\n    if (!raw || typeof raw !== 'object') continue;\n    const c = {...raw};\n    c.full_name = clean(c.full_name) || null;\n    c.job_title = clean(c.job_title) || null;\n    c.authority_level = clean(c.authority_level).toLowerCase() || 'unknown';\n    c.phone = cleanPhone(c.phone) || null;\n    c.linkedin_url = clean(c.linkedin_url) || null;\n    c.source_url = clean(c.source_url) || null;\n    c.confidence = Math.max(0, Math.min(100, Number.parseInt(c.confidence, 10) || 0));\n    c.is_decision_maker = c.is_decision_maker === true || c.is_decision_maker === 1 || /^(?:1|true|yes|y)$/i.test(String(c.is_decision_maker || ''));\n\n    if (c.email) {\n      const ev = await validateEmail(c.email);\n      c.email_validation = ev;\n      c.email = ev.valid ? ev.email : null;\n    } else {\n      c.email = null;\n    }\n\n    if (c.full_name || c.email || c.linkedin_url || c.phone) cleanedContacts.push(c);\n  }\n\n  const seen = new Set();\n  data.contacts = cleanedContacts.filter(c => {\n    const key = String(c.email || c.linkedin_url || c.phone || `${c.full_name || ''}|${c.job_title || ''}`).toLowerCase().trim();\n    if (!key || seen.has(key)) return false;\n    seen.add(key);\n    return true;\n  });\n  data.decision_makers = data.contacts;\n  data.emailValidation = emailValidation;\n  data.emailValidationSummary = {\n    candidates:emailValidation.length,\n    valid:emailValidation.filter(x => x.valid).length,\n    rejected:emailValidation.filter(x => !x.valid).length,\n    rejectedEmails:emailValidation.filter(x => !x.valid).map(x => ({email:x.email,reason:x.reason}))\n  };\n\n  const hasLocator = !!(data.googleMapsUrl || data.domain || data.phone || data.website);\n  if (!data.businessName || !data.city || !hasLocator) {\n    data._skipUpsert = true;\n    data.skipReason = !data.businessName ? 'missing_business_name' : !data.city ? 'missing_city' : 'missing_business_locator';\n  }\n\n  return {json:data};\n});\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        848
+      ],
+      "id": "89a9e63e-0c2b-4559-a32b-fc127de84740",
+      "name": "Validate Emails + MX"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "52802a4f-18da-4eec-8066-d075fe4d4433",
+      "name": "Loop Searches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        400,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(i => i.json);\nreturn [{json:{\n  loopContinue:true,\n  rowsProcessed:rows.length,\n  upserted:rows.filter(r => r.status === 'upserted').length,\n  skipped:rows.filter(r => r.status === 'skipped').length,\n  leadIds:rows.map(r => r.lead_id).filter(Boolean)\n}}];"
+      },
+      "id": "74de7c7d-5c54-4080-811b-7b926f6c5209",
+      "name": "Continue Search Loop",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 20
+            }
+          ]
+        }
+      },
+      "id": "100bb816-0c58-40e2-9b4c-5f8ade688e15",
+      "name": "Schedule - Every 20 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -272,
+        736
       ]
     }
   ],
-  "pinData": {},
   "connections": {
-    "Schedule - Every 6 Hours": {
-      "main": [
-        [
-          {
-            "node": "Pakistan Runtime Config",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Pakistan Runtime Config": {
       "main": [
         [
@@ -222,18 +247,6 @@
         [
           {
             "node": "Loop Searches",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Searches": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Google Maps Pakistan Scraper",
             "type": "main",
             "index": 0
           }
@@ -266,7 +279,7 @@
       "main": [
         [
           {
-            "node": "Upsert Lead and Decision Makers",
+            "node": "Validate Emails + MX",
             "type": "main",
             "index": 0
           }
@@ -277,7 +290,7 @@
       "main": [
         [
           {
-            "node": "Loop Searches",
+            "node": "Continue Search Loop",
             "type": "main",
             "index": 0
           }
@@ -316,17 +329,56 @@
           }
         ]
       ]
+    },
+    "Validate Emails + MX": {
+      "main": [
+        [
+          {
+            "node": "Upsert Lead and Decision Makers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Searches": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Google Maps Pakistan Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continue Search Loop": {
+      "main": [
+        [
+          {
+            "node": "Loop Searches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule - Every 20 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Pakistan Runtime Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate",
-    "availableInMCP": false
-  },
-  "versionId": "3e39292f-32de-4c7d-a5d5-7d54b433f745",
+  "pinData": {},
   "meta": {
-    "templateCredsSetupCompleted": false
-  },
-  "tags": []
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6f4ddd19d6e6b74f777c7351e64ff05ded166492207f0e052776641ed9097a69"
+  }
 }
