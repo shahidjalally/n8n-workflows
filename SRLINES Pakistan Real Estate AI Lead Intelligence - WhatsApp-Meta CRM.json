@@ -1,0 +1,408 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nreturn [{json:{\n  executionId:`pk-real-estate-${now.toISOString()}-${Math.random().toString(36).slice(2,8)}`,\n  country:'Pakistan',\n  countryCode:'PK',\n  locale:'en-PK',\n  language:'English',\n  cities:[\n    {city:'Karachi',province:'Sindh'},\n    {city:'Lahore',province:'Punjab'},\n    {city:'Islamabad',province:'Islamabad Capital Territory'},\n    {city:'Rawalpindi',province:'Punjab'},\n    {city:'Faisalabad',province:'Punjab'},\n    {city:'Multan',province:'Punjab'},\n    {city:'Peshawar',province:'Khyber Pakhtunkhwa'},\n    {city:'Quetta',province:'Balochistan'},\n    {city:'Gujranwala',province:'Punjab'},\n    {city:'Sialkot',province:'Punjab'},\n    {city:'Hyderabad',province:'Sindh'},\n    {city:'Bahawalpur',province:'Punjab'},\n    {city:'Abbottabad',province:'Khyber Pakhtunkhwa'}\n  ],\n  niche:'Real Estate',\n  keywords:[\n    'real estate agency',\n    'property dealer',\n    'property developer',\n    'real estate developer',\n    'commercial real estate',\n    'property management company',\n    'housing society',\n    'real estate investment company',\n    'estate agent',\n    'property consultant'\n  ],\n  limits:{\n    keywordsPerRun:4,\n    maxResultsPerKeyword:12,\n    crawlPagesPerSite:3,\n    websiteConcurrency:3,\n    aiConcurrency:3,\n    mxConcurrency:6,\n    requestDelayMs:700\n  },\n  scraper:{baseUrl:'http://localhost:3000'},\n  deepseek:{\n    apiKey:'REPLACE_DEEPSEEK_KEY', // <-- rotate the old key, it was exposed; paste the NEW one here\n    apiUrl:'https://api.deepseek.com/chat/completions',\n    model:'deepseek-chat'\n  }\n}}];"
+      },
+      "id": "8a07d3b8-28de-465f-b0c7-e75e5abed2e7",
+      "name": "Pakistan Runtime Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $input.first().json;\nconst state = $getWorkflowStaticData('global');\n\nconst cities = Array.isArray(cfg.cities) ? cfg.cities.filter(c => c?.city) : [];\nconst keywords = Array.isArray(cfg.keywords)\n  ? cfg.keywords.map(k => String(k || '').trim()).filter(Boolean)\n  : [];\n\nif (!cities.length) throw new Error('No cities configured');\nif (!keywords.length) throw new Error('No keywords configured');\n\nconst candidates = [];\nfor (const cityConfig of cities) {\n  for (const category of keywords) {\n    candidates.push({\n      ...cityConfig,\n      category,\n      keyword: `${category} in ${cityConfig.city}, Pakistan`,\n    });\n  }\n}\n\nlet cursor = Number(state.searchRotationCursor ?? 0);\nif (!Number.isInteger(cursor) || cursor < 0 || cursor >= candidates.length) cursor = 0;\n\nconst requested = Math.max(1, Math.floor(Number(cfg?.limits?.keywordsPerRun || 1)));\nconst count = Math.min(requested, candidates.length);\nconst nextCursor = (cursor + count) % candidates.length;\nconst run = Number(state.searchRotationRuns ?? 0) + 1;\n\nconst out = [];\nfor (let i = 0; i < count; i++) {\n  const index = (cursor + i) % candidates.length;\n  out.push({\n    json:{\n      ...cfg,\n      ...candidates[index],\n      industry:cfg.niche,\n      rotation:{\n        index,\n        position:index + 1,\n        total:candidates.length,\n        cursor_before:cursor,\n        cursor_after:nextCursor,\n        batch_position:i + 1,\n        batch_size:count,\n        run\n      }\n    }\n  });\n}\n\nstate.searchRotationCursor = nextCursor;\nstate.searchRotationRuns = run;\nreturn out;"
+      },
+      "id": "6dd8d928-6a9e-4928-8263-55dfa4b8dd96",
+      "name": "Rotate City and Keywords",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const out = [];\n\nfunction clean(value) {\n  const s = String(value ?? '')\n    .replace(/\\s+/g, ' ')\n    .trim();\n\n  if (\n    !s ||\n    /^(?:n\\/?a|na|none|null|unknown|-|—)$/i.test(s)\n  ) {\n    return '';\n  }\n\n  return s;\n}\n\nfunction normalizePhone(value) {\n  const s = clean(value);\n\n  if (!s) return '';\n\n  const p = s.replace(/[^0-9+]/g, '');\n\n  return p.length >= 7 ? p : '';\n}\n\nfunction normalizeWebsite(value) {\n  let s = clean(value);\n\n  if (!s) return '';\n\n  s = s.replace(/&amp;/gi, '&');\n\n  if (s.startsWith('//')) {\n    s = `https:${s}`;\n  }\n\n  if (!/^https?:\\/\\//i.test(s)) {\n    s = `https://${s}`;\n  }\n\n  /*\n   * IMPORTANT:\n   * Do NOT use new URL() here.\n   *\n   * Some n8n Code-node environments do not\n   * expose the URL constructor as expected.\n   */\n\n  if (!/^https?:\\/\\/[^\\s/]+(?:[/?#][^\\s]*)?$/i.test(s)) {\n    return '';\n  }\n\n  return s;\n}\n\nfunction getDomain(value) {\n  const s = clean(value);\n\n  if (!s) return '';\n\n  /*\n   * Extract hostname without new URL().\n   *\n   * Examples:\n   *\n   * http://propertyprimetime.net/\n   * -> propertyprimetime.net\n   *\n   * https://www.tabanirealestate.com/\n   * -> tabanirealestate.com\n   *\n   * https://www.facebook.com/profile.php?id=123\n   * -> facebook.com\n   */\n\n  const match = s.match(\n    /^https?:\\/\\/([^/?#\\s]+)/i\n  );\n\n  if (!match || !match[1]) {\n    return '';\n  }\n\n  return match[1]\n    .replace(/^[^@]+@/, '')\n    .replace(/:\\d+$/, '')\n    .replace(/^www\\./i, '')\n    .toLowerCase();\n}\n\nfunction normalizeMapsUrl(value) {\n  /*\n   * Backend already provides the Maps URL.\n   * There is no reason to parse/rebuild it.\n   */\n  return clean(value);\n}\n\nfunction parsePossibleJson(value) {\n  if (typeof value !== 'string') {\n    return value;\n  }\n\n  try {\n    return JSON.parse(value);\n  } catch {\n    return value;\n  }\n}\n\nfunction extractResults(rawResponse) {\n  let response = parsePossibleJson(rawResponse);\n\n  /*\n   * n8n may wrap HTTP response in body.\n   */\n  if (\n    response &&\n    response.body !== undefined\n  ) {\n    response =\n      parsePossibleJson(response.body);\n  }\n\n  /*\n   * Normal backend response:\n   *\n   * {\n   *   success: true,\n   *   data: {\n   *     results: [...]\n   *   }\n   * }\n   */\n  if (\n    Array.isArray(\n      response?.data?.results\n    )\n  ) {\n    return response.data.results;\n  }\n\n  /*\n   * Direct search result object.\n   */\n  if (\n    Array.isArray(\n      response?.results\n    )\n  ) {\n    return response.results;\n  }\n\n  /*\n   * Extra wrapper fallback.\n   */\n  if (\n    Array.isArray(\n      response?.data?.data?.results\n    )\n  ) {\n    return response.data.data.results;\n  }\n\n  /*\n   * Direct array fallback.\n   */\n  if (Array.isArray(response)) {\n    return response;\n  }\n\n  return [];\n}\n\n\n/*\n * ==========================================\n * PROCESS INPUT\n * ==========================================\n */\n\nfor (const item of $input.all()) {\n\n  const j = item.json;\n\n  const query =\n    clean(j.keyword);\n\n  if (!query) {\n\n    out.push({\n      json: {\n        ...j,\n\n        _skipUpsert: true,\n\n        skipReason:\n          'empty_search_keyword'\n      }\n    });\n\n    continue;\n  }\n\n\n  const baseUrl =\n    String(\n      j.scraper?.baseUrl || ''\n    ).replace(/\\/$/, '');\n\n\n  if (!baseUrl) {\n\n    out.push({\n      json: {\n        ...j,\n\n        _skipUpsert: true,\n\n        skipReason:\n          'missing_scraper_base_url'\n      }\n    });\n\n    continue;\n  }\n\n\n  /*\n   * ========================================\n   * CALL GOOGLE MAPS SCRAPER\n   * ========================================\n   */\n\n  let response;\n\n  try {\n\n    response =\n      await this.helpers.httpRequest({\n\n        method: 'POST',\n\n        url:\n          `${baseUrl}/api/scrape/search`,\n\n        headers: {\n          'Content-Type':\n            'application/json'\n        },\n\n        body: {\n          query,\n\n          maxResults:\n            Math.max(\n              1,\n              Math.min(\n                12,\n                Number(\n                  j.limits\n                    ?.maxResultsPerKeyword ||\n                    12\n                )\n              )\n            )\n        },\n\n        json: true,\n\n        timeout: 240000\n      });\n\n  } catch (error) {\n\n    out.push({\n      json: {\n        ...j,\n\n        _skipUpsert: true,\n\n        skipReason:\n          'google_maps_scrape_failed',\n\n        scrapeError:\n          String(\n            error?.message ||\n            error\n          )\n      }\n    });\n\n    continue;\n  }\n\n\n  /*\n   * ========================================\n   * GET SCRAPER RESULTS\n   * ========================================\n   */\n\n  const results =\n    extractResults(response);\n\n\n  if (!results.length) {\n\n    out.push({\n      json: {\n        ...j,\n\n        _skipUpsert: true,\n\n        skipReason:\n          'google_maps_no_results'\n      }\n    });\n\n    continue;\n  }\n\n\n  /*\n   * ========================================\n   * PROCESS BUSINESSES\n   * ========================================\n   */\n\n  let acceptedWithWebsite = 0;\n  let rejectedNoWebsite = 0;\n  let rejectedNoName = 0;\n  let rejectedInvalidWebsite = 0;\n\n\n  for (const rawPlace of results) {\n\n    const p =\n      parsePossibleJson(rawPlace) || {};\n\n\n    /*\n     * BUSINESS NAME\n     */\n\n    const businessName =\n      clean(\n        p.title ??\n        p.name ??\n        p.businessName\n      );\n\n\n    if (!businessName) {\n\n      rejectedNoName++;\n\n      continue;\n    }\n\n\n    /*\n     * WEBSITE\n     *\n     * Website is mandatory.\n     */\n\n    const rawWebsite =\n      clean(\n        p.website ??\n        p.businessWebsite ??\n        p.websiteUrl ??\n        p.websiteURL\n      );\n\n\n    if (!rawWebsite) {\n\n      rejectedNoWebsite++;\n\n      continue;\n    }\n\n\n    const businessWebsite =\n      normalizeWebsite(\n        rawWebsite\n      );\n\n\n    if (!businessWebsite) {\n\n      rejectedInvalidWebsite++;\n\n      continue;\n    }\n\n\n    const domain =\n      getDomain(\n        businessWebsite\n      );\n\n\n    if (!domain) {\n\n      rejectedInvalidWebsite++;\n\n      continue;\n    }\n\n\n    /*\n     * PHONE\n     */\n\n    const businessPhone =\n      normalizePhone(\n        p.phone ??\n        p.phoneNumber\n      );\n\n\n    /*\n     * GOOGLE MAPS URL\n     */\n\n    const googleMapsUrl =\n      normalizeMapsUrl(\n        p.googleMapsUrl ??\n        p.url ??\n        p.mapsUrl\n      );\n\n\n    /*\n     * EMAIL FROM MAPS\n     */\n\n    const mapEmail =\n      clean(\n        p.email\n      ).toLowerCase();\n\n\n    /*\n     * LATITUDE\n     */\n\n    const latitude =\n      Number.isFinite(\n        Number(p.latitude)\n      )\n        ? Number(p.latitude)\n        : null;\n\n\n    /*\n     * LONGITUDE\n     */\n\n    const longitude =\n      Number.isFinite(\n        Number(p.longitude)\n      )\n        ? Number(p.longitude)\n        : null;\n\n\n    /*\n     * RATING\n     */\n\n    const rating =\n      Number.isFinite(\n        Number(p.rating)\n      )\n        ? Number(p.rating)\n        : null;\n\n\n    /*\n     * REVIEWS\n     */\n\n    const reviews =\n      Math.max(\n        0,\n\n        Number(\n          String(\n            p.reviews ?? ''\n          ).replace(\n            /[^0-9]/g,\n            ''\n          )\n        ) || 0\n      );\n\n\n    /*\n     * ======================================\n     * ACCEPT BUSINESS\n     * ======================================\n     */\n\n    acceptedWithWebsite++;\n\n\n    out.push({\n      json: {\n\n        ...j,\n\n        businessName,\n\n        address:\n          clean(\n            p.address\n          ),\n\n        phone:\n          businessPhone,\n\n        /*\n         * MANDATORY WEBSITE\n         */\n        website:\n          businessWebsite,\n\n        domain,\n\n        googleMapsUrl,\n\n        latitude,\n\n        longitude,\n\n        rating,\n\n        reviews,\n\n        rawCategory:\n          clean(\n            p.category ??\n            j.category\n          ),\n\n        sourceRetrievedAt:\n          new Date()\n            .toISOString(),\n\n        mapEmails:\n          mapEmail\n            ? [mapEmail]\n            : []\n\n      }\n    });\n\n  }\n\n\n  /*\n   * ========================================\n   * ZERO ACCEPTED RESULTS\n   * ========================================\n   */\n\n  if (acceptedWithWebsite === 0) {\n\n    const firstResult =\n      results.length\n        ? parsePossibleJson(\n            results[0]\n          )\n        : null;\n\n\n    out.push({\n      json: {\n\n        ...j,\n\n        _skipUpsert: true,\n\n        skipReason:\n          'google_maps_no_results_with_website',\n\n        scraperResultsReceived:\n          results.length,\n\n        acceptedWithWebsite,\n\n        rejectedNoWebsite,\n\n        rejectedInvalidWebsite,\n\n        rejectedNoName,\n\n        firstResultFields:\n          firstResult &&\n          typeof firstResult ===\n            'object'\n            ? Object.keys(\n                firstResult\n              )\n            : [],\n\n        firstResultWebsite:\n          clean(\n            firstResult?.website\n          )\n\n      }\n    });\n\n  }\n\n}\n\nreturn out;"
+      },
+      "id": "aaa18be0-1c94-4369-a548-275ae3fd770e",
+      "name": "Google Maps Pakistan Scraper",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputs = $input.all();\n\n/* =========================================================\n * HELPERS\n * ========================================================= */\n\nfunction uniq(values) {\n  return [...new Set(\n    (values || []).filter(Boolean)\n  )];\n}\n\nfunction clean(value) {\n  const s = String(value ?? '')\n    .replace(/\\s+/g, ' ')\n    .trim();\n\n  if (\n    !s ||\n    /^(?:n\\/?a|na|none|null|unknown|-|—)$/i.test(s)\n  ) {\n    return '';\n  }\n\n  return s;\n}\n\nfunction htmlToText(html) {\n  return String(html || '')\n    .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')\n    .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n    .replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n    .replace(/<svg[\\s\\S]*?<\\/svg>/gi, ' ')\n    .replace(/<!--[\\s\\S]*?-->/g, ' ')\n    .replace(/<[^>]+>/g, ' ')\n    .replace(/&nbsp;/gi, ' ')\n    .replace(/&amp;/gi, '&')\n    .replace(/&quot;/gi, '\"')\n    .replace(/&apos;/gi, \"'\")\n    .replace(/&lt;/gi, '<')\n    .replace(/&gt;/gi, '>')\n    .replace(/&#\\d+;/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n}\n\nfunction normalizeEmail(value) {\n  return String(value || '')\n    .trim()\n    .toLowerCase()\n    .replace(/^mailto:/i, '')\n    .replace(/^[<(\\\"'\\s]+/, '')\n    .replace(/[>)\\\"'\\],.;:\\s]+$/, '');\n}\n\nfunction validEmailSyntax(email) {\n  if (!email || email.length > 254) {\n    return false;\n  }\n\n  const at = email.lastIndexOf('@');\n\n  if (at <= 0) {\n    return false;\n  }\n\n  const local = email.slice(0, at);\n  const domain = email.slice(at + 1);\n\n  if (\n    !local ||\n    !domain ||\n    local.length > 64 ||\n    domain.length > 253\n  ) {\n    return false;\n  }\n\n  if (\n    local.startsWith('.') ||\n    local.endsWith('.') ||\n    local.includes('..')\n  ) {\n    return false;\n  }\n\n  if (\n    !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(local)\n  ) {\n    return false;\n  }\n\n  const labels = domain.split('.');\n\n  if (labels.length < 2) {\n    return false;\n  }\n\n  for (const label of labels) {\n    if (\n      !label ||\n      label.length > 63 ||\n      !/^[a-z0-9-]+$/i.test(label) ||\n      label.startsWith('-') ||\n      label.endsWith('-')\n    ) {\n      return false;\n    }\n  }\n\n  return /^[a-z]{2,63}$/i.test(\n    labels[labels.length - 1]\n  );\n}\n\nfunction assetGarbage(email) {\n  const lower =\n    String(email || '').toLowerCase();\n\n  const parts = lower.split('@');\n\n  const local = parts[0] || '';\n  const domain = parts[1] || '';\n\n  return (\n    /\\.(?:png|jpe?g|gif|webp|svg|ico|css|js|woff2?|ttf|eot|pdf|zip)$/i\n      .test(domain) ||\n\n    /^(?:logo|icon|sprite|favicon|image|img|avatar|banner|thumbnail|thumb)(?:[-_.]|$)/i\n      .test(local) ||\n\n    /@(?:2x|3x)\\.(?:png|jpe?g|gif|webp)$/i\n      .test(lower)\n  );\n}\n\nfunction sanitizeEmails(values) {\n  return uniq(\n    (values || [])\n      .map(normalizeEmail)\n      .filter(\n        email =>\n          validEmailSyntax(email) &&\n          !assetGarbage(email)\n      )\n  );\n}\n\n\n/* =========================================================\n * PHONE / WHATSAPP\n * ========================================================= */\n\nfunction normalizeMsisdn(value) {\n  const digits =\n    String(value || '')\n      .replace(/[^0-9]/g, '');\n\n  if (!digits) {\n    return '';\n  }\n\n  if (digits.startsWith('92')) {\n    return digits.slice(-10);\n  }\n\n  if (digits.startsWith('0')) {\n    return digits.slice(-10);\n  }\n\n  return digits.slice(-10);\n}\n\nfunction isPakMobile(value) {\n  const n = normalizeMsisdn(value);\n\n  return /^3\\d{9}$/.test(n);\n}\n\nfunction extractWaNumber(link) {\n  const s = String(link || '');\n\n  const match =\n    s.match(\n      /wa\\.me\\/(\\+?\\d{7,15})/i\n    ) ||\n    s.match(\n      /[?&](?:phone|number)=(\\+?\\d{7,15})/i\n    );\n\n  return match\n    ? match[1].replace(/[^0-9+]/g, '')\n    : '';\n}\n\n\n/* =========================================================\n * URL HELPERS\n *\n * IMPORTANT:\n * NO new URL()\n * ========================================================= */\n\nfunction normalizeWebsite(value) {\n  let s = clean(value);\n\n  if (!s) {\n    return '';\n  }\n\n  s = s.replace(/&amp;/gi, '&');\n\n  if (s.startsWith('//')) {\n    s = `https:${s}`;\n  }\n\n  if (!/^https?:\\/\\//i.test(s)) {\n    s = `https://${s}`;\n  }\n\n  if (!/^https?:\\/\\/[^\\s/]+/i.test(s)) {\n    return '';\n  }\n\n  return s;\n}\n\nfunction getOrigin(value) {\n  const s = normalizeWebsite(value);\n\n  if (!s) {\n    return '';\n  }\n\n  const match =\n    s.match(\n      /^(https?):\\/\\/([^/?#\\s]+)/i\n    );\n\n  if (!match) {\n    return '';\n  }\n\n  return `${match[1].toLowerCase()}://${match[2]}`;\n}\n\nfunction getHostname(value) {\n  const s = normalizeWebsite(value);\n\n  if (!s) {\n    return '';\n  }\n\n  const match =\n    s.match(\n      /^https?:\\/\\/([^/?#\\s]+)/i\n    );\n\n  if (!match) {\n    return '';\n  }\n\n  return match[1]\n    .replace(/:\\d+$/, '')\n    .replace(/^www\\./i, '')\n    .toLowerCase();\n}\n\nfunction isFacebookUrl(value) {\n  const host = getHostname(value);\n\n  return (\n    host === 'facebook.com' ||\n    host.endsWith('.facebook.com') ||\n    host === 'fb.com' ||\n    host.endsWith('.fb.com')\n  );\n}\n\nfunction isInstagramUrl(value) {\n  const host = getHostname(value);\n\n  return (\n    host === 'instagram.com' ||\n    host.endsWith('.instagram.com')\n  );\n}\n\nfunction isLinkedinUrl(value) {\n  const host = getHostname(value);\n\n  return (\n    host === 'linkedin.com' ||\n    host.endsWith('.linkedin.com')\n  );\n}\n\nfunction isSocialWebsite(value) {\n  return (\n    isFacebookUrl(value) ||\n    isInstagramUrl(value) ||\n    isLinkedinUrl(value)\n  );\n}\n\n\n/* =========================================================\n * PAGE URL GENERATOR\n *\n * NO new URL()\n * ========================================================= */\n\nfunction pageUrls(site, limit) {\n  const website =\n    normalizeWebsite(site);\n\n  if (!website) {\n    return [];\n  }\n\n  /*\n   * If Google Maps supplied Facebook,\n   * Instagram or LinkedIn as \"website\",\n   * don't attempt /about, /contact etc.\n   */\n  if (isSocialWebsite(website)) {\n    return [website];\n  }\n\n  const origin =\n    getOrigin(website);\n\n  if (!origin) {\n    return [website];\n  }\n\n  const maxPages =\n    Math.max(\n      1,\n      Math.min(\n        6,\n        Number(limit || 3)\n      )\n    );\n\n  /*\n   * Always crawl the EXACT URL Google Maps\n   * supplied first.\n   */\n  const urls = [\n    website,\n    `${origin}/`,\n    `${origin}/contact`,\n    `${origin}/contact-us`,\n    `${origin}/about`,\n    `${origin}/about-us`\n  ];\n\n  return uniq(urls)\n    .slice(0, maxPages);\n}\n\n\n/* =========================================================\n * HTML LINK EXTRACTION\n * ========================================================= */\n\nfunction extractSocialProfiles(html, originalWebsite) {\n  const source =\n    String(html || '');\n\n  let linkedin =\n    source.match(\n      /https?:\\/\\/(?:[a-z]{2,3}\\.)?linkedin\\.com\\/(?:in|company)\\/[A-Za-z0-9_%?&=#./-]+/gi\n    ) || [];\n\n  let facebook =\n    source.match(\n      /https?:\\/\\/(?:www\\.|m\\.)?facebook\\.com\\/[A-Za-z0-9_.?&=#%/-]+/gi\n    ) || [];\n\n  let instagram =\n    source.match(\n      /https?:\\/\\/(?:www\\.)?instagram\\.com\\/[A-Za-z0-9_.?&=#%/-]+/gi\n    ) || [];\n\n  /*\n   * Google Maps itself may provide a social\n   * profile as the business website.\n   */\n  const original =\n    normalizeWebsite(originalWebsite);\n\n  if (original) {\n    if (isFacebookUrl(original)) {\n      facebook.push(original);\n    }\n\n    if (isInstagramUrl(original)) {\n      instagram.push(original);\n    }\n\n    if (isLinkedinUrl(original)) {\n      linkedin.push(original);\n    }\n  }\n\n  return {\n    linkedin: uniq(linkedin),\n    facebook: uniq(facebook),\n    instagram: uniq(instagram)\n  };\n}\n\nfunction extractWhatsappLinks(html) {\n  const source =\n    String(html || '');\n\n  const links = [];\n\n  const patterns = [\n    /https?:\\/\\/wa\\.me\\/[0-9+][0-9]{6,15}[^\\s\"'<>]*/gi,\n\n    /https?:\\/\\/api\\.whatsapp\\.com\\/send[^\\s\"'<>]*/gi,\n\n    /https?:\\/\\/(?:www\\.)?whatsapp\\.com\\/send[^\\s\"'<>]*/gi,\n\n    /whatsapp:\\/\\/send\\?[^\\s\"'<>]*/gi\n  ];\n\n  for (const pattern of patterns) {\n    const found =\n      source.match(pattern) || [];\n\n    links.push(...found);\n  }\n\n  return uniq(\n    links.map(\n      link =>\n        String(link)\n          .replace(/&amp;/gi, '&')\n          .replace(/[),.;]+$/, '')\n    )\n  );\n}\n\n\n/* =========================================================\n * HTTP FETCH\n * ========================================================= */\n\nasync function fetchPage(url) {\n  try {\n    const response =\n      await this.helpers.httpRequest({\n\n        method: 'GET',\n\n        url,\n\n        timeout: 15000,\n\n        followRedirect: true,\n\n        maxRedirects: 8,\n\n        headers: {\n          'User-Agent':\n            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36',\n\n          'Accept':\n            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',\n\n          'Accept-Language':\n            'en-US,en;q=0.9',\n\n          'Cache-Control':\n            'no-cache',\n\n          'Pragma':\n            'no-cache'\n        },\n\n        json: false\n      });\n\n    const html =\n      String(response || '');\n\n    if (!html.trim()) {\n      return {\n        ok: false,\n        url,\n        html: '',\n        error: 'empty_response'\n      };\n    }\n\n    return {\n      ok: true,\n      url,\n      html,\n      error: ''\n    };\n\n  } catch (error) {\n\n    return {\n      ok: false,\n      url,\n      html: '',\n      error:\n        String(\n          error?.message ||\n          error\n        ).slice(0, 500)\n    };\n  }\n}\n\n\n/* =========================================================\n * CONCURRENCY\n * ========================================================= */\n\nasync function mapLimit(\n  items,\n  limit,\n  worker\n) {\n  const results =\n    new Array(items.length);\n\n  let cursor = 0;\n\n  async function run() {\n    while (true) {\n      const i = cursor++;\n\n      if (i >= items.length) {\n        return;\n      }\n\n      results[i] =\n        await worker(items[i], i);\n    }\n  }\n\n  await Promise.all(\n    Array.from(\n      {\n        length:\n          Math.min(\n            limit,\n            items.length\n          )\n      },\n      run\n    )\n  );\n\n  return results;\n}\n\n\n/* =========================================================\n * MAIN\n * ========================================================= */\n\nconst concurrency =\n  Math.max(\n    1,\n    Math.min(\n      5,\n      Number(\n        inputs[0]\n          ?.json\n          ?.limits\n          ?.websiteConcurrency ||\n        3\n      )\n    )\n  );\n\n\nconst results =\n  await mapLimit(\n    inputs,\n    concurrency,\n\n    async item => {\n\n      const j = item.json;\n\n\n      /*\n       * Preserve an upstream skip only when\n       * there really was no usable Maps lead.\n       */\n      if (j._skipUpsert === true) {\n\n        return {\n          json: {\n            ...j,\n\n            emails: [],\n\n            socialProfiles: {\n              linkedin: [],\n              facebook: [],\n              instagram: []\n            },\n\n            websiteText: '',\n\n            websiteSignals: {\n              hasWebsite:\n                !!clean(j.website),\n\n              websiteReachable:\n                false,\n\n              emailCandidateCount:\n                0,\n\n              emailCount:\n                0,\n\n              linkedinCount:\n                0,\n\n              pagesAttempted:\n                [],\n\n              pagesCrawled:\n                []\n            },\n\n            whatsappSignals: {\n              hasClickToChat:\n                false,\n\n              links: [],\n\n              numbers: [],\n\n              matchesListedPhone:\n                false,\n\n              phoneType:\n                j.phone\n                  ? (\n                      isPakMobile(j.phone)\n                        ? 'mobile'\n                        : 'landline_or_other'\n                    )\n                  : 'unknown'\n            },\n\n            socialPlatformCount:\n              0,\n\n            contacts: []\n          }\n        };\n      }\n\n\n      /*\n       * =====================================\n       * WEBSITE\n       * =====================================\n       */\n\n      const website =\n        normalizeWebsite(\n          j.website\n        );\n\n\n      /*\n       * Website remains mandatory.\n       */\n      if (!website) {\n\n        return {\n          json: {\n            ...j,\n\n            _skipUpsert: true,\n\n            skipReason:\n              'missing_website',\n\n            emails: [],\n\n            socialProfiles: {\n              linkedin: [],\n              facebook: [],\n              instagram: []\n            },\n\n            websiteText: '',\n\n            websiteSignals: {\n              hasWebsite: false,\n              websiteReachable: false,\n              emailCandidateCount: 0,\n              emailCount: 0,\n              linkedinCount: 0,\n              pagesAttempted: [],\n              pagesCrawled: []\n            },\n\n            whatsappSignals: {\n              hasClickToChat: false,\n              links: [],\n              numbers: [],\n              matchesListedPhone: false,\n\n              phoneType:\n                j.phone\n                  ? (\n                      isPakMobile(j.phone)\n                        ? 'mobile'\n                        : 'landline_or_other'\n                    )\n                  : 'unknown'\n            },\n\n            socialPlatformCount: 0,\n\n            contacts: []\n          }\n        };\n      }\n\n\n      /*\n       * =====================================\n       * SOCIAL PROFILE AS WEBSITE\n       * =====================================\n       */\n\n      const directSocial =\n        extractSocialProfiles(\n          '',\n          website\n        );\n\n\n      /*\n       * =====================================\n       * BUILD CRAWL URLS\n       * =====================================\n       */\n\n      const urls =\n        pageUrls(\n          website,\n          Number(\n            j.limits\n              ?.crawlPagesPerSite ||\n            3\n          )\n        );\n\n\n      /*\n       * =====================================\n       * FETCH PAGES\n       * =====================================\n       */\n\n      const pages =\n        await Promise.all(\n          urls.map(\n            url =>\n              fetchPage.call(\n                this,\n                url\n              )\n          )\n        );\n\n\n      const goodPages =\n        pages.filter(\n          page =>\n            page &&\n            page.ok &&\n            page.html\n        );\n\n\n      const failedPages =\n        pages.filter(\n          page =>\n            page &&\n            !page.ok\n        );\n\n\n      /*\n       * IMPORTANT CHANGE:\n       *\n       * An unreachable website does NOT\n       * invalidate the Google Maps lead.\n       *\n       * Keep it for AI/scoring/database.\n       */\n\n      const combined =\n        goodPages\n          .map(page => page.html)\n          .join('\\n');\n\n\n      /*\n       * =====================================\n       * EMAILS\n       * =====================================\n       */\n\n      const emailCandidates = [\n        ...(\n          Array.isArray(j.mapEmails)\n            ? j.mapEmails\n            : []\n        ),\n\n        ...(\n          combined.match(\n            /[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Z0-9.-]+\\.[A-Z]{2,63}/gi\n          ) || []\n        )\n      ];\n\n\n      const emails =\n        sanitizeEmails(\n          emailCandidates\n        );\n\n\n      /*\n       * =====================================\n       * SOCIAL PROFILES\n       * =====================================\n       */\n\n      const extractedSocial =\n        extractSocialProfiles(\n          combined,\n          website\n        );\n\n\n      const socialProfiles = {\n\n        linkedin:\n          uniq([\n            ...directSocial.linkedin,\n            ...extractedSocial.linkedin\n          ]),\n\n        facebook:\n          uniq([\n            ...directSocial.facebook,\n            ...extractedSocial.facebook\n          ]),\n\n        instagram:\n          uniq([\n            ...directSocial.instagram,\n            ...extractedSocial.instagram\n          ])\n      };\n\n\n      /*\n       * =====================================\n       * WHATSAPP\n       * =====================================\n       */\n\n      const whatsappLinks =\n        extractWhatsappLinks(\n          combined\n        );\n\n\n      const whatsappNumbers =\n        uniq(\n          whatsappLinks\n            .map(\n              extractWaNumber\n            )\n            .filter(Boolean)\n        );\n\n\n      const listedPhoneNorm =\n        normalizeMsisdn(\n          j.phone\n        );\n\n\n      const matchesListedPhone =\n        !!listedPhoneNorm &&\n        whatsappNumbers.some(\n          number =>\n            normalizeMsisdn(number) ===\n            listedPhoneNorm\n        );\n\n\n      const phoneType =\n        j.phone\n          ? (\n              isPakMobile(j.phone)\n                ? 'mobile'\n                : 'landline_or_other'\n            )\n          : 'unknown';\n\n\n      /*\n       * =====================================\n       * SOCIAL PLATFORM COUNT\n       * =====================================\n       */\n\n      const socialPlatformCount =\n        [\n          socialProfiles.linkedin.length > 0,\n          socialProfiles.facebook.length > 0,\n          socialProfiles.instagram.length > 0\n        ]\n        .filter(Boolean)\n        .length;\n\n\n      /*\n       * =====================================\n       * WEBSITE TEXT\n       * =====================================\n       */\n\n      const websiteText =\n        htmlToText(\n          combined\n        )\n        .slice(\n          0,\n          18000\n        );\n\n\n      /*\n       * =====================================\n       * RETURN ENRICHED LEAD\n       * =====================================\n       *\n       * DO NOT set _skipUpsert simply because\n       * website crawling failed.\n       */\n\n      return {\n        json: {\n\n          ...j,\n\n          /*\n           * Make sure old website_unreachable\n           * state cannot survive.\n           */\n          _skipUpsert: false,\n\n          skipReason: '',\n\n          website,\n\n          emails,\n\n          socialProfiles,\n\n          websiteText,\n\n          websiteSignals: {\n\n            hasWebsite:\n              true,\n\n            websiteReachable:\n              goodPages.length > 0,\n\n            emailCandidateCount:\n              emailCandidates.length,\n\n            emailCount:\n              emails.length,\n\n            linkedinCount:\n              socialProfiles\n                .linkedin\n                .length,\n\n            facebookCount:\n              socialProfiles\n                .facebook\n                .length,\n\n            instagramCount:\n              socialProfiles\n                .instagram\n                .length,\n\n            pagesAttempted:\n              urls,\n\n            pagesCrawled:\n              goodPages.map(\n                page => page.url\n              ),\n\n            failedPages:\n              failedPages.map(\n                page => ({\n                  url:\n                    page.url,\n\n                  error:\n                    page.error\n                })\n              )\n          },\n\n          whatsappSignals: {\n\n            hasClickToChat:\n              whatsappLinks.length > 0,\n\n            links:\n              whatsappLinks,\n\n            numbers:\n              whatsappNumbers,\n\n            matchesListedPhone,\n\n            phoneType\n          },\n\n          socialPlatformCount,\n\n          contacts: []\n        }\n      };\n    }\n  );\n\n\nreturn results;"
+      },
+      "id": "2d4ffb0c-b2a2-4c37-b9ae-4a3019ccd560",
+      "name": "Public Website Contact Enrichment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputs = $input.all();\nconst cfg = $('Pakistan Runtime Config').first().json;\nlet apiDisabledReason = '';\n\nfunction fallback(j) {\n  let s = 15;\n  if (j.website) s += 10;\n  if (Array.isArray(j.emails) && j.emails.length) s += 10;\n  if (j.socialProfiles?.linkedin?.length) s += 5;\n  if (j.socialProfiles?.facebook?.length) s += 5;\n  if (j.socialProfiles?.instagram?.length) s += 5;\n  if ((j.reviews || 0) >= 50) s += 5;\n  if ((j.reviews || 0) >= 200) s += 5;\n  if ((j.rating || 0) >= 4) s += 5;\n  if (j.whatsappSignals?.hasClickToChat) s += 20;\n  else if (j.whatsappSignals?.phoneType === 'mobile' && (j.socialPlatformCount || 0) >= 1) s += 10;\n  return Math.min(100, s);\n}\nfunction gradeFor(score) {\n  return score >= 80 ? 'A' : score >= 65 ? 'B' : score >= 45 ? 'C' : 'D';\n}\n// WhatsApp is never \"confirmed\" from a cold scrape without messaging the number (which\n// requires opt-in / an approved template under Meta's policy). \"Confirmed\" here means we\n// found real, public evidence the business already runs WhatsApp for customer contact\n// (a wa.me / click-to-chat link on their own site). \"Capable\" just means the number could\n// technically be a WhatsApp number (it's mobile, not a landline).\nfunction whatsappConfirmedFor(j) {\n  return !!(j.whatsappSignals?.hasClickToChat);\n}\nfunction whatsappCapableFor(j) {\n  return !!(j.whatsappSignals?.hasClickToChat || j.whatsappSignals?.phoneType === 'mobile');\n}\nfunction metaCrmFitFor(j, score) {\n  const social = j.socialPlatformCount || 0;\n  const waWeight = whatsappConfirmedFor(j) ? 2 : (whatsappCapableFor(j) ? 1 : 0);\n  const composite = score + social * 8 + waWeight * 15;\n  if (composite >= 95 && waWeight >= 1 && social >= 1) return 'high';\n  if (composite >= 65) return 'medium';\n  return 'low';\n}\nfunction conversionTierFor(j, score) {\n  const social = j.socialPlatformCount || 0;\n  if (whatsappConfirmedFor(j) && score >= 80 && social >= 1) return 'tier1_high_conversion';\n  if (whatsappCapableFor(j) && score >= 65 && social >= 1) return 'tier2_medium_conversion';\n  return 'tier3_low_conversion';\n}\nfunction socialActivityScoreFor(j) {\n  return Math.min(100, (j.socialPlatformCount || 0) * 25 + Math.min(50, Math.round((j.reviews || 0) / 10)));\n}\nfunction finalizeSignals(j, score) {\n  return {\n    whatsappCapable: whatsappCapableFor(j),\n    whatsappConfirmed: whatsappConfirmedFor(j),\n    whatsappNumbers: [...new Set([...(j.whatsappSignals?.numbers || []), ...(whatsappConfirmedFor(j) && j.phone ? [j.phone] : [])])],\n    conversionTier: conversionTierFor(j, score),\n    metaCrmFit: metaCrmFitFor(j, score),\n    socialActivityScore: socialActivityScoreFor(j)\n  };\n}\nasync function mapLimit(items, limit, worker) {\n  const results = new Array(items.length);\n  let cursor = 0;\n  async function run() {\n    while (true) {\n      const i = cursor++;\n      if (i >= items.length) return;\n      results[i] = await worker(items[i], i);\n    }\n  }\n  await Promise.all(Array.from({length:Math.min(limit, items.length)}, run));\n  return results;\n}\n\nconst concurrency = Math.max(1, Math.min(4, Number(cfg?.limits?.aiConcurrency || 3)));\nconst results = await mapLimit(inputs, concurrency, async item => {\n  const j = item.json;\n  if (j._skipUpsert) return {json:{...j,score:0,grade:'D',qualification:'Skipped: no usable Google Maps lead.',nurtureStrategy:'',contacts:[],whatsappCapable:false,whatsappConfirmed:false,whatsappNumbers:[],conversionTier:'tier3_low_conversion',metaCrmFit:'low',socialActivityScore:0,aiAnalysis:{skipped:true,reason:j.skipReason || 'invalid_lead'}}};\n\n  const base = fallback(j);\n  const fallbackAi = {\n    score:base,\n    grade:gradeFor(base),\n    qualification:'Heuristic score; AI was unavailable or there was insufficient public evidence.',\n    nurture_strategy:'Research and verify a senior decision-maker before outreach.',\n    whatsapp_business_score:base,\n    meta_crm_fit:metaCrmFitFor(j, base),\n    social_activity_level:(j.socialPlatformCount || 0) >= 2 ? 'medium' : (j.socialPlatformCount || 0) === 1 ? 'low' : 'none',\n    contacts:[]\n  };\n\n  const hasEvidence = !!String(j.websiteText || '').trim() || (j.emails?.length || 0) > 0 || (j.socialProfiles?.linkedin?.length || 0) > 0;\n  if (!hasEvidence) {\n    const signals = finalizeSignals(j, base);\n    return {json:{...j,score:base,grade:gradeFor(base),qualification:fallbackAi.qualification,nurtureStrategy:fallbackAi.nurture_strategy,contacts:[],...signals,aiAnalysis:{...fallbackAi,skipped:true,reason:'insufficient_public_website_evidence'}}};\n  }\n\n  if (apiDisabledReason) {\n    const signals = finalizeSignals(j, base);\n    return {json:{...j,score:base,grade:gradeFor(base),qualification:fallbackAi.qualification,nurtureStrategy:fallbackAi.nurture_strategy,contacts:[],...signals,aiAnalysis:{...fallbackAi,error:apiDisabledReason}}};\n  }\n\n  let ai = {...fallbackAi};\n  try {\n    if (!cfg.deepseek?.apiKey || cfg.deepseek.apiKey.startsWith('PASTE_')) throw new Error('DeepSeek key is not configured');\n\n    const prompt = `Research/qualification task only; do not write or send outreach. Use ONLY the supplied public evidence. Return one JSON object with: score (0-100), grade (A/B/C/D), qualification, nurture_strategy, whatsapp_business_score (0-100 - how strongly the evidence shows this business already actively uses WhatsApp for customer contact; a wa.me/click-to-chat link is strong evidence, a mobile number alone is weak evidence, do not guess beyond the evidence given), meta_crm_fit (high/medium/low - how good a fit this lead is for a WhatsApp-native/Meta Business Suite CRM with AI automations, based on their existing social + messaging presence), social_activity_level (high/medium/low/none - based only on the social profile evidence given, never invented), contacts. Each contacts item may contain full_name, job_title, authority_level (owner/c-suite/director/manager/unknown), email, phone, linkedin_url, source_url, confidence (0-100), is_decision_maker. Never invent a person or contact detail. If a person is not explicitly supported by the evidence, do not include them. Lead evidence: ${JSON.stringify({business:j.businessName,city:j.city,category:j.rawCategory,rating:j.rating,reviews:j.reviews,emails:j.emails,socialProfiles:j.socialProfiles,socialPlatformCount:j.socialPlatformCount,whatsappSignals:j.whatsappSignals,website:j.website,websiteText:String(j.websiteText || '').slice(0,12000)})}`;\n\n    const r = await this.helpers.httpRequest({\n      method:'POST',\n      url:cfg.deepseek.apiUrl,\n      headers:{Authorization:`Bearer ${cfg.deepseek.apiKey}`,'Content-Type':'application/json'},\n      body:{\n        model:cfg.deepseek.model,\n        temperature:0.1,\n        messages:[{role:'user',content:prompt}],\n        response_format:{type:'json_object'}\n      },\n      json:true,\n      timeout:45000\n    });\n\n    const parsed = JSON.parse(r?.choices?.[0]?.message?.content || '{}');\n    ai = {...ai,...parsed};\n  } catch (e) {\n    const message = String(e.message || e);\n    ai.error = message;\n    if (/status code 402|\\b402\\b|payment|required|balance/i.test(message)) apiDisabledReason = message;\n  }\n\n  const score = Math.max(0, Math.min(100, Math.round(Number(ai.score) || base)));\n  const contacts = Array.isArray(ai.contacts) ? ai.contacts.filter(c => c && typeof c === 'object') : [];\n  const signals = finalizeSignals(j, score);\n  const metaCrmFit = /^(?:high|medium|low)$/i.test(String(ai.meta_crm_fit || '')) ? String(ai.meta_crm_fit).toLowerCase() : signals.metaCrmFit;\n\n  return {json:{\n    ...j,\n    score,\n    grade:/^[ABCD]$/i.test(String(ai.grade || '')) ? String(ai.grade).toUpperCase() : gradeFor(score),\n    qualification:String(ai.qualification || fallbackAi.qualification),\n    nurtureStrategy:String(ai.nurture_strategy || fallbackAi.nurture_strategy),\n    contacts,\n    ...signals,\n    metaCrmFit,\n    aiAnalysis:ai\n  }};\n});\n\nreturn results;\n"
+      },
+      "id": "4ae05a5e-00f9-4f29-9a92-4c1fa3498b4e",
+      "name": "AI Qualify, Score and Nurture",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH\ninput_data AS (\n  SELECT\n    NULLIF(btrim($1::text), '') AS business_name,\n    NULLIF(btrim($2::text), '') AS city,\n    NULLIF(btrim($3::text), '') AS province,\n    NULLIF(btrim($4::text), '') AS address,\n    CASE WHEN lower(btrim(coalesce($5::text,''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE btrim($5::text) END AS phone,\n    CASE WHEN lower(btrim(coalesce($6::text,''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE btrim($6::text) END AS website,\n    CASE WHEN lower(btrim(coalesce($7::text,''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE lower(btrim($7::text)) END AS domain,\n    CASE WHEN lower(btrim(coalesce($8::text,''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE btrim($8::text) END AS google_maps_url,\n    CASE WHEN NULLIF(btrim($9::text),'') IS NULL THEN NULL ELSE $9::numeric END AS latitude,\n    CASE WHEN NULLIF(btrim($10::text),'') IS NULL THEN NULL ELSE $10::numeric END AS longitude,\n    CASE WHEN NULLIF(btrim($11::text),'') IS NULL THEN NULL ELSE $11::numeric END AS rating,\n    CASE WHEN NULLIF(btrim($12::text),'') IS NULL THEN 0 ELSE greatest(0,$12::integer) END AS review_count,\n    NULLIF(btrim($13::text),'') AS category,\n    COALESCE(NULLIF(btrim($14::text),''),'unknown') AS search_keyword,\n    CASE WHEN $16 IS NULL OR btrim($16::text)='' THEN '{}'::jsonb ELSE $16::jsonb END AS social_profiles,\n    CASE WHEN $17 IS NULL OR btrim($17::text)='' THEN '{}'::jsonb ELSE $17::jsonb END AS website_signals,\n    least(100,greatest(0,COALESCE(NULLIF(btrim($18::text),'')::integer,0))) AS ai_score,\n    COALESCE(NULLIF(btrim($19::text),''),'unrated') AS ai_grade,\n    NULLIF(btrim($20::text),'') AS ai_qualification,\n    NULLIF(btrim($21::text),'') AS ai_nurture_strategy,\n    CASE WHEN $22 IS NULL OR btrim($22::text)='' THEN '{}'::jsonb ELSE $22::jsonb END AS ai_analysis,\n    COALESCE(NULLIF(btrim($23::text),'')::timestamptz,now()) AS source_retrieved_at,\n    CASE WHEN lower(coalesce($25::text,'false')) IN ('true','1','yes','y') THEN true ELSE false END AS whatsapp_capable,\n    CASE WHEN lower(coalesce($26::text,'false')) IN ('true','1','yes','y') THEN true ELSE false END AS whatsapp_confirmed,\n    NULLIF(btrim($28::text),'') AS conversion_tier,\n    NULLIF(btrim($29::text),'') AS meta_crm_fit,\n    CASE WHEN NULLIF(btrim($30::text),'') IS NULL THEN NULL ELSE $30::integer END AS social_activity_score\n),\nraw_business_emails AS (\n  SELECT lower(btrim(value)) AS email\n  FROM jsonb_array_elements_text(\n    CASE WHEN $15 IS NULL OR btrim($15::text)='' OR jsonb_typeof($15::jsonb) <> 'array' THEN '[]'::jsonb ELSE $15::jsonb END\n  ) AS x(value)\n),\nvalid_business_emails AS (\n  SELECT DISTINCT email\n  FROM raw_business_emails\n  WHERE email IS NOT NULL\n    AND email <> ''\n    AND length(email) <= 254\n    AND email ~ '^[a-z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-z0-9][a-z0-9.-]*\\.[a-z]{2,63}$'\n    AND email !~ '\\.\\.'\n    AND email !~* '@[^@]+\\.(png|jpe?g|gif|webp|svg|ico|css|js|woff2?|ttf|eot|pdf|zip)$'\n),\nbusiness_email_array AS (\n  SELECT COALESCE(array_agg(email ORDER BY email),ARRAY[]::text[]) AS emails\n  FROM valid_business_emails\n),\nraw_whatsapp_numbers AS (\n  SELECT NULLIF(btrim(value),'') AS wa_number\n  FROM jsonb_array_elements_text(\n    CASE WHEN $27 IS NULL OR btrim($27::text)='' OR jsonb_typeof($27::jsonb) <> 'array' THEN '[]'::jsonb ELSE $27::jsonb END\n  ) AS x(value)\n),\nwhatsapp_number_array AS (\n  SELECT COALESCE(array_agg(DISTINCT wa_number ORDER BY wa_number),ARRAY[]::text[]) AS whatsapp_numbers\n  FROM raw_whatsapp_numbers WHERE wa_number IS NOT NULL\n),\nlead AS (\n  INSERT INTO pakistan_real_estate_leads (\n    business_name,city,province,address,phone,website,domain,google_maps_url,\n    latitude,longitude,rating,review_count,category,search_keyword,emails,\n    social_profiles,website_signals,ai_score,ai_grade,ai_qualification,\n    ai_nurture_strategy,ai_analysis,source_retrieved_at,last_seen_at,\n    whatsapp_capable,whatsapp_confirmed,whatsapp_numbers,conversion_tier,\n    meta_crm_fit,social_activity_score\n  )\n  SELECT\n    i.business_name,i.city,i.province,i.address,i.phone,i.website,i.domain,i.google_maps_url,\n    i.latitude,i.longitude,i.rating,i.review_count,i.category,i.search_keyword,e.emails,\n    i.social_profiles,i.website_signals,i.ai_score,i.ai_grade,i.ai_qualification,\n    i.ai_nurture_strategy,i.ai_analysis,i.source_retrieved_at,now(),\n    i.whatsapp_capable,i.whatsapp_confirmed,w.whatsapp_numbers,i.conversion_tier,\n    i.meta_crm_fit,i.social_activity_score\n  FROM input_data i CROSS JOIN business_email_array e CROSS JOIN whatsapp_number_array w\n  WHERE i.business_name IS NOT NULL\n    AND i.city IS NOT NULL\n    AND (i.google_maps_url IS NOT NULL OR i.domain IS NOT NULL OR i.phone IS NOT NULL OR i.website IS NOT NULL)\n  ON CONFLICT (business_key) DO UPDATE SET\n    province=COALESCE(EXCLUDED.province,pakistan_real_estate_leads.province),\n    address=COALESCE(EXCLUDED.address,pakistan_real_estate_leads.address),\n    phone=COALESCE(EXCLUDED.phone,pakistan_real_estate_leads.phone),\n    website=COALESCE(EXCLUDED.website,pakistan_real_estate_leads.website),\n    domain=COALESCE(EXCLUDED.domain,pakistan_real_estate_leads.domain),\n    google_maps_url=COALESCE(EXCLUDED.google_maps_url,pakistan_real_estate_leads.google_maps_url),\n    latitude=COALESCE(EXCLUDED.latitude,pakistan_real_estate_leads.latitude),\n    longitude=COALESCE(EXCLUDED.longitude,pakistan_real_estate_leads.longitude),\n    rating=COALESCE(EXCLUDED.rating,pakistan_real_estate_leads.rating),\n    review_count=greatest(EXCLUDED.review_count,pakistan_real_estate_leads.review_count),\n    category=COALESCE(EXCLUDED.category,pakistan_real_estate_leads.category),\n    search_keyword=EXCLUDED.search_keyword,\n    emails=(\n      SELECT COALESCE(array_agg(DISTINCT e ORDER BY e),ARRAY[]::text[])\n      FROM unnest(pakistan_real_estate_leads.emails || EXCLUDED.emails) AS u(e)\n      WHERE e IS NOT NULL AND e <> ''\n    ),\n    social_profiles=CASE WHEN EXCLUDED.social_profiles='{}'::jsonb THEN pakistan_real_estate_leads.social_profiles ELSE EXCLUDED.social_profiles END,\n    website_signals=CASE WHEN EXCLUDED.website_signals='{}'::jsonb THEN pakistan_real_estate_leads.website_signals ELSE EXCLUDED.website_signals END,\n    ai_score=EXCLUDED.ai_score,\n    ai_grade=EXCLUDED.ai_grade,\n    ai_qualification=EXCLUDED.ai_qualification,\n    ai_nurture_strategy=EXCLUDED.ai_nurture_strategy,\n    ai_analysis=CASE WHEN EXCLUDED.ai_analysis='{}'::jsonb THEN pakistan_real_estate_leads.ai_analysis ELSE EXCLUDED.ai_analysis END,\n    source_retrieved_at=EXCLUDED.source_retrieved_at,\n    last_seen_at=now(),\n    whatsapp_capable=EXCLUDED.whatsapp_capable,\n    whatsapp_confirmed=EXCLUDED.whatsapp_confirmed OR pakistan_real_estate_leads.whatsapp_confirmed,\n    whatsapp_numbers=(\n      SELECT COALESCE(array_agg(DISTINCT n ORDER BY n),ARRAY[]::text[])\n      FROM unnest(pakistan_real_estate_leads.whatsapp_numbers || EXCLUDED.whatsapp_numbers) AS u(n)\n      WHERE n IS NOT NULL AND n <> ''\n    ),\n    conversion_tier=EXCLUDED.conversion_tier,\n    meta_crm_fit=EXCLUDED.meta_crm_fit,\n    social_activity_score=EXCLUDED.social_activity_score\n  RETURNING id,business_name\n),\nraw_contacts AS (\n  SELECT c\n  FROM jsonb_array_elements(\n    CASE WHEN $24 IS NULL OR btrim($24::text)='' OR jsonb_typeof($24::jsonb) <> 'array' THEN '[]'::jsonb ELSE $24::jsonb END\n  ) AS x(c)\n  WHERE jsonb_typeof(c)='object'\n),\nclean_contacts AS (\n  SELECT DISTINCT ON (contact_identity)\n    full_name,job_title,authority_level,email,phone,linkedin_url,source_url,confidence,is_decision_maker\n  FROM (\n    SELECT\n      NULLIF(btrim(c->>'full_name'),'') AS full_name,\n      NULLIF(btrim(c->>'job_title'),'') AS job_title,\n      COALESCE(NULLIF(lower(btrim(c->>'authority_level')),''),'unknown') AS authority_level,\n      CASE\n        WHEN lower(btrim(coalesce(c->>'email',''))) ~ '^[a-z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-z0-9][a-z0-9.-]*\\.[a-z]{2,63}$'\n         AND lower(btrim(c->>'email')) !~ '\\.\\.'\n         AND lower(btrim(c->>'email')) !~* '@[^@]+\\.(png|jpe?g|gif|webp|svg|ico|css|js|woff2?|ttf|eot|pdf|zip)$'\n        THEN lower(btrim(c->>'email')) ELSE NULL END AS email,\n      CASE WHEN lower(btrim(coalesce(c->>'phone',''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE btrim(c->>'phone') END AS phone,\n      NULLIF(btrim(c->>'linkedin_url'),'') AS linkedin_url,\n      NULLIF(btrim(c->>'source_url'),'') AS source_url,\n      least(100,greatest(0,CASE WHEN coalesce(c->>'confidence','') ~ '^[0-9]+$' THEN (c->>'confidence')::integer ELSE 0 END)) AS confidence,\n      lower(coalesce(c->>'is_decision_maker','false')) IN ('true','1','yes','y') AS is_decision_maker,\n      lower(coalesce(\n        NULLIF(btrim(c->>'email'),''),\n        NULLIF(btrim(c->>'linkedin_url'),''),\n        CASE WHEN lower(btrim(coalesce(c->>'phone',''))) IN ('','n/a','na','none','null','unknown','-','—') THEN NULL ELSE btrim(c->>'phone') END,\n        NULLIF(coalesce(NULLIF(btrim(c->>'full_name'),''),'') || '|' || coalesce(NULLIF(btrim(c->>'job_title'),''),''),'|')\n      )) AS contact_identity\n    FROM raw_contacts\n  ) s\n  WHERE contact_identity IS NOT NULL AND contact_identity <> ''\n  ORDER BY contact_identity, confidence DESC\n),\ncontacts AS (\n  INSERT INTO pakistan_real_estate_contacts (\n    lead_id,full_name,job_title,authority_level,email,phone,linkedin_url,source_url,confidence,is_decision_maker\n  )\n  SELECT\n    l.id,c.full_name,c.job_title,c.authority_level,c.email,c.phone,c.linkedin_url,c.source_url,c.confidence,c.is_decision_maker\n  FROM lead l CROSS JOIN clean_contacts c\n  ON CONFLICT (lead_id,contact_key) DO UPDATE SET\n    full_name=COALESCE(EXCLUDED.full_name,pakistan_real_estate_contacts.full_name),\n    job_title=COALESCE(EXCLUDED.job_title,pakistan_real_estate_contacts.job_title),\n    authority_level=CASE WHEN EXCLUDED.authority_level='unknown' THEN pakistan_real_estate_contacts.authority_level ELSE EXCLUDED.authority_level END,\n    email=COALESCE(EXCLUDED.email,pakistan_real_estate_contacts.email),\n    phone=COALESCE(EXCLUDED.phone,pakistan_real_estate_contacts.phone),\n    linkedin_url=COALESCE(EXCLUDED.linkedin_url,pakistan_real_estate_contacts.linkedin_url),\n    source_url=COALESCE(EXCLUDED.source_url,pakistan_real_estate_contacts.source_url),\n    confidence=greatest(pakistan_real_estate_contacts.confidence,EXCLUDED.confidence),\n    is_decision_maker=pakistan_real_estate_contacts.is_decision_maker OR EXCLUDED.is_decision_maker\n  RETURNING id\n)\nSELECT\n  (SELECT id FROM lead LIMIT 1) AS lead_id,\n  CASE WHEN EXISTS(SELECT 1 FROM lead) THEN 'upserted' ELSE 'skipped' END AS status,\n  COALESCE((SELECT business_name FROM lead LIMIT 1),(SELECT business_name FROM input_data)) AS business_name,\n  (SELECT count(*) FROM valid_business_emails) AS valid_email_count,\n  (SELECT count(*) FROM contacts) AS contacts_upserted;",
+        "options": {
+          "queryReplacement": "={{ [$json.businessName,$json.city,$json.province,$json.address,$json.phone,$json.website,$json.domain,$json.googleMapsUrl,$json.latitude,$json.longitude,$json.rating,$json.reviews,$json.rawCategory,$json.keyword,$json.emails,$json.socialProfiles,$json.websiteSignals,$json.score,$json.grade,$json.qualification,$json.nurtureStrategy,$json.aiAnalysis,$json.sourceRetrievedAt,$json.contacts,($json.whatsappCapable?'true':'false'),($json.whatsappConfirmed?'true':'false'),$json.whatsappNumbers,$json.conversionTier,$json.metaCrmFit,$json.socialActivityScore].map((v,i)=>[14,15,16,21,23,26].includes(i)?JSON.stringify(v ?? ([14,23,26].includes(i)?[]:{})):v) }}"
+        }
+      },
+      "id": "02e5e3a3-21bc-4b5c-a1bb-8dcb0309055f",
+      "name": "Upsert Lead and Decision Makers",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1328,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "pakistan-real-estate-leads.csv",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "3c756a91-c4ed-4312-9aba-7a8688dada42",
+      "name": "Download Leads Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -528,
+        448
+      ],
+      "webhookId": "0f23f1b5-9e66-45c7-b093-fb51f32b4aeb"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  l.id,\n  l.business_name,\n  l.city,\n  l.province,\n  l.address,\n  l.phone,\n  l.website,\n  l.domain,\n  l.google_maps_url,\n  l.rating,\n  l.review_count,\n  l.category,\n  l.search_keyword,\n  array_to_string(l.emails, '; ') AS emails,\n  l.ai_score,\n  l.ai_grade,\n  l.ai_qualification,\n  l.ai_nurture_strategy,\n  l.whatsapp_confirmed,\n  l.whatsapp_capable,\n  array_to_string(l.whatsapp_numbers, '; ') AS whatsapp_numbers,\n  l.conversion_tier,\n  l.meta_crm_fit,\n  l.social_activity_score,\n  l.first_seen_at,\n  l.last_seen_at,\n  coalesce(\n    string_agg(\n      concat_ws(' | ',c.full_name,c.job_title,c.authority_level,c.email,c.phone,c.linkedin_url),\n      ' ;; ' ORDER BY c.is_decision_maker DESC,c.confidence DESC\n    ) FILTER (WHERE c.id IS NOT NULL),\n    ''\n  ) AS decision_makers\nFROM pakistan_real_estate_leads l\nLEFT JOIN pakistan_real_estate_contacts c ON c.lead_id=l.id\nGROUP BY l.id\nORDER BY l.conversion_tier ASC,l.ai_score DESC,l.city,l.business_name;",
+        "options": {}
+      },
+      "id": "755dfae2-ee6f-4855-acc8-5a9d382496b7",
+      "name": "Read Presentable Lead Dataset",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -272,
+        448
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "jKyryAv0xqGF5HpO",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows=$input.all().map(i=>i.json);const cols=rows.length?Object.keys(rows[0]):[];const esc=v=>'\"'+String(v??'').replace(/\"/g,'\"\"')+'\"';const csv='\\uFEFF'+cols.map(esc).join(',')+'\\r\\n'+rows.map(r=>cols.map(c=>esc(r[c])).join(',')).join('\\r\\n');return [{json:{csv,count:rows.length,generatedAt:new Date().toISOString()}}];"
+      },
+      "id": "55e249cf-8c91-497c-af0b-f3f36131f2d2",
+      "name": "Build Downloadable CSV",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.csv }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/csv; charset=utf-8"
+              },
+              {
+                "name": "Content-Disposition",
+                "value": "attachment; filename=\"pakistan-real-estate-leads.csv\""
+              },
+              {
+                "name": "X-Lead-Count",
+                "value": "={{ String($json.count) }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7f3a3d0f-a660-4b64-b8b9-a4b55732752a",
+      "name": "Return CSV Download",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        224,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputs = $input.all();\nconst mxCache = new Map();\n\nfunction clean(v) {\n  const s = String(v ?? '').replace(/\\s+/g, ' ').trim();\n  if (!s || /^(?:n\\/?a|na|none|null|unknown|-|—)$/i.test(s)) return '';\n  return s;\n}\nfunction cleanPhone(v) {\n  const s = clean(v);\n  if (!s) return '';\n  const p = s.replace(/[^0-9+]/g, '');\n  return p.length >= 7 ? p : '';\n}\nfunction normalizeEmail(v) {\n  return String(v || '').trim().toLowerCase().replace(/^mailto:/i, '').replace(/^[<(\\\"'\\s]+/, '').replace(/[>)\\\"'\\],.;:\\s]+$/, '');\n}\nfunction validSyntax(email) {\n  if (!email || email.length > 254) return false;\n  const at = email.lastIndexOf('@');\n  if (at <= 0) return false;\n  const local = email.slice(0, at), domain = email.slice(at + 1);\n  if (!local || !domain || local.length > 64 || domain.length > 253) return false;\n  if (local.startsWith('.') || local.endsWith('.') || local.includes('..')) return false;\n  if (!/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(local)) return false;\n  const labels = domain.split('.');\n  if (labels.length < 2) return false;\n  for (const label of labels) {\n    if (!label || label.length > 63 || !/^[a-z0-9-]+$/i.test(label) || label.startsWith('-') || label.endsWith('-')) return false;\n  }\n  return /^[a-z]{2,63}$/i.test(labels.at(-1));\n}\nfunction assetGarbage(email) {\n  const lower = email.toLowerCase();\n  const [local='', domain=''] = lower.split('@');\n  return /\\.(?:png|jpe?g|gif|webp|svg|ico|css|js|woff2?|ttf|eot|pdf|zip)$/i.test(domain) ||\n    /^(?:logo|icon|sprite|favicon|image|img|avatar|banner|thumbnail|thumb)(?:[-_.]|$)/i.test(local) ||\n    /@(?:2x|3x)\\.(?:png|jpe?g|gif|webp)$/i.test(lower);\n}\nasync function mxFor(domain) {\n  if (mxCache.has(domain)) return mxCache.get(domain);\n  let result;\n  try {\n    const r = await this.helpers.httpRequest({\n      method:'GET',\n      url:'https://dns.google/resolve',\n      qs:{name:domain,type:'MX'},\n      headers:{Accept:'application/dns-json'},\n      json:true,\n      timeout:8000\n    });\n    const answers = Array.isArray(r?.Answer) ? r.Answer : [];\n    const records = answers.filter(x => Number(x.type) === 15).map(x => String(x.data || '').trim()).filter(Boolean);\n    const nullMx = records.some(x => /^0\\s+\\.$/.test(x));\n    result = {valid:records.length > 0 && !nullMx,records,reason:nullMx?'null_mx':records.length?'mx_found':'no_mx'};\n  } catch (e) {\n    result = {valid:false,records:[],reason:`dns_error:${String(e.message || e)}`};\n  }\n  mxCache.set(domain, result);\n  return result;\n}\nasync function validateEmail(raw) {\n  const email = normalizeEmail(raw);\n  if (!validSyntax(email)) return {email,valid:false,syntax_valid:false,mx_valid:false,mx_records:[],reason:'invalid_syntax'};\n  if (assetGarbage(email)) return {email,valid:false,syntax_valid:true,mx_valid:false,mx_records:[],reason:'asset_or_scraper_junk'};\n  const mx = await mxFor(email.split('@')[1]);\n  return {email,valid:mx.valid,syntax_valid:true,mx_valid:mx.valid,mx_records:mx.records,reason:mx.reason};\n}\nasync function mapLimit(items, limit, worker) {\n  const results = new Array(items.length);\n  let cursor = 0;\n  async function run() {\n    while (true) {\n      const i = cursor++;\n      if (i >= items.length) return;\n      results[i] = await worker(items[i], i);\n    }\n  }\n  await Promise.all(Array.from({length:Math.min(limit, items.length)}, run));\n  return results;\n}\n\nconst concurrency = Math.max(1, Math.min(10, Number(inputs[0]?.json?.limits?.mxConcurrency || 6)));\nconst results = await mapLimit(inputs, concurrency, async item => {\n  const data = {...item.json};\n\n  data.businessName = clean(data.businessName);\n  data.city = clean(data.city);\n  data.province = clean(data.province);\n  data.address = clean(data.address);\n  data.phone = cleanPhone(data.phone);\n  data.website = clean(data.website);\n  data.domain = clean(data.domain).toLowerCase();\n  data.googleMapsUrl = clean(data.googleMapsUrl);\n\n  if (data._skipUpsert) {\n    data.emails = [];\n    data.contacts = [];\n    data.decision_makers = [];\n    data.emailValidation = [];\n    data.emailValidationSummary = {candidates:0,valid:0,rejected:0,rejectedEmails:[]};\n    return {json:data};\n  }\n\n  const rawEmails = [...new Set((Array.isArray(data.emails) ? data.emails : []).map(normalizeEmail).filter(Boolean))];\n  const emailValidation = await Promise.all(rawEmails.map(validateEmail));\n  data.emails = emailValidation.filter(x => x.valid).map(x => x.email);\n\n  const sourceContacts = Array.isArray(data.contacts) ? data.contacts : [];\n  const cleanedContacts = [];\n\n  for (const raw of sourceContacts) {\n    if (!raw || typeof raw !== 'object') continue;\n    const c = {...raw};\n    c.full_name = clean(c.full_name) || null;\n    c.job_title = clean(c.job_title) || null;\n    c.authority_level = clean(c.authority_level).toLowerCase() || 'unknown';\n    c.phone = cleanPhone(c.phone) || null;\n    c.linkedin_url = clean(c.linkedin_url) || null;\n    c.source_url = clean(c.source_url) || null;\n    c.confidence = Math.max(0, Math.min(100, Number.parseInt(c.confidence, 10) || 0));\n    c.is_decision_maker = c.is_decision_maker === true || c.is_decision_maker === 1 || /^(?:1|true|yes|y)$/i.test(String(c.is_decision_maker || ''));\n\n    if (c.email) {\n      const ev = await validateEmail(c.email);\n      c.email_validation = ev;\n      c.email = ev.valid ? ev.email : null;\n    } else {\n      c.email = null;\n    }\n\n    if (c.full_name || c.email || c.linkedin_url || c.phone) cleanedContacts.push(c);\n  }\n\n  const seen = new Set();\n  data.contacts = cleanedContacts.filter(c => {\n    const key = String(c.email || c.linkedin_url || c.phone || `${c.full_name || ''}|${c.job_title || ''}`).toLowerCase().trim();\n    if (!key || seen.has(key)) return false;\n    seen.add(key);\n    return true;\n  });\n  data.decision_makers = data.contacts;\n  data.emailValidation = emailValidation;\n  data.emailValidationSummary = {\n    candidates:emailValidation.length,\n    valid:emailValidation.filter(x => x.valid).length,\n    rejected:emailValidation.filter(x => !x.valid).length,\n    rejectedEmails:emailValidation.filter(x => !x.valid).map(x => ({email:x.email,reason:x.reason}))\n  };\n\n  // Website/domain is mandatory for this workflow. Keep the existing DB schema\n  // unchanged; simply stop non-website leads before the Postgres node.\n  const hasWebsite = !!data.website;\n  const hasDomain = !!data.domain;\n  if (!data.businessName || !data.city || !hasWebsite || !hasDomain) {\n    data._skipUpsert = true;\n    data.skipReason = !data.businessName\n      ? 'missing_business_name'\n      : !data.city\n        ? 'missing_city'\n        : !hasWebsite\n          ? 'missing_website'\n          : 'missing_domain';\n  }\n\n  return {json:data};\n});\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        160
+      ],
+      "id": "993dca89-a6a0-412c-951b-a4b57944370d",
+      "name": "Validate Emails + MX"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "0a6c40b4-4fc4-428b-b400-73740a2836cf",
+      "name": "Loop Searches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        160,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(i => i.json);\nreturn [{json:{\n  loopContinue:true,\n  rowsProcessed:rows.length,\n  upserted:rows.filter(r => r.status === 'upserted').length,\n  skipped:rows.filter(r => r.status === 'skipped').length,\n  leadIds:rows.map(r => r.lead_id).filter(Boolean)\n}}];"
+      },
+      "id": "b4315c35-d193-43b1-8466-1652ed292c21",
+      "name": "Continue Search Loop",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 20
+            }
+          ]
+        }
+      },
+      "id": "cabd1d16-6543-4e75-9a13-ecfe3367b3c4",
+      "name": "Schedule - Every 20 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -512,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const out = [];\n\nfor (const item of $input.all()) {\n  const j = item.json;\n\n  // Drop anything that never became a usable lead in the first place.\n  if (j._skipUpsert) continue;\n\n  // Website is mandatory for persistence.\n  const hasWebsite = !!String(j.website || '').trim();\n  const hasDomain = !!String(j.domain || '').trim();\n\n  // Only keep leads the scoring step classified as tier 1 (confirmed WhatsApp\n  // click-to-chat presence) or tier 2 (mobile number + real social presence).\n  const qualifyingTier = j.conversionTier === 'tier1_high_conversion' || j.conversionTier === 'tier2_medium_conversion';\n\n  // Belt-and-braces: require real social presence AND a number that's at least\n  // technically capable of being a WhatsApp number (mobile, not landline).\n  const hasSocialPresence = (j.socialPlatformCount || 0) >= 1;\n  const hasWhatsappCapableNumber = j.whatsappCapable === true;\n\n  // Meta/WhatsApp-native CRM fit, as scored by the AI qualification step.\n  const goodMetaCrmFit = j.metaCrmFit === 'high' || j.metaCrmFit === 'medium';\n\n  if (hasWebsite && hasDomain && qualifyingTier && hasSocialPresence && hasWhatsappCapableNumber && goodMetaCrmFit) {\n    out.push(item);\n  }\n}\n\nreturn out;\n"
+      },
+      "id": "727e6cf6-601e-4b08-9c2d-1578596d9fed",
+      "name": "Keep Only High-Conversion Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        160
+      ]
+    }
+  ],
+  "connections": {
+    "Pakistan Runtime Config": {
+      "main": [
+        [
+          {
+            "node": "Rotate City and Keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rotate City and Keywords": {
+      "main": [
+        [
+          {
+            "node": "Loop Searches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Maps Pakistan Scraper": {
+      "main": [
+        [
+          {
+            "node": "Public Website Contact Enrichment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Public Website Contact Enrichment": {
+      "main": [
+        [
+          {
+            "node": "AI Qualify, Score and Nurture",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Qualify, Score and Nurture": {
+      "main": [
+        [
+          {
+            "node": "Validate Emails + MX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Lead and Decision Makers": {
+      "main": [
+        [
+          {
+            "node": "Continue Search Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Leads Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read Presentable Lead Dataset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Presentable Lead Dataset": {
+      "main": [
+        [
+          {
+            "node": "Build Downloadable CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Downloadable CSV": {
+      "main": [
+        [
+          {
+            "node": "Return CSV Download",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Emails + MX": {
+      "main": [
+        [
+          {
+            "node": "Keep Only High-Conversion Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Searches": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Google Maps Pakistan Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continue Search Loop": {
+      "main": [
+        [
+          {
+            "node": "Loop Searches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule - Every 20 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Pakistan Runtime Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Only High-Conversion Leads": {
+      "main": [
+        [
+          {
+            "node": "Upsert Lead and Decision Makers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6f4ddd19d6e6b74f777c7351e64ff05ded166492207f0e052776641ed9097a69"
+  }
+}
