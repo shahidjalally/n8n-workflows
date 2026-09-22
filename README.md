@@ -1,221 +1,647 @@
-# SRLINES Multi-Market Google Maps Lead Pipeline — PostgreSQL Edition
+# SRLINES Pakistan Real Estate AI Lead Intelligence --- Google Maps + AI + PostgreSQL
 
-This repository contains two n8n lead-generation workflows for the **United Kingdom, Italy, Spain, and the United Arab Emirates**. Both target the same six business-niche groups and store operational data in a PostgreSQL database on the same VPS as n8n instead of Google Sheets. This gives writes transaction semantics, and adds indexes for suppression and email-history lookups.
+This repository contains the current **SRLINES Pakistan Real Estate AI
+Lead Intelligence** pipeline for discovering Pakistani real-estate
+businesses from Google Maps, enriching their public web presence,
+scoring their suitability for **WhatsApp/Meta CRM (wCRM)**, generating
+nurture guidance, and storing both company and decision-maker/contact
+intelligence in PostgreSQL.
 
-PostgreSQL is used rather than an n8n SQLite community node: PostgreSQL has a maintained core n8n node, supports concurrent workflow executions, and remains modest on a small single-VPS deployment.
+The current repository is intentionally focused on the **Pakistan
+real-estate intelligence workflow**. Older multi-market email-outreach
+documentation is no longer representative of the repository.
 
-## Repository contents
+> **Important:** This is a lead-intelligence and qualification pipeline.
+> It does not require Gmail, SES, Google Sheets, or an email-sending
+> workflow.
 
-- `SRLINES Ultimate 6-in-1 Google Maps AI Lead Pipeline.json` — the original importable workflow for wCRM/WhatsApp CRM outreach, with 11 PostgreSQL nodes and no Google Sheets nodes.
-- `SRLINES 2nd Workflow - Website and Web Application Client Hunt.json` — the duplicated client-hunting workflow for website, ecommerce, portal, dashboard, integration, and custom web application development. It keeps the original countries and niche groups, uses a distinct set of search phrases and web-development scoring/personalization, and contains no YouTube video, thumbnail, or call to action.
-- `SRLINES Pakistan Real Estate AI Lead Intelligence and CSV Export.json` — a collection-only Pakistan workflow for real-estate companies. It rotates city/category searches, enriches public decision-maker evidence, applies AI scoring and nurture guidance, stores PostgreSQL records, and exposes a CSV download. It contains no Gmail, SMTP, or outreach nodes.
-- `database/init.sql` — idempotent tables, constraints, grants, and query indexes.
-- `database/pakistan_real_estate_leads.sql` — dedicated Pakistan lead/contact tables, constraints, grants, and indexes.
-- `googlemaps-scraper/` — scraper service required by the workflow.
+## Current repository structure
 
-## Recommended VPS prerequisites and technology stack
-
-We currently run and recommend the following single-VPS configuration for this workflow:
-
-| Resource | Recommended configuration |
-| --- | --- |
-| vCPU | 2 vCPUs |
-| Memory | 2 GB RAM |
-| Swap | 3 GB |
-| Disk | 30 GB HDD or better |
-| Operating system | Debian 12 or Debian 13 |
-
-The technology stack used on the VPS is:
-
-- **n8n** for workflow automation.
-- **PM2** for keeping the Google Maps scraper process running.
-- **Node.js** for n8n and the scraper runtime.
-- **PostgreSQL** for workflow data storage.
-- **Nginx** as the reverse proxy.
-
-This is our tested and recommended baseline, not a universal sizing guarantee. Monitor CPU, memory, swap, and disk usage, and increase the VPS resources when workflow concurrency, database size, or scraping volume grows.
-
-## 1. Install PostgreSQL on the n8n VPS
-
-The following commands are for Ubuntu/Debian. Run them as a sudo-capable VPS user:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y postgresql postgresql-contrib
-sudo systemctl enable --now postgresql
-sudo systemctl status postgresql --no-pager
+``` text
+n8n-workflows/
+├── database/
+│   └── n8n_leads_full_backup.dump
+├── googlemaps-scraper/
+│   ├── .env
+│   ├── ecosystem.config.js
+│   ├── package.json
+│   └── server.js
+├── .gitignore
+├── README.md
+└── SRLINES Pakistan Real Estate AI Lead Intelligence - WhatsApp-Meta CRM.json
 ```
 
-Keep PostgreSQL private. When n8n runs directly on the host, retain PostgreSQL's default loopback-only listener and do **not** open port 5432 in UFW or the cloud firewall.
+### Main files
 
-Create a randomly generated password, the restricted application role, and its database. Substitute the generated password in both commands; do not commit it:
+  ------------------------------------------------------------------------------------------------------------------
+  Path                                                                           Purpose
+  ------------------------------------------------------------------------------ -----------------------------------
+  `SRLINES Pakistan Real Estate AI Lead Intelligence - WhatsApp-Meta CRM.json`   Importable n8n workflow for
+                                                                                 Pakistan real-estate discovery,
+                                                                                 enrichment, AI scoring/nurturing,
+                                                                                 and PostgreSQL persistence.
 
-```bash
-openssl rand -base64 32
-sudo -u postgres psql -v ON_ERROR_STOP=1 <<'SQL'
-CREATE ROLE n8n_leads LOGIN PASSWORD 'REPLACE_WITH_RANDOM_PASSWORD';
+  `database/n8n_leads_full_backup.dump`                                          PostgreSQL custom-format backup
+                                                                                 containing the current `n8n_leads`
+                                                                                 database schema/data snapshot used
+                                                                                 by this project.
+
+  `googlemaps-scraper/server.js`                                                 Google Maps scraper API used by the
+                                                                                 n8n workflow.
+
+  `googlemaps-scraper/package.json`                                              Node.js dependencies and npm
+                                                                                 scripts for the scraper.
+
+  `googlemaps-scraper/ecosystem.config.js`                                       PM2 configuration. The process name
+                                                                                 is `googlemaps-scraper`, one forked
+                                                                                 instance, port `3000`.
+
+  `googlemaps-scraper/.env`                                                      Scraper runtime environment values.
+                                                                                 **Do not store credentials or
+                                                                                 private secrets in this tracked
+                                                                                 file.**
+  ------------------------------------------------------------------------------------------------------------------
+
+## What the workflow does
+
+The pipeline is designed around this flow:
+
+``` text
+Schedule / Manual Run
+        ↓
+Pakistan Runtime Config
+        ↓
+Rotate City and Keywords
+        ↓
+Process search combinations one-by-one
+        ↓
+Google Maps Pakistan Scraper
+        ↓
+Website / Contact Enrichment
+        ↓
+AI Lead Intelligence
+        ↓
+Qualification + Nurture Guidance
+        ↓
+PostgreSQL Upsert
+        ↓
+Continue search rotation
+```
+
+The workflow deliberately processes rotating search combinations rather
+than trying to scrape every city/category combination in one execution.
+This keeps individual executions manageable and reduces pressure on the
+scraper, n8n Code nodes, target websites, and the AI API.
+
+## Current Pakistan search coverage
+
+The Runtime Config currently targets real-estate businesses in:
+
+-   Karachi
+-   Lahore
+-   Islamabad
+-   Rawalpindi
+-   Faisalabad
+-   Multan
+-   Peshawar
+-   Quetta
+-   Gujranwala
+-   Sialkot
+-   Hyderabad
+-   Bahawalpur
+-   Abbottabad
+
+Configured real-estate search categories include:
+
+-   real estate agency
+-   property dealer
+-   property developer
+-   real estate developer
+-   commercial real estate
+-   property management company
+-   housing society
+-   real estate investment company
+-   estate agent
+-   property consultant
+
+The workflow currently rotates **4 search combinations per run** and
+requests up to **12 Google Maps results per keyword**.
+
+## Google Maps collection rules
+
+The Google Maps stage calls:
+
+``` text
+POST /api/scrape/search
+```
+
+against the scraper URL configured in **Pakistan Runtime Config**.
+
+Current behavior includes:
+
+-   business name normalization;
+-   business phone normalization;
+-   website normalization;
+-   Google Maps URL retention;
+-   latitude/longitude retention when available;
+-   rating and review-count retention;
+-   Maps-provided email retention when available;
+-   category/city/province context;
+-   source retrieval timestamp;
+-   rejection of records with no usable business name;
+-   rejection of businesses without a usable website.
+
+A website is currently required because the next enrichment stage
+depends on the business domain and public website evidence.
+
+## Website and contact enrichment
+
+For every accepted Maps business, the workflow attempts to enrich the
+lead from its public website and related public links.
+
+The current enrichment logic was hardened so that it does **not** depend
+on JavaScript's `new URL()` constructor inside n8n Code nodes.
+URL/domain parsing is handled explicitly to avoid runtime compatibility
+problems.
+
+Enrichment can collect and normalize signals such as:
+
+-   public business emails;
+-   phone numbers;
+-   WhatsApp links and numbers;
+-   `wa.me` / WhatsApp click-to-chat evidence;
+-   Facebook profiles/pages;
+-   Instagram profiles;
+-   LinkedIn URLs where found;
+-   website/contact/about/team/leadership evidence;
+-   website text/signals used for downstream AI analysis.
+
+Unreachable or partially crawlable websites should not automatically
+destroy an otherwise valid Maps lead. The workflow preserves the
+business and carries available evidence forward.
+
+## AI scoring and nurture intelligence
+
+The AI stage evaluates the collected business evidence for likely
+relevance to **SRLINES wCRM / WhatsApp-Meta CRM** rather than merely
+checking whether a company exists.
+
+The output can include:
+
+-   `ai_score` on a 0--100 scale;
+-   lead grade;
+-   qualification summary;
+-   conversion/qualification tier;
+-   WhatsApp-related signals;
+-   Facebook/Instagram or broader Meta presence;
+-   social activity evidence;
+-   CRM/lead-management fit;
+-   business/contact evidence;
+-   recommended nurture strategy;
+-   decision-maker/contact intelligence when supported by public
+    evidence.
+
+The AI prompt is intended to remain **evidence-grounded**. It must not
+invent a person, job title, email address, phone number, social profile,
+or other contact detail that was not supported by collected evidence.
+
+### Important scoring behavior
+
+Scoring and qualification are intelligence fields, not a reason to
+discard the entire lead dataset. Lower-scoring businesses can still be
+useful for later nurturing, re-scoring, segmentation, or manual review.
+
+Do not use an unnecessarily strict downstream filter that requires every
+signal (for example a particular conversion tier **and** active social
+presence **and** WhatsApp evidence) before a lead can be stored. The
+database should remain the durable source of collected intelligence.
+
+## PostgreSQL database
+
+The workflow uses PostgreSQL database:
+
+``` text
+n8n_leads
+```
+
+The two important tables are:
+
+``` text
+public.pakistan_real_estate_leads
+public.pakistan_real_estate_contacts
+```
+
+The lead table stores the company-level Google Maps, website,
+enrichment, AI-score, qualification, and nurture information.
+
+The contacts table stores decision-maker/contact evidence linked back to
+the lead.
+
+### Contact deduplication fix
+
+The current contact schema uses a generated `contact_key` and the
+workflow upserts contacts using:
+
+``` text
+ON CONFLICT (lead_id, contact_key)
+```
+
+Contact identity is derived in this priority order:
+
+``` text
+email
+→ LinkedIn URL
+→ phone
+→ full_name|job_title
+```
+
+This allows the workflow to repeatedly enrich the same company without
+creating duplicate copies of the same known contact.
+
+The generated key is normalized to lowercase, and the database has a
+unique constraint/index compatible with the workflow's
+`(lead_id, contact_key)` conflict target.
+
+## Restore the included PostgreSQL backup
+
+The repository currently contains a PostgreSQL **custom-format** dump
+rather than standalone schema `.sql` files.
+
+Before restoring, copy the dump to the server and inspect it:
+
+``` bash
+pg_restore --list database/n8n_leads_full_backup.dump | less
+```
+
+For a new/empty deployment, create the application role/database first
+if required:
+
+``` bash
+sudo -u postgres psql
+```
+
+Then, for example:
+
+``` sql
+CREATE ROLE n8n_leads LOGIN PASSWORD 'REPLACE_WITH_A_STRONG_PASSWORD';
 CREATE DATABASE n8n_leads OWNER n8n_leads;
-SQL
+\q
 ```
 
-Initialize the schema from this repository. `init.sql` is safe to run again after pulling an update:
+Restore the backup:
 
-```bash
-sudo cp /home/admin/init.sql /tmp/init.sql
-sudo chmod 644 /tmp/init.sql
-
-sudo -u postgres psql \
-  --set ON_ERROR_STOP=1 \
+``` bash
+sudo -u postgres pg_restore \
   --dbname=n8n_leads \
-  --file=/tmp/init.sql
+  --no-owner \
+  --no-privileges \
+  database/n8n_leads_full_backup.dump
 ```
 
-Test the application login (the prompt asks for the password):
+Verify that both core tables exist:
 
-```bash
-psql 'host=127.0.0.1 port=5432 dbname=n8n_leads user=n8n_leads sslmode=prefer' -c 'SELECT current_database(), current_user;'
+``` bash
+sudo -u postgres psql -d n8n_leads -c "\dt public.pakistan_real_estate_*"
 ```
 
-The included health check prevents n8n from starting before PostgreSQL accepts connections. Docker initialization scripts only run when the data volume is empty; on an existing volume apply upgrades with `docker compose exec -T postgres psql -U n8n_leads -d n8n_leads < database/init.sql`.
+Check the contacts table definition and indexes:
 
-## 2. Create the n8n PostgreSQL credential
+``` bash
+sudo -u postgres psql -d n8n_leads -c "\d+ public.pakistan_real_estate_contacts"
+```
 
-1. Open **Credentials → Add credential → Postgres** in n8n.
-2. Use host `localhost` when n8n is installed directly on the VPS, or `postgres` when both services share the Docker Compose network.
-3. Enter database `n8n_leads`, user `n8n_leads`, the generated password, and port `5432`.
-4. Set SSL to **Disable** only for loopback/private Docker-network traffic. If the database is ever remote, require TLS and validate its CA instead.
-5. Save it as **Lead Pipeline PostgreSQL** and run **Test connection**.
+You should confirm that the schema supports the workflow's current
+contact conflict target:
 
-## 3. Choose a workflow
+``` text
+(lead_id, contact_key)
+```
 
-Use the workflow whose offer matches the campaign you intend to send:
+## Create a fresh database backup
 
-| Workflow | Use it for | Important behavior |
-| --- | --- | --- |
-| **Original — Google Maps AI Lead Pipeline** | Introducing the SRLINES wCRM/WhatsApp CRM product | Generates Google Maps searches across the four configured countries and six niche groups, scores product fit, then creates localized initial and follow-up email. |
-| **2nd Workflow — Website and Web Application Client Hunt** | Finding clients for websites, redesigns, ecommerce, portals, dashboards, booking/enquiry systems, integrations, and custom web applications | Uses the same countries and niche groups with changed search phrases, evidence-grounded web-development scoring, and dynamic localized emails. It deliberately has no YouTube content. |
+After schema or workflow-related database changes, create a fresh full
+custom-format backup:
 
-The workflows share the PostgreSQL tables. Their campaign names differ, but the email cooldown and blacklist apply across the shared history, which helps prevent contacting the same address twice. If you want completely isolated data, create a separate database/schema and update every Postgres credential accordingly.
+``` bash
+sudo rm -f /home/admin/n8n_leads_full_backup.dump
 
-## 4. Configure Runtime Config before publishing
+sudo -u postgres pg_dump \
+  -F c \
+  -d n8n_leads \
+  -f /home/admin/n8n_leads_full_backup.dump
 
-**Do this separately in every imported workflow.** Open the **Runtime Config** node and replace or review all operator-specific values before testing or publishing:
+sudo chown admin:admin /home/admin/n8n_leads_full_backup.dump
+```
 
-1. Replace `PASTE_DEEPSEEK_API_KEY_HERE`; preferably move the secret to an n8n credential or protected environment variable if your deployment supports it.
-2. Change the company name, legal name, sender name/title, sender email, reply-to address, contact email, phone/WhatsApp number, WhatsApp CTA URL, website, branding, signature, product/service description, and trust statements to your own accurate details.
-3. Review countries, cities, niches, keyword categories, languages/locales, campaign name, sending limits, cooldown, delays, follow-up timing, scraper URL, result limits, validation rules, and timezone.
-4. Verify that the selected SES identity belongs to you and that every link and contact value in a seed email is correct.
-5. Do not publish or activate the schedule until the Runtime Config has been updated, credentials are connected, suppression ingestion works, and a manual low-volume test passes.
+Verify the dump before replacing the repository copy:
 
-The JSON files contain template operator details for illustration; importing a file does **not** make those details appropriate for your deployment.
+``` bash
+pg_restore --list /home/admin/n8n_leads_full_backup.dump | \
+grep -E "pakistan_real_estate_leads|pakistan_real_estate_contacts"
+```
 
-## 5. Import and connect a workflow
+## n8n PostgreSQL credential
 
-1. Back up/export the currently active workflow, then deactivate it so the old and new workflows cannot send duplicate messages.
-2. Import either workflow JSON listed above as a new workflow. To run both offers, import both files and configure/test each one independently.
-3. Open each of its 11 Postgres nodes, select **Lead Pipeline PostgreSQL**, and save. n8n intentionally does not receive a committed credential ID or password.
-4. Attach your **SES SMTP account** credential to both email nodes and verify all operator details and the scraper configuration in **Runtime Config**. Repeat this for the second workflow if both are imported.
-5. There is no Google Sheet ID and no Google OAuth credential to configure. `Reply_Log` and `Blacklist` are now the `reply_log` and `blacklist` tables.
-6. Run a manual seed-list execution for the chosen workflow. Inspect each Postgres node, generated subject, plain-text body, rendered HTML, links, localization, and suppression result before activation. When using both workflows, test them one at a time while both schedules remain inactive.
+Create a Postgres credential in n8n using the deployment-specific
+values.
 
-The history readers only retrieve the last 180 days, matching the configured cooldown and bounding n8n memory use. Database indexes make email suppression lookups independent of Google API quotas. The write nodes use positional parameters rather than interpolating lead content into SQL.
+Typical same-VPS settings:
+
+``` text
+Host:     127.0.0.1
+Port:     5432
+Database: n8n_leads
+User:     n8n_leads
+SSL:      Disable for loopback-only traffic
+```
+
+Keep PostgreSQL private. Do not expose port `5432` publicly when n8n and
+PostgreSQL are on the same VPS.
+
+Attach the PostgreSQL credential to the workflow's Postgres node(s),
+especially the node responsible for the lead/contact upsert.
 
 ## Deploy the Google Maps scraper
 
-The VPS or instance needs Node.js and npm. Playwright also needs its Chromium browser and system dependencies. From the repository root, run:
+Requirements:
 
-```bash
+-   Node.js
+-   npm
+-   Playwright Chromium
+-   PM2 for production process management
+
+From the repository:
+
+``` bash
 cd googlemaps-scraper
 npm install
 npx playwright install chromium
 ```
 
-Review `.env` before starting the service, especially `PORT`, `HEADLESS`, timeouts, rate limits, and `DATA_DIR`. Ensure that the configured data and log directories exist and are writable by the service account. For a quick foreground start, run:
+If Playwright reports missing Linux libraries, install the required
+browser dependencies for the VPS before starting the service.
 
-```bash
+### Run in foreground
+
+``` bash
 npm start
 ```
 
-For a persistent production process, install PM2 and use the included configuration:
+### Run with PM2
 
-```bash
-npm install --global pm2
+The included `ecosystem.config.js` defines the process as:
+
+``` text
+googlemaps-scraper
+```
+
+Start and persist it:
+
+``` bash
+sudo mkdir -p /var/log/googlemaps-scraper
+sudo chown "$USER":"$USER" /var/log/googlemaps-scraper
+
 pm2 start ecosystem.config.js
 pm2 save
 pm2 startup
 ```
 
-Run the command printed by `pm2 startup` if PM2 asks you to do so. Restrict network access to the scraper so only n8n or trusted hosts can reach it; the service does not define API authentication. Verify the deployment from the same network context as n8n:
+Run the additional command printed by `pm2 startup` when required.
 
-```bash
-curl http://localhost:3000/api/health
+Useful checks:
+
+``` bash
+pm2 status
+pm2 describe googlemaps-scraper
+pm2 logs googlemaps-scraper
 ```
 
-Set `scraper.baseUrl` in the workflow's **Runtime Config** to the reachable URL, for example `http://localhost:3000` when both services share a host or `http://localhost:3000` when that is the scraper's container/DNS name. Do not use `localhost` when n8n runs in a separate container or machine, because it would refer to n8n itself. Keep a single scraper process—the supplied PM2 configuration intentionally uses one instance to preserve its in-memory queue.
+If you only know the PM2 process ID:
 
-## Pakistan real-estate intelligence workflow
-
-This workflow is deliberately **data collection only**: it neither drafts nor sends email. It retains low- and high-scoring leads, while DeepSeek assigns a 0–100 score, A–D grade, qualification summary, nurture recommendation, and evidence-backed decision-maker records. Its prompt forbids invented people or contact details. Review Pakistani privacy requirements, website terms, and your retention policy before activation.
-
-### Create the dedicated PostgreSQL tables
-
-Apply the idempotent schema as the database owner:
-
-```bash
-sudo -u postgres psql --set ON_ERROR_STOP=1 --dbname=n8n_leads \
-  --file=/path/to/n8n-workflows/database/pakistan_real_estate_leads.sql
+``` bash
+pm2 describe 3
 ```
 
-Verify the tables and application login:
+The `script path` and `exec cwd` fields show where that PM2 process is
+actually running from.
 
-```bash
-psql 'host=127.0.0.1 dbname=n8n_leads user=n8n_leads' -c \
-  "SELECT to_regclass('public.pakistan_real_estate_leads'), to_regclass('public.pakistan_real_estate_contacts');"
+## Scraper health check
+
+The scraper defaults to port `3000`.
+
+Check it from the same server/network context used by n8n:
+
+``` bash
+curl http://127.0.0.1:3000/api/health
 ```
 
-### Import and configure
+The workflow's **Pakistan Runtime Config** currently expects:
 
-1. Import `SRLINES Pakistan Real Estate AI Lead Intelligence and CSV Export.json` as a **new** workflow; do not overwrite the existing workflow.
-2. In **Pakistan Runtime Config**, replace `PASTE_DEEPSEEK_API_KEY_HERE` (prefer a protected environment variable), confirm the scraper URL, and review the cities, real-estate keywords, crawl/result limits, delays, and six-hour schedule.
-3. Select **Lead Pipeline PostgreSQL** on both Postgres nodes. No Gmail, SES, Google Sheets, or SMTP credential is required.
-4. Start the repository's scraper, run the workflow manually, and inspect its output before enabling the schedule. Maps results are retained even without email; public home/about/team/leadership/contact pages provide enrichment evidence.
-5. Check coverage with `SELECT city, count(*), round(avg(ai_score), 1) FROM pakistan_real_estate_leads GROUP BY city ORDER BY count(*) DESC;`.
-
-### Download a presentable CSV
-
-Activate the workflow, then open the production URL shown by **Download Leads Webhook**, whose path ends in:
-
-```text
-/webhook/pakistan-real-estate-leads.csv
+``` text
+http://localhost:3000
 ```
 
-It returns a UTF-8 CSV attachment ordered by score, with one company per row and decision makers in a readable field. Protect the endpoint using n8n/reverse-proxy authentication or an allowlist before exposing it; the template commits no secret. Limit access and define deletion/retention rules because the export can contain business-contact personal data.
+This is correct when n8n and the scraper run directly on the same host.
+If n8n runs inside a separate Docker container or on another machine,
+`localhost` points to that container/machine instead, so use a reachable
+private hostname/IP for the scraper.
 
-## Reply, bounce, complaint, and unsubscribe operations
+Keep the scraper as a **single PM2 instance** because the service is
+designed around a single-instance queue.
 
-SMTP sending cannot search the reply mailbox. Before every scheduled follow-up run, synchronize replies into `reply_log` and delivery failures/complaints/unsubscribes into `blacklist` using an external inbound-mail or SES event workflow.
+## Import and configure the n8n workflow
 
-- `reply_log.email` must contain the normalized recipient address.
-- In `blacklist`, use `type=email`, the normalized address in `value`, an active `status`, and a clear `reason` such as `bounce`, `complaint`, or `unsubscribe`.
-- For domain-wide suppression, the current workflow requires individual email rows; do not assume `type=domain` is enforced.
-- Treat synchronization failure as a stop condition for follow-up sending.
+1.  In n8n, import:
 
-## Compliance and deliverability gate
+    ``` text
+    SRLINES Pakistan Real Estate AI Lead Intelligence - WhatsApp-Meta CRM.json
+    ```
 
-This automation is a technical template, not a determination that contacting any lead is lawful. Before each market launch, document the applicable lawful basis and direct-marketing rules, use only relevant business contact data, honor objection/unsubscribe immediately, publish an appropriate privacy notice, apply retention limits, and maintain evidence of suppression. Obtain qualified legal advice for the UK, EU member states (Italy and Spain), and UAE.
+2.  Keep the imported workflow inactive while configuring and testing
+    it.
 
-Start with SES sandbox/test recipients, then a reviewed pilot of no more than five messages. Monitor hard bounces, complaints, replies, and unsubscribes daily. Pause automatically or manually if suppression ingestion is stale, SPF/DKIM/DMARC fails, or complaint/bounce metrics deteriorate.
+3.  Open **Pakistan Runtime Config** and review:
 
-## Preflight and rollout
+    -   cities;
+    -   real-estate keywords;
+    -   `keywordsPerRun`;
+    -   `maxResultsPerKeyword`;
+    -   website crawl limits;
+    -   concurrency values;
+    -   request delay;
+    -   scraper base URL;
+    -   DeepSeek API URL/model/key.
 
-- [ ] All `PASTE_*` placeholders are replaced in the imported n8n copy.
-- [ ] The old exposed DeepSeek key is revoked.
-- [ ] PostgreSQL and SES SMTP credentials are attached and tested.
-- [ ] SES identity, SPF, DKIM, DMARC, and reply mailbox are verified.
-- [ ] The PostgreSQL schema is initialized and all 11 Postgres nodes use the Lead Pipeline PostgreSQL credential.
-- [ ] The four-file `googlemaps-scraper/` service is installed and running on the VPS/instance before any workflow test.
-- [ ] Scraper health is reachable from n8n, `scraper.baseUrl` is correct, and one keyword from each market is verified manually.
-- [ ] Reply/SES event ingestion updates `reply_log` and `blacklist` before follow-ups.
-- [ ] A legal/compliance owner approves each market and niche.
-- [ ] A five-recipient seed-list execution has correct language, links, sender, reply-to, and suppression behavior.
-- [ ] Only then activate the hourly UTC schedule and raise volume gradually.
+4.  Replace the placeholder DeepSeek key with a valid secret. Prefer an
+    n8n credential or protected server environment variable rather than
+    committing an API key into the workflow JSON.
+
+5.  Attach the **Lead Pipeline PostgreSQL** credential to the Postgres
+    node(s).
+
+6.  Run a manual execution before enabling the schedule.
+
+7.  Inspect the output of each major stage:
+
+    -   city/keyword rotation;
+    -   Maps scraper;
+    -   contact enrichment;
+    -   AI intelligence;
+    -   database upsert.
+
+8.  Confirm both company and contact rows are being written without
+    conflict errors.
+
+## Validation queries
+
+### Lead count by city
+
+``` sql
+SELECT
+  city,
+  count(*) AS leads,
+  round(avg(ai_score), 1) AS avg_ai_score
+FROM public.pakistan_real_estate_leads
+GROUP BY city
+ORDER BY leads DESC;
+```
+
+### Inspect highest-scoring leads
+
+``` sql
+SELECT
+  id,
+  business_name,
+  city,
+  website,
+  ai_score,
+  grade
+FROM public.pakistan_real_estate_leads
+ORDER BY ai_score DESC NULLS LAST
+LIMIT 50;
+```
+
+Column names can evolve with the workflow/schema; use
+`\d+ public.pakistan_real_estate_leads` if a query needs adjustment.
+
+### Verify contact deduplication
+
+``` sql
+SELECT
+  lead_id,
+  contact_key,
+  count(*)
+FROM public.pakistan_real_estate_contacts
+GROUP BY lead_id, contact_key
+HAVING count(*) > 1;
+```
+
+A healthy unique constraint should prevent duplicate rows for the same
+`(lead_id, contact_key)` identity.
+
+## Troubleshooting
+
+### Workflow stops after Contact Enrichment
+
+First inspect the execution data rather than assuming the scraper
+failed. A valid enrichment result should continue downstream even when
+some websites cannot be crawled.
+
+Check:
+
+-   whether items are actually emitted from the enrichment node;
+-   whether `_skipUpsert` is unexpectedly `true`;
+-   the connection between enrichment and the AI node;
+-   any downstream filter conditions;
+-   whether the execution was a partial/manual node execution rather
+    than a full workflow execution.
+
+### All leads disappear after scoring
+
+Do not require every "high conversion" signal simultaneously unless that
+is intentional. A strict filter combining tier, social activity, and
+WhatsApp evidence can reduce a valid batch to zero.
+
+Persist the intelligence first; use score/grade/tier fields later for
+segmentation and nurture priority.
+
+### `ON CONFLICT` error in Postgres
+
+If the upsert uses:
+
+``` sql
+ON CONFLICT (lead_id, contact_key)
+```
+
+PostgreSQL must have a matching unique/exclusion constraint.
+
+Inspect:
+
+``` bash
+sudo -u postgres psql -d n8n_leads -c \
+"\d+ public.pakistan_real_estate_contacts"
+```
+
+Confirm `contact_key` exists and `(lead_id, contact_key)` is unique.
+
+### Website extraction fails because `URL` is unavailable
+
+The current workflow avoids `new URL()` in n8n Code nodes. Keep
+URL/domain parsing compatible with the n8n Code-node runtime rather than
+reintroducing a dependency on that constructor.
+
+### Check scraper logs
+
+``` bash
+pm2 logs googlemaps-scraper --lines 200
+```
+
+For process details:
+
+``` bash
+pm2 describe googlemaps-scraper
+```
+
+## Security notes
+
+-   Never commit a real DeepSeek/API key into the workflow JSON.
+-   Never commit database passwords.
+-   Treat `googlemaps-scraper/.env` as public because this repository is
+    public; keep only non-secret defaults there or replace it with an
+    `.env.example`.
+-   Keep PostgreSQL bound to loopback/private networking.
+-   Restrict scraper access to n8n/trusted hosts where practical.
+-   Back up PostgreSQL before schema migrations.
+-   Public website/contact data should still be handled under an
+    appropriate retention and privacy policy.
+
+## Preflight checklist
+
+-   [ ] `googlemaps-scraper` is online in PM2.
+-   [ ] `curl http://127.0.0.1:3000/api/health` succeeds.
+-   [ ] Pakistan Runtime Config contains the intended cities, keywords,
+    limits, and scraper URL.
+-   [ ] No real API key or database password is committed to GitHub.
+-   [ ] PostgreSQL database `n8n_leads` is reachable from n8n.
+-   [ ] `pakistan_real_estate_leads` exists.
+-   [ ] `pakistan_real_estate_contacts` exists.
+-   [ ] `contact_key` exists and `(lead_id, contact_key)` supports the
+    current upsert conflict target.
+-   [ ] A manual run produces Maps leads with valid websites.
+-   [ ] Contact enrichment preserves valid leads even when some crawl
+    attempts fail.
+-   [ ] AI scoring/nurture output is generated.
+-   [ ] Leads are stored regardless of whether they qualify as immediate
+    high-conversion prospects.
+-   [ ] Decision-maker/contact records upsert without duplicates.
+-   [ ] A fresh PostgreSQL backup is created after confirmed schema
+    changes.
+-   [ ] Only after manual validation is the scheduled workflow enabled.
+
+## Scope
+
+This repository is currently optimized for **Pakistan real-estate lead
+intelligence for WhatsApp/Meta CRM prospecting**. The architecture can
+later be extended to other niches or markets, but the committed
+workflow, database backup, scraper configuration, and this README should
+be treated as one synchronized deployment set.
