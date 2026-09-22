@@ -261,6 +261,9 @@ class ScraperQueue {
 
     const item = this.queue.shift();
 
+    let result;
+    let taskError = null;
+
     try {
       await this.ensureInitialized();
 
@@ -268,30 +271,67 @@ class ScraperQueue {
         `Processing task. Remaining in queue: ${this.queue.length}`
       );
 
-      const result =
-        await this.executeTask(
-          item.task
-        );
+      result = await this.executeTask(
+        item.task
+      );
 
-      item.resolve(result);
     } catch (error) {
+
+      taskError = error;
+
       logger.error(
         { err: error },
         'Task execution failed'
       );
 
-      item.reject(error);
-    } finally {
-      this.isProcessing = false;
+    }
 
+    /*
+     * IMPORTANT:
+     *
+     * Finish page cleanup BEFORE resolving
+     * the current request.
+     *
+     * Previously item.resolve(result) happened
+     * first. n8n could therefore immediately
+     * submit the next request while this scraper
+     * was still navigating the shared page to
+     * about:blank.
+     *
+     * That caused:
+     *
+     * "Navigation ... interrupted by another
+     * navigation to about:blank"
+     */
+    try {
       await this.resetPageAfterTask();
+    } catch (cleanupError) {
+      logger.warn(
+        `Post-task cleanup failed: ${cleanupError.message}`
+      );
+    }
 
-      if (this.queue.length > 0) {
-        setTimeout(
-          () => void this.processQueue(),
-          250
-        );
-      }
+    this.isProcessing = false;
+
+    /*
+     * Resolve/reject ONLY after cleanup has
+     * completely finished.
+     */
+    if (taskError) {
+      item.reject(taskError);
+    } else {
+      item.resolve(result);
+    }
+
+    /*
+     * Process the next queued task only after
+     * the current task + cleanup are finished.
+     */
+    if (this.queue.length > 0) {
+      setTimeout(
+        () => void this.processQueue(),
+        250
+      );
     }
   }
 
